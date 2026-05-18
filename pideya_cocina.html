@@ -290,6 +290,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
       <div class="kpi p"><div class="kpi-icon">📦</div><div class="kpi-val" id="kpiTotal">—</div><div class="kpi-lbl">Órdenes totales</div></div>
       <div class="kpi g"><div class="kpi-icon">💳</div><div class="kpi-val" id="kpiFees">—</div><div class="kpi-lbl">Comisión Stripe</div></div>
       <div class="kpi b"><div class="kpi-icon">🛵</div><div class="kpi-val" id="kpiEnviadas">—</div><div class="kpi-lbl">Enviadas hoy</div></div>
+      <div class="kpi g"><div class="kpi-icon">🙏</div><div class="kpi-val" id="kpiTips">—</div><div class="kpi-lbl">Propinas hoy</div></div>
     </div>
     <div class="chart-box">
       <div class="chart-title">Ingresos — últimos 7 días</div>
@@ -383,6 +384,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
       <div class="kpi g"><div class="kpi-icon">💼</div><div class="kpi-val" id="rpGestionPeriod">—</div><div class="kpi-lbl">Com. Gestión</div></div>
       <div class="kpi p"><div class="kpi-icon">💳</div><div class="kpi-val" id="rpStripeFeePeriod">—</div><div class="kpi-lbl">Com. Stripe</div></div>
       <div class="kpi b"><div class="kpi-icon">📈</div><div class="kpi-val" id="rpAvgOrder">—</div><div class="kpi-lbl">Ticket promedio</div></div>
+      <div class="kpi g"><div class="kpi-icon">🙏</div><div class="kpi-val" id="rpTipPeriod">—</div><div class="kpi-lbl">Propinas período</div></div>
     </div>
     <!-- Revenue chart -->
     <div class="chart-box">
@@ -405,7 +407,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
       <div class="chart-title">Ventas por día — detalle</div>
       <div style="overflow-x:auto;">
         <table class="report-table" id="rpDailyTable">
-          <thead><tr><th>Fecha</th><th>Órdenes</th><th>Subtotal</th><th>Tax</th><th>Gestión</th><th>Stripe Fee</th><th>Total</th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Órdenes</th><th>Subtotal</th><th>Tax</th><th>Gestión</th><th>Propinas</th><th>Stripe Fee</th><th>Total</th></tr></thead>
           <tbody id="rpDailyTbody"></tbody>
         </table>
       </div>
@@ -660,6 +662,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
     <div class="t-row"><span>Subtotal</span><strong id="tkSub"></strong></div>
     <div class="t-row"><span>Tax NJ (6.625%)</span><strong id="tkTax"></strong></div>
     <div class="t-row"><span>Gestión</span><strong id="tkGes"></strong></div>
+    <div class="t-row" id="tkTipRow" style="display:none"><span>🙏 Propina repartidor</span><strong id="tkTip" style="color:#166534"></strong></div>
     <div class="t-row" id="tkFeeRow" style="display:none"><span>Cargo Stripe (3.5%)</span><strong id="tkFee"></strong></div>
     <div class="t-total"><span>TOTAL</span><span id="tkTot"></span></div>
     <hr class="t-hr">
@@ -864,7 +867,7 @@ async function loadAll(){
       const rows=parseCSV(csvText);
       if(rows.length>=2){
         const h=rows[0].map(x=>x.replace(/[\uFEFF\u200B\u00A0]/g,'').trim());
-        const POS=['Order ID','Timestamp','Phone','Name','Address','Items','Subtotal','Tax','Gestion','StripeFee','Total','Status','StripeLink'];
+        const POS=['Order ID','Timestamp','Phone','Name','Address','Items','Subtotal','Tax','Gestion','StripeFee','Total','Status','StripeLink','Tip'];
         allOrders=rows.slice(1).map(r=>{const o={};h.forEach((k,i)=>{if(k)o[k]=(r[i]||'').trim();});POS.forEach((k,i)=>{if(!o[k]&&r[i]!==undefined)o[k]=(r[i]||'').trim();});return o;});
         orderMap={};allOrders.forEach(o=>{if(o['Order ID'])orderMap[o['Order ID']]=o;});
       }
@@ -898,7 +901,8 @@ function updateAll(conn){
 
   const todayRev=confToday.reduce((s,o)=>s+parseFloat(o.Total||0),0);
   const todayFees=confToday.reduce((s,o)=>s+parseFloat(o.StripeFee||0),0);
-  const enviadasToday=despachados; // same filter
+  const todayTips=confToday.reduce((s,o)=>s+parseFloat(o.Tip||0),0);
+  const enviadasToday=despachados;
 
   document.getElementById('kpiConf').textContent=confToday.length;
   document.getElementById('kpiEnviadas').textContent=enviadasToday.length;
@@ -907,6 +911,7 @@ function updateAll(conn){
   document.getElementById('kpiRev').textContent='$'+todayRev.toFixed(2);
   document.getElementById('kpiTotal').textContent=allOrders.length;
   document.getElementById('kpiFees').textContent='$'+todayFees.toFixed(2);
+  document.getElementById('kpiTips').textContent='$'+todayTips.toFixed(2);
   document.getElementById('nb-cocina').textContent=confToday.length;
   document.getElementById('nb-zelle').textContent=zel.length;
   document.getElementById('nb-despachados').textContent=despachados.length;
@@ -1043,6 +1048,7 @@ function renderReports(){
   const periodTax=sum(periodOrders,'Tax');
   const periodGestion=sum(periodOrders,'Gestion');
   const periodStripeFee=sum(periodStripe,'StripeFee');
+  const periodTips=sum(periodOrders,'Tip');
   const avgOrder=periodOrders.length?periodRev/periodOrders.length:0;
 
   const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
@@ -1054,6 +1060,7 @@ function renderReports(){
   setEl('rpGestionPeriod','$'+periodGestion.toFixed(2));
   setEl('rpStripeFeePeriod','$'+periodStripeFee.toFixed(2));
   setEl('rpAvgOrder','$'+avgOrder.toFixed(2));
+  setEl('rpTipPeriod','$'+periodTips.toFixed(2));
 
   // Historical
   setEl('rpRevAll','$'+sum(allConf,'Total').toFixed(2));
@@ -1073,6 +1080,7 @@ function renderReports(){
     ['🧾 Subtotal bruto','—','$'+sum(periodOrders,'Subtotal').toFixed(2)],
     ['🏛️ Tax NJ (6.625%)','—','$'+periodTax.toFixed(2)],
     ['💼 Comisión Gestión','—','$'+periodGestion.toFixed(2)],
+    ['🙏 Propinas repartidor','—','$'+periodTips.toFixed(2)],
     ['💳 Comisión Stripe','—','$'+periodStripeFee.toFixed(2)],
     ['💰 Neto estimado','—','$'+(periodRev-periodStripeFee).toFixed(2)],
   ];
@@ -1100,10 +1108,10 @@ function renderReports(){
 
   // Daily breakdown table
   const dayMap={};
-  periodOrders.forEach(o=>{const d=toDateStr(o.Timestamp);if(!dayMap[d])dayMap[d]={orders:0,subtotal:0,tax:0,gestion:0,stripefee:0,total:0};dayMap[d].orders++;dayMap[d].subtotal+=parseFloat(o.Subtotal||0);dayMap[d].tax+=parseFloat(o.Tax||0);dayMap[d].gestion+=parseFloat(o.Gestion||0);dayMap[d].stripefee+=parseFloat(o.StripeFee||0);dayMap[d].total+=parseFloat(o.Total||0);});
+  periodOrders.forEach(o=>{const d=toDateStr(o.Timestamp);if(!dayMap[d])dayMap[d]={orders:0,subtotal:0,tax:0,gestion:0,tip:0,stripefee:0,total:0};dayMap[d].orders++;dayMap[d].subtotal+=parseFloat(o.Subtotal||0);dayMap[d].tax+=parseFloat(o.Tax||0);dayMap[d].gestion+=parseFloat(o.Gestion||0);dayMap[d].tip+=parseFloat(o.Tip||0);dayMap[d].stripefee+=parseFloat(o.StripeFee||0);dayMap[d].total+=parseFloat(o.Total||0);});
   const days=Object.keys(dayMap).sort().reverse();
   const dtbody=document.getElementById('rpDailyTbody');
-  if(dtbody){dtbody.innerHTML=days.length?days.map(d=>{const r=dayMap[d];return`<tr><td style="font-weight:600">${d}</td><td style="font-weight:700">${r.orders}</td><td>$${r.subtotal.toFixed(2)}</td><td>$${r.tax.toFixed(2)}</td><td>$${r.gestion.toFixed(2)}</td><td>$${r.stripefee.toFixed(2)}</td><td style="font-weight:700;color:var(--green)">$${r.total.toFixed(2)}</td></tr>`;}).join(''):'<tr><td colspan="7" style="text-align:center;color:#94A3B8;padding:16px;">Sin órdenes en este período</td></tr>';}
+  if(dtbody){dtbody.innerHTML=days.length?days.map(d=>{const r=dayMap[d];return`<tr><td style="font-weight:600">${d}</td><td style="font-weight:700">${r.orders}</td><td>$${r.subtotal.toFixed(2)}</td><td>$${r.tax.toFixed(2)}</td><td>$${r.gestion.toFixed(2)}</td><td style="color:#166534;font-weight:600">$${r.tip.toFixed(2)}</td><td>$${r.stripefee.toFixed(2)}</td><td style="font-weight:700;color:var(--green)">$${r.total.toFixed(2)}</td></tr>`;}).join(''):'<tr><td colspan="8" style="text-align:center;color:#94A3B8;padding:16px;">Sin órdenes en este período</td></tr>';}
 
   // Chart — determine granularity
   renderChart('reportChart',14,from,to);
@@ -1144,6 +1152,9 @@ function openTicket(o){
   document.getElementById('tkTax').textContent='$'+parseFloat(o.Tax||0).toFixed(2);
   document.getElementById('tkGes').textContent='$'+parseFloat(o.Gestion||0).toFixed(2);
   document.getElementById('tkTot').textContent='$'+parseFloat(o.Total||0).toFixed(2);
+  const tip=parseFloat(o.Tip||0);
+  const tipRow=document.getElementById('tkTipRow');
+  if(tip>0){document.getElementById('tkTip').textContent='$'+tip.toFixed(2);tipRow.style.display='flex';}else tipRow.style.display='none';
   const feeRow=document.getElementById('tkFeeRow');
   if(fee>0){document.getElementById('tkFee').textContent='$'+fee.toFixed(2);feeRow.style.display='flex';}else feeRow.style.display='none';
   document.getElementById('tkItems').innerHTML=(o.Items||'').split(' | ').map(i=>`<div class="t-item">• ${i}</div>`).join('');
@@ -1306,7 +1317,8 @@ function checkAndAutoPrint(orders){
         +'&name='+encodeURIComponent(o.Name||'')+'&phone='+encodeURIComponent(o.Phone||'')
         +'&address='+encodeURIComponent(o.Address||'')+'&items='+encodeURIComponent((o.Items||'').replace(/\s*\|\s*/g,'|'))
         +'&subtotal='+parseFloat(o.Subtotal||0).toFixed(2)+'&tax='+parseFloat(o.Tax||0).toFixed(2)
-        +'&gestion='+parseFloat(o.Gestion||0).toFixed(2)+'&stripefee='+parseFloat(o.StripeFee||0).toFixed(2)
+        +'&gestion='+parseFloat(o.Gestion||0).toFixed(2)+'&tip='+parseFloat(o.Tip||0).toFixed(2)
+        +'&stripefee='+parseFloat(o.StripeFee||0).toFixed(2)
         +'&total='+parseFloat(o.Total||0).toFixed(2);
       setTimeout(()=>{const pw=window.open(tUrl,'_blank');if(pw)setTimeout(()=>{try{pw.print();}catch(e){}},1200);},500);
     }
