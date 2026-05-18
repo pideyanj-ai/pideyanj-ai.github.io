@@ -29,6 +29,7 @@
   .totals { margin-top:10px; }
   .total-row { display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:3px; }
   .total-row.stripe-fee { color:#888; font-size:0.78rem; }
+  .total-row.tip-row { color:#166534; font-weight:700; font-size:0.82rem; }
   .total-row.grand { font-size:1rem; font-weight:bold; border-top:2px solid #333; padding-top:6px; margin-top:6px; }
   .qr-section { text-align:center; margin-top:14px; padding-top:14px; border-top:1px dashed #ccc; }
   .qr-label { font-size:0.65rem; text-transform:uppercase; letter-spacing:1.5px; color:#888; margin-bottom:8px; }
@@ -61,10 +62,16 @@
 function getParams(){
   const p=new URLSearchParams(window.location.search);
   return{
-    order:p.get('order')||'',name:p.get('name')||'',phone:p.get('phone')||'',
-    address:p.get('address')||'',items:p.get('items')||'',
-    subtotal:p.get('subtotal')||'0',tax:p.get('tax')||'0',
-    gestion:p.get('gestion')||'0',stripefee:p.get('stripefee')||'0',
+    order:p.get('order')||'',
+    name:p.get('name')||'',
+    phone:p.get('phone')||'',
+    address:p.get('address')||'',
+    items:p.get('items')||'',
+    subtotal:p.get('subtotal')||'0',
+    tax:p.get('tax')||'0',
+    gestion:p.get('gestion')||'0',
+    tip:p.get('tip')||'0',
+    stripefee:p.get('stripefee')||'0',
     total:p.get('total')||'0'
   };
 }
@@ -94,9 +101,19 @@ function render(){
   const name=decodeURIComponent(p.name);
   const items=decodeURIComponent(p.items);
   const fee=parseFloat(p.stripefee);
+  const tip=parseFloat(p.tip)||0;
   const now=new Date();
   const timeStr=now.toLocaleString('es-DO',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-  const stripeFeeRow=fee>0?`<div class="total-row stripe-fee"><span>Cargo Stripe (3.5%)</span><span>$${fee.toFixed(2)}</span></div>`:'';
+
+  // Tip row — only shown if tip > 0
+  const tipRow=tip>0
+    ? `<div class="total-row tip-row"><span>🙏 Propina repartidor</span><span>$${tip.toFixed(2)}</span></div>`
+    : '';
+
+  // Stripe fee row — only shown if fee > 0
+  const stripeFeeRow=fee>0
+    ? `<div class="total-row stripe-fee"><span>Cargo Stripe (3.5%)</span><span>$${fee.toFixed(2)}</span></div>`
+    : '';
 
   document.getElementById('ticket-content').innerHTML=`
     <div class="header">
@@ -121,6 +138,7 @@ function render(){
         <div class="total-row"><span>Subtotal</span><span>$${parseFloat(p.subtotal).toFixed(2)}</span></div>
         <div class="total-row"><span>Tax NJ (6.625%)</span><span>$${parseFloat(p.tax).toFixed(2)}</span></div>
         <div class="total-row"><span>Gestión</span><span>$${parseFloat(p.gestion).toFixed(2)}</span></div>
+        ${tipRow}
         ${stripeFeeRow}
         <div class="total-row grand"><span>TOTAL</span><span>$${parseFloat(p.total).toFixed(2)}</span></div>
       </div>
@@ -136,7 +154,6 @@ function render(){
       PIDEYA LLC · El Conuco Restaurante
     </div>`;
 
-  // QR with QRCode.js — no external API, always works
   try{
     new QRCode(document.getElementById('qr-canvas'),{
       text:mapsUrl(addr),width:150,height:150,
