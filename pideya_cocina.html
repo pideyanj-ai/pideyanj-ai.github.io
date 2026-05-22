@@ -228,6 +228,38 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
   .login-card{padding:32px 24px;}
   .card-btns .btn-xs{font-size:.65rem;padding:8px 5px;}
 }
+
+/* ═══════════════════════════════════════
+   REPORT PRINT / PDF STYLES
+   ═══════════════════════════════════════ */
+#reportPrintArea{display:none;}
+@media print{
+  body>*{display:none!important;}
+  .modal-overlay.open{position:static!important;background:none!important;display:block!important;padding:0!important;}
+  .ticket-paper{max-height:none!important;border-radius:0!important;box-shadow:none!important;border:none!important;}
+  .t-x,.t-print-btn{display:none!important;}
+  #tkQR canvas{display:none!important;}
+  #tkQR img{display:block!important;width:140px!important;height:140px!important;}
+  #reportPrintArea{display:block!important;font-family:'Outfit',Arial,sans-serif;color:#111;padding:10mm 14mm;font-size:9pt;}
+  #reportPrintArea .rp-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #166534;padding-bottom:10px;margin-bottom:16px;}
+  #reportPrintArea .rp-logo{font-size:17pt;font-weight:900;color:#1a3a1a;}
+  #reportPrintArea .rp-logo span{color:#D97706;}
+  #reportPrintArea .rp-meta{text-align:right;font-size:7.5pt;color:#555;line-height:1.7;}
+  #reportPrintArea .rp-title{font-size:13pt;font-weight:800;color:#111;margin-bottom:14px;padding-bottom:6px;border-bottom:1px solid #E2E8F0;}
+  #reportPrintArea .rp-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+  #reportPrintArea .rp-kpi{border:1px solid #E2E8F0;border-radius:6px;padding:8px 10px;background:#F9FAFB;}
+  #reportPrintArea .rp-kpi-val{font-size:12pt;font-weight:900;color:#111;}
+  #reportPrintArea .rp-kpi-lbl{font-size:6.5pt;color:#6B7280;text-transform:uppercase;letter-spacing:.7px;margin-top:2px;}
+  #reportPrintArea .rp-section-title{font-size:8pt;font-weight:800;color:#555;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid #E2E8F0;padding-bottom:4px;margin-bottom:8px;margin-top:14px;}
+  #reportPrintArea table{width:100%;border-collapse:collapse;font-size:8pt;}
+  #reportPrintArea table th{text-align:left;background:#F1F5F9;color:#374151;font-weight:700;padding:5px 7px;border:1px solid #E2E8F0;}
+  #reportPrintArea table td{padding:4px 7px;border:1px solid #E2E8F0;color:#111;}
+  #reportPrintArea table tr:nth-child(even) td{background:#F9FAFB;}
+  #reportPrintArea .rp-totals-row td{font-weight:800;background:#DCFCE7!important;color:#166534;}
+  #reportPrintArea .rp-two-col{display:grid;grid-template-columns:55% 43%;gap:2%;margin-bottom:14px;}
+  #reportPrintArea .rp-footer{margin-top:16px;border-top:1px dashed #bbb;padding-top:8px;text-align:center;font-size:7pt;color:#aaa;}
+  @page{margin:0.8cm;size:A4;}
+}
 </style>
 </head>
 <body>
@@ -372,6 +404,11 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
         <span style="color:#64748B;font-size:.8rem;">→</span>
         <input type="date" id="rpTo" style="background:#F8FAFC;border:1px solid #CBD5E1;color:#1E293B;border-radius:8px;padding:7px 10px;font-family:Outfit,sans-serif;font-size:.82rem;outline:none;">
         <button onclick="renderReports()" style="background:#166534;color:white;border:none;border-radius:8px;padding:7px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;">Aplicar</button>
+      </div>
+      <!-- PRINT & PDF BUTTONS -->
+      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
+        <button onclick="printReport()" style="background:#1E293B;color:#fff;border:none;border-radius:9px;padding:8px 16px;font-family:Outfit,sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#1E293B'">🖨️ Imprimir Reporte</button>
+        <button onclick="exportReportPDF()" style="background:#166534;color:#fff;border:none;border-radius:9px;padding:8px 16px;font-family:Outfit,sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;" onmouseover="this.style.background='#15803D'" onmouseout="this.style.background='#166534'">📄 Exportar PDF</button>
       </div>
     </div>
     <!-- KPIs -->
@@ -619,6 +656,9 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
     </div>
   </div>
 </div>
+
+<!-- REPORT PRINT AREA (hidden on screen, shown during @media print) -->
+<div id="reportPrintArea"></div>
 
 <!-- EDIT MODAL -->
 <div class="modal-overlay" id="editModal" onclick="if(event.target===this)closeEdit()">
@@ -1348,6 +1388,82 @@ async function markDispatched(idx){
     }else throw new Error('Error '+r.status);
   }catch(e){alert('Error al marcar como enviada: '+e.message);}
 }
+
+
+// ═══════════════════════════════════════════════════════════
+// PRINT / PDF REPORT
+// ═══════════════════════════════════════════════════════════
+function buildReportHTML(){
+  const{from,to,label}=getReportDateRange();
+  const now=new Date().toLocaleString('es-DO',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'});
+  const allConf=allOrders.filter(o=>o.Status==='Confirmed'||o.Status==='Enviado');
+  const periodOrders=allConf.filter(o=>{const d=toDateStr(o.Timestamp);return d>=from&&d<=to;});
+  const periodZelle=periodOrders.filter(o=>parseFloat(o.StripeFee||0)===0);
+  const periodStripe=periodOrders.filter(o=>parseFloat(o.StripeFee||0)>0);
+  const sum=(arr,key)=>arr.reduce((s,o)=>s+parseFloat(o[key]||0),0);
+  const periodRev=sum(periodOrders,'Total');
+  const periodZelleRev=sum(periodZelle,'Total');
+  const periodStripeRev=sum(periodStripe,'Total');
+  const periodTax=sum(periodOrders,'Tax');
+  const periodGestion=sum(periodOrders,'Gestion');
+  const periodStripeFee=sum(periodStripe,'StripeFee');
+  const periodTips=sum(periodOrders,'Tip');
+  const periodSubtotal=sum(periodOrders,'Subtotal');
+  const avgOrder=periodOrders.length?periodRev/periodOrders.length:0;
+  const netEst=periodRev-periodStripeFee;
+  const itemCount={};
+  periodOrders.forEach(o=>{(o.Items||'').split(' | ').forEach(line=>{const m=line.match(/^(\d+)x (.+?) - \$/);if(m){const name=m[2].trim();const qty=parseInt(m[1]);itemCount[name]=(itemCount[name]||0)+qty;}});});
+  const topItems=Object.entries(itemCount).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const dayMap={};
+  periodOrders.forEach(o=>{const d=toDateStr(o.Timestamp);if(!dayMap[d])dayMap[d]={orders:0,subtotal:0,tax:0,gestion:0,tip:0,stripefee:0,total:0};dayMap[d].orders++;dayMap[d].subtotal+=parseFloat(o.Subtotal||0);dayMap[d].tax+=parseFloat(o.Tax||0);dayMap[d].gestion+=parseFloat(o.Gestion||0);dayMap[d].tip+=parseFloat(o.Tip||0);dayMap[d].stripefee+=parseFloat(o.StripeFee||0);dayMap[d].total+=parseFloat(o.Total||0);});
+  const days=Object.keys(dayMap).sort();
+  const kpis=[['💰 Ingresos totales','$'+periodRev.toFixed(2)],['📦 Total órdenes',periodOrders.length],['💸 Ingresos Zelle','$'+periodZelleRev.toFixed(2)],['💳 Ingresos Stripe','$'+periodStripeRev.toFixed(2)],['🏛️ Tax cobrado','$'+periodTax.toFixed(2)],['💼 Com. Gestión','$'+periodGestion.toFixed(2)],['🙏 Propinas repartidor','$'+periodTips.toFixed(2)],['📈 Ticket promedio','$'+avgOrder.toFixed(2)]];
+  const breakdown=[['💳 Órdenes Stripe',periodStripe.length,'$'+periodStripeRev.toFixed(2)],['💸 Órdenes Zelle',periodZelle.length,'$'+periodZelleRev.toFixed(2)],['📦 Total órdenes',periodOrders.length,'$'+periodRev.toFixed(2)],['🧾 Subtotal bruto','—','$'+periodSubtotal.toFixed(2)],['🏛️ Tax NJ (6.625%)','—','$'+periodTax.toFixed(2)],['💼 Comisión Gestión','—','$'+periodGestion.toFixed(2)],['🙏 Propinas repartidor','—','$'+periodTips.toFixed(2)],['💳 Comisión Stripe','—','$'+periodStripeFee.toFixed(2)],['💰 Neto estimado','—','$'+netEst.toFixed(2)]];
+  return `
+    <div class="rp-header">
+      <div>
+        <div class="rp-logo">🍽️ PIDE<span>YA</span></div>
+        <div style="font-size:8pt;color:#555;margin-top:3px;">El Conuco Restaurante · 715 Summit Ave, Union City, NJ 07087 · +1 (201) 772-7540</div>
+      </div>
+      <div class="rp-meta">Generado: ${now}<br>Período: <strong>${label}</strong><br>${from!==to?from+' → '+to:from}</div>
+    </div>
+    <div class="rp-title">📈 Reporte de Ventas — ${label}</div>
+    <div class="rp-kpi-grid">${kpis.map(([l,v])=>`<div class="rp-kpi"><div class="rp-kpi-val">${v}</div><div class="rp-kpi-lbl">${l}</div></div>`).join('')}</div>
+    <div class="rp-two-col">
+      <div>
+        <div class="rp-section-title">Desglose del Período</div>
+        <table><thead><tr><th>Concepto</th><th style="text-align:center">Cant.</th><th style="text-align:right">Monto</th></tr></thead><tbody>
+          ${breakdown.map(([c,n,m],i)=>`<tr${i===breakdown.length-1?' class="rp-totals-row"':''}><td>${c}</td><td style="text-align:center;font-weight:700">${n}</td><td style="text-align:right;font-weight:700;color:#166534">${m}</td></tr>`).join('')}
+        </tbody></table>
+      </div>
+      <div>
+        <div class="rp-section-title">🏆 Top Platos Más Vendidos</div>
+        <table><thead><tr><th style="text-align:center">#</th><th>Plato</th><th style="text-align:center">Uds</th></tr></thead><tbody>
+          ${topItems.length?topItems.map(([name,qty],i)=>`<tr><td style="text-align:center;color:#64748B;font-weight:700">${i+1}</td><td>${name}</td><td style="text-align:center;font-weight:700;color:#166534">${qty}</td></tr>`).join(''):'<tr><td colspan="3" style="text-align:center;color:#94A3B8">Sin datos</td></tr>'}
+        </tbody></table>
+      </div>
+    </div>
+    ${days.length?`
+    <div class="rp-section-title">Ventas por Día — Detalle</div>
+    <table><thead><tr><th>Fecha</th><th style="text-align:center">Órdenes</th><th style="text-align:right">Subtotal</th><th style="text-align:right">Tax</th><th style="text-align:right">Gestión</th><th style="text-align:right">Propinas</th><th style="text-align:right">Stripe Fee</th><th style="text-align:right">Total</th></tr></thead><tbody>
+      ${days.map(d=>{const r=dayMap[d];return`<tr><td style="font-weight:600">${d}</td><td style="text-align:center">${r.orders}</td><td style="text-align:right">$${r.subtotal.toFixed(2)}</td><td style="text-align:right">$${r.tax.toFixed(2)}</td><td style="text-align:right">$${r.gestion.toFixed(2)}</td><td style="text-align:right;color:#166534;font-weight:600">$${r.tip.toFixed(2)}</td><td style="text-align:right">$${r.stripefee.toFixed(2)}</td><td style="text-align:right;font-weight:800;color:#166534">$${r.total.toFixed(2)}</td></tr>`;}).join('')}
+      <tr class="rp-totals-row"><td>TOTAL</td><td style="text-align:center">${periodOrders.length}</td><td style="text-align:right">$${periodSubtotal.toFixed(2)}</td><td style="text-align:right">$${periodTax.toFixed(2)}</td><td style="text-align:right">$${periodGestion.toFixed(2)}</td><td style="text-align:right">$${periodTips.toFixed(2)}</td><td style="text-align:right">$${periodStripeFee.toFixed(2)}</td><td style="text-align:right">$${periodRev.toFixed(2)}</td></tr>
+    </tbody></table>`:''}
+    <div class="rp-footer">PIDEYA LLC · El Conuco Restaurante · +1 (201) 772-7540 · Generado el ${now}</div>
+  `;
+}
+
+function printReport(){
+  renderReports();
+  document.getElementById('reportPrintArea').innerHTML=buildReportHTML();
+  const ticketModal=document.getElementById('ticketModal');
+  const wasOpen=ticketModal.classList.contains('open');
+  if(wasOpen)ticketModal.classList.remove('open');
+  window.print();
+  if(wasOpen)ticketModal.classList.add('open');
+}
+
+function exportReportPDF(){printReport();}
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeTicket();closeEdit();}});
 </script>
