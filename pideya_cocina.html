@@ -116,7 +116,6 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
 .card-total{font-size:.92rem;font-weight:800;color:#111827;}
 .card-time{font-size:.67rem;color:#6B7280;}
 .card-btns{display:flex;gap:5px;flex-wrap:wrap;}
-/* ── RESPONSIVE BUTTONS ── */
 .btn-xs{border:none;border-radius:7px;padding:7px 12px;font-family:'Outfit',sans-serif;font-size:.73rem;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s;white-space:nowrap;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
 .btn-xs:hover{opacity:.82;}
 .btn-xs:active{transform:scale(.95);opacity:.75;}
@@ -231,9 +230,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
   .card-btns .btn-xs{font-size:.65rem;padding:8px 5px;}
 }
 
-/* ═══════════════════════════════════════
-   REPORT PRINT / PDF STYLES
-   ═══════════════════════════════════════ */
+/* REPORT PRINT / PDF STYLES */
 #reportPrintArea{display:none;}
 @media print{
   body>*{display:none!important;}
@@ -398,7 +395,6 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
 
   <!-- REPORTES -->
   <div class="page" id="page-reportes">
-    <!-- Date range picker -->
     <div style="background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
       <div style="font-size:.8rem;font-weight:700;color:#374151;white-space:nowrap;">📅 Período:</div>
       <select id="rpRange" onchange="onRangeChange()" style="background:#F8FAFC;border:1px solid #CBD5E1;color:#1E293B;border-radius:8px;padding:7px 12px;font-family:Outfit,sans-serif;font-size:.82rem;outline:none;">
@@ -415,13 +411,11 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
         <input type="date" id="rpTo" style="background:#F8FAFC;border:1px solid #CBD5E1;color:#1E293B;border-radius:8px;padding:7px 10px;font-family:Outfit,sans-serif;font-size:.82rem;outline:none;">
         <button onclick="renderReports()" style="background:#166534;color:white;border:none;border-radius:8px;padding:7px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;">Aplicar</button>
       </div>
-      <!-- PRINT & PDF BUTTONS -->
       <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
         <button onclick="printReport()" style="background:#1E293B;color:#fff;border:none;border-radius:9px;padding:8px 16px;font-family:Outfit,sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#1E293B'">🖨️ Imprimir Reporte</button>
-        <button onclick="exportReportPDF()" style="background:#166534;color:#fff;border:none;border-radius:9px;padding:8px 16px;font-family:Outfit,sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;" onmouseover="this.style.background='#15803D'" onmouseout="this.style.background='#166534'">📄 Exportar PDF</button>
+        <button onclick="exportReportPDF()" style="background:#166534;color:#fff;border:none;border-radius:9px;padding:8px 16px;font-family:Outfit,sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;" onmouseover="this.style.background='#15803D'" onmouseout="this.style.background='#166634'">📄 Exportar PDF</button>
       </div>
     </div>
-    <!-- KPIs -->
     <div class="kpi-grid" style="margin-bottom:16px">
       <div class="kpi g"><div class="kpi-icon">💰</div><div class="kpi-val" id="rpRevPeriod">—</div><div class="kpi-lbl">Ingresos período</div></div>
       <div class="kpi o"><div class="kpi-icon">📦</div><div class="kpi-val" id="rpOrdersPeriod">—</div><div class="kpi-lbl">Órdenes período</div></div>
@@ -433,12 +427,10 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
       <div class="kpi b"><div class="kpi-icon">📈</div><div class="kpi-val" id="rpAvgOrder">—</div><div class="kpi-lbl">Ticket promedio</div></div>
       <div class="kpi g"><div class="kpi-icon">🙏</div><div class="kpi-val" id="rpTipPeriod">—</div><div class="kpi-lbl">Propinas período</div></div>
     </div>
-    <!-- Revenue chart -->
     <div class="chart-box">
       <div class="chart-title" id="rpChartTitle">Ingresos por día</div>
       <div class="bar-chart" id="reportChart" style="height:140px"></div>
     </div>
-    <!-- Two col: breakdown table + top items -->
     <div class="two-col" style="margin-bottom:16px;">
       <div class="chart-box" style="margin-bottom:0">
         <div class="chart-title">Desglose del período</div>
@@ -449,7 +441,6 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
         <div id="rpTopItems"><div class="empty" style="padding:16px"><em>📊</em>Sin datos</div></div>
       </div>
     </div>
-    <!-- Daily breakdown table -->
     <div class="chart-box">
       <div class="chart-title">Ventas por día — detalle</div>
       <div style="overflow-x:auto;">
@@ -459,7 +450,6 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
         </table>
       </div>
     </div>
-    <!-- Historical totals -->
     <div class="kpi-grid">
       <div class="kpi g"><div class="kpi-icon">📦</div><div class="kpi-val" id="rpRevAll">—</div><div class="kpi-lbl">Total histórico</div></div>
       <div class="kpi o"><div class="kpi-icon">🧾</div><div class="kpi-val" id="rpOrdersAll">—</div><div class="kpi-lbl">Órdenes totales</div></div>
@@ -517,7 +507,6 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
       </div>
     </div>
 
-    <!-- ── DELIVERY RADIUS ── -->
     <div class="setting-group">
       <h3>🚗 Radio de Entrega</h3>
       <div class="setting-row">
@@ -611,46 +600,82 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
       <div class="setting-row"><div class="setting-label">Restaurante</div><div style="font-size:.82rem;color:var(--muted)">El Conuco Restaurante</div></div>
       <div class="setting-row"><div class="setting-label">Dirección</div><div style="font-size:.82rem;color:var(--muted)">715 Summit Ave, Union City, NJ 07087</div></div>
       <div class="setting-row"><div class="setting-label">WhatsApp Bot</div><div style="font-size:.82rem;color:var(--green)">+1 (201) 772-7540</div></div>
-      <div class="setting-row"><div class="setting-label">Panel versión</div><div style="font-size:.82rem;color:var(--muted)">PIDEYA v3.1</div></div>
+      <div class="setting-row"><div class="setting-label">Panel versión</div><div style="font-size:.82rem;color:var(--muted)">PIDEYA v3.2</div></div>
     </div>
   </div>
 
-  <!-- HORARIO -->
+  <!-- ══════════════════════════════════════════════════════════
+       HORARIO — REDESIGNED: direct save, no copy-paste to n8n
+       ══════════════════════════════════════════════════════════ -->
   <div class="page" id="page-horario">
     <div class="sec-head"><div class="sec-title"><div class="sec-dot dot-g"></div>Horario del Restaurante</div></div>
-    <p style="font-size:.78rem;color:#4B5563;margin-bottom:20px;">Edita el horario, genera el código y pégalo en n8n.</p>
-    <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:12px;padding:16px;margin-bottom:16px;">
-      <div style="font-weight:800;font-size:.88rem;color:#92400E;margin-bottom:8px;">⚡ Acciones Rápidas</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button onclick="applyPreset('open24')" style="background:#166534;color:white;border:none;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:120px;">✅ Forzar Abierto</button>
-        <button onclick="applyPreset('normal')" style="background:#1E293B;color:white;border:none;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:120px;">🕐 Horario Normal</button>
-        <button onclick="applyPreset('extend1h')" style="background:#0369A1;color:white;border:none;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:120px;">+1 hora extra</button>
-        <button onclick="applyPreset('closed')" style="background:#DC2626;color:white;border:none;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:120px;">🔴 Cerrar Bot</button>
+
+    <!-- TODAY QUICK EDIT -->
+    <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:2px solid #86EFAC;border-radius:16px;padding:20px;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <div style="background:#166534;color:#fff;border-radius:10px;padding:6px 14px;font-size:.82rem;font-weight:800;letter-spacing:.5px;">📅 HOY</div>
+        <div id="todayDayName" style="font-size:1.1rem;font-weight:900;color:#166534;"></div>
+        <div id="todayCurrentHours" style="font-size:.8rem;color:#4B5563;background:#fff;border:1px solid #BBF7D0;border-radius:8px;padding:5px 12px;"></div>
       </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <label style="font-size:.8rem;font-weight:700;color:#374151;white-space:nowrap;">🌅 Abre:</label>
+          <select id="todayOpen" style="background:#fff;border:2px solid #86EFAC;color:#111827;border-radius:9px;padding:9px 11px;font-family:Outfit,sans-serif;font-size:.92rem;font-weight:700;outline:none;cursor:pointer;min-width:90px;">
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <label style="font-size:.8rem;font-weight:700;color:#374151;white-space:nowrap;">🌙 Cierra:</label>
+          <select id="todayClose" style="background:#fff;border:2px solid #86EFAC;color:#111827;border-radius:9px;padding:9px 11px;font-family:Outfit,sans-serif;font-size:.92rem;font-weight:700;outline:none;cursor:pointer;min-width:90px;">
+          </select>
+          <select id="todayCloseMin" style="background:#fff;border:2px solid #86EFAC;color:#111827;border-radius:9px;padding:9px 9px;font-family:Outfit,sans-serif;font-size:.88rem;font-weight:700;outline:none;cursor:pointer;">
+            <option value="0">:00</option>
+            <option value="15">:15</option>
+            <option value="30">:30</option>
+            <option value="40">:40</option>
+            <option value="45">:45</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button onclick="saveTodayHours()" id="saveTodayBtn"
+          style="flex:2;min-width:170px;background:#166534;color:white;border:none;border-radius:11px;padding:13px;font-family:Outfit,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;transition:background .2s;"
+          onmouseover="this.style.background='#15803D'" onmouseout="this.style.background='#166534'">
+          💾 Guardar horario de hoy
+        </button>
+        <button onclick="closeTodayBot()"
+          style="flex:1;min-width:130px;background:#DC2626;color:white;border:none;border-radius:11px;padding:13px;font-family:Outfit,sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:background .2s;"
+          onmouseover="this.style.background='#B91C1C'" onmouseout="this.style.background='#DC2626'">
+          🔴 Cerrar bot hoy
+        </button>
+      </div>
+      <div id="saveTodayMsg" style="display:none;margin-top:12px;border-radius:9px;padding:10px 14px;font-size:.82rem;font-weight:600;text-align:center;"></div>
     </div>
+
+    <!-- DIVIDER -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+      <div style="flex:1;height:1px;background:#E2E8F0;"></div>
+      <div style="font-size:.72rem;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;">⚙️ Horario completo semanal</div>
+      <div style="flex:1;height:1px;background:#E2E8F0;"></div>
+    </div>
+
+    <!-- QUICK PRESETS -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+      <button onclick="applyPreset('normal')" style="background:#F1F5F9;color:#374151;border:1px solid #E2E8F0;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:110px;">↩ Horario Normal</button>
+      <button onclick="applyPreset('open24')" style="background:#DCFCE7;color:#166534;border:1px solid #86EFAC;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:110px;">✅ Forzar Abierto</button>
+      <button onclick="applyPreset('extend1h')" style="background:#DBEAFE;color:#1E40AF;border:1px solid #93C5FD;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:110px;">+1 hora extra</button>
+      <button onclick="applyPreset('closed')" style="background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:110px;">🔴 Cerrar todo</button>
+    </div>
+
+    <!-- WEEKLY EDITOR -->
     <div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;margin-bottom:16px;">
       <div style="background:#F8FAFC;padding:12px 16px;border-bottom:1px solid #E2E8F0;font-weight:800;font-size:.82rem;color:#374151;text-transform:uppercase;letter-spacing:.5px;">📅 Editar Horario por Día</div>
       <div style="padding:16px;display:flex;flex-direction:column;gap:14px;" id="hoursEditor"></div>
       <div style="padding:12px 16px;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
         <button onclick="applyPreset('normal')" style="background:#F1F5F9;color:#374151;border:none;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;">↩ Restablecer</button>
-        <button onclick="saveHoursToN8n()" id="saveHoursBtn" style="background:#166534;color:white;border:none;border-radius:8px;padding:9px 20px;font-family:Outfit,sans-serif;font-size:.85rem;font-weight:800;cursor:pointer;">💾 Guardar Horario</button>
+        <button onclick="saveAllHoursToN8n()" id="saveHoursBtn" style="background:#166534;color:white;border:none;border-radius:8px;padding:9px 20px;font-family:Outfit,sans-serif;font-size:.85rem;font-weight:800;cursor:pointer;">💾 Guardar semana completa</button>
       </div>
     </div>
-    <div id="generatedCodeBox" style="display:none;background:#1E293B;border-radius:12px;padding:16px;margin-bottom:16px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <div style="font-weight:800;font-size:.85rem;color:#94A3B8;">📋 Código generado</div>
-        <button onclick="copyHoursCode()" id="copyHoursBtn" style="background:#166534;color:white;border:none;border-radius:7px;padding:6px 14px;font-family:Outfit,sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;">📋 Copiar</button>
-      </div>
-      <textarea id="generatedHoursCode" readonly style="width:100%;background:#0F172A;color:#4ADE80;border:1px solid #334155;border-radius:8px;padding:10px;font-family:monospace;font-size:.72rem;line-height:1.5;resize:none;height:80px;outline:none;"></textarea>
-    </div>
-    <div id="hoursInstructions" style="display:none;background:#EEF2FF;border:1px solid #C7D2FE;border-radius:10px;padding:14px 16px;font-size:.78rem;color:#1E293B;line-height:1.8;">
-      <div style="font-weight:800;margin-bottom:8px;color:#3730A3;">📌 Cómo aplicar:</div>
-      <div>1️⃣ Clic en <strong>📋 Copiar</strong></div>
-      <div>2️⃣ Ve a <strong>n8n → Build Response</strong></div>
-      <div>3️⃣ Busca <code style="background:#E0E7FF;padding:1px 4px;border-radius:3px;">const RESTAURANT=</code></div>
-      <div>4️⃣ Reemplaza solo <code style="background:#E0E7FF;padding:1px 4px;border-radius:3px;">hours:{...}</code></div>
-      <div>5️⃣ Guarda y publica ✅</div>
-    </div>
+    <div id="saveWeekMsg" style="display:none;border-radius:10px;padding:12px 16px;font-size:.82rem;font-weight:600;text-align:center;margin-bottom:12px;"></div>
   </div>
 
   <!-- MENÚ -->
@@ -667,7 +692,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
   </div>
 </div>
 
-<!-- REPORT PRINT AREA (hidden on screen, shown during @media print) -->
+<!-- REPORT PRINT AREA -->
 <div id="reportPrintArea"></div>
 
 <!-- EDIT MODAL -->
@@ -812,18 +837,168 @@ function copyZipCode(){
   }).catch(()=>{ta.select();document.execCommand('copy');});
 }
 
-// ── HORARIO ────────────────────────────────────────────────────────────────
-const DEFAULT_HOURS={0:{open:9,close:21,closeMin:0,label:'Domingo'},1:{open:9,close:21,closeMin:40,label:'Lunes'},2:{open:9,close:21,closeMin:40,label:'Martes'},3:{open:9,close:21,closeMin:40,label:'Miércoles'},4:{open:9,close:21,closeMin:40,label:'Jueves'},5:{open:9,close:21,closeMin:40,label:'Viernes'},6:{open:9,close:21,closeMin:40,label:'Sábado'}};
+// ════════════════════════════════════════════════════════════════
+// HORARIO — NEW DIRECT-SAVE SYSTEM (no copy-paste to n8n needed)
+// ════════════════════════════════════════════════════════════════
+
+const DAY_NAMES=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const DEFAULT_HOURS={
+  0:{open:9,close:21,closeMin:0,label:'Domingo'},
+  1:{open:9,close:21,closeMin:40,label:'Lunes'},
+  2:{open:9,close:21,closeMin:40,label:'Martes'},
+  3:{open:9,close:21,closeMin:40,label:'Miércoles'},
+  4:{open:9,close:21,closeMin:40,label:'Jueves'},
+  5:{open:9,close:21,closeMin:40,label:'Viernes'},
+  6:{open:9,close:21,closeMin:40,label:'Sábado'}
+};
 let currentHours=JSON.parse(JSON.stringify(DEFAULT_HOURS));
 
+// ── Build the 24-option dropdowns for "today" pickers ────────────────
+function buildHourOptions(selectId, selectedVal){
+  const sel=document.getElementById(selectId);
+  if(!sel)return;
+  sel.innerHTML='';
+  for(let h=0;h<24;h++){
+    const suffix=h<12?'am':'pm';
+    const display=h===0?'12:00 am':h<12?h+':00 am':h===12?'12:00 pm':(h-12)+':00 pm';
+    const opt=document.createElement('option');
+    opt.value=h;opt.textContent=display;
+    if(h===selectedVal)opt.selected=true;
+    sel.appendChild(opt);
+  }
+}
+
+// ── Init horario page ─────────────────────────────────────────────────
+function initHoursPage(){
+  currentHours=JSON.parse(JSON.stringify(DEFAULT_HOURS));
+
+  // Set "today" section
+  const todayIdx=new Date().getDay(); // 0=Sun, 6=Sat
+  const todayH=currentHours[todayIdx];
+  const dayEl=document.getElementById('todayDayName');
+  if(dayEl)dayEl.textContent=DAY_NAMES[todayIdx];
+
+  const curHoursEl=document.getElementById('todayCurrentHours');
+  if(curHoursEl){
+    const openStr=fmt12(todayH.open,0);
+    const closeStr=fmt12(todayH.close,todayH.closeMin);
+    curHoursEl.textContent='Horario actual: '+openStr+' – '+closeStr;
+  }
+
+  buildHourOptions('todayOpen', todayH.open);
+  buildHourOptions('todayClose', todayH.close);
+  const minSel=document.getElementById('todayCloseMin');
+  if(minSel)minSel.value=todayH.closeMin;
+
+  // Hide any previous messages
+  const tm=document.getElementById('saveTodayMsg');if(tm)tm.style.display='none';
+  const wm=document.getElementById('saveWeekMsg');if(wm)wm.style.display='none';
+
+  renderHoursEditor();
+}
+
+function fmt12(h,m){
+  const suffix=h<12?'am':'pm';
+  const display=h===0?'12':h<=12?''+h:''+(h-12);
+  const mm=m>0?':'+String(m).padStart(2,'0'):'';
+  return display+mm+' '+suffix;
+}
+
+// ── Save today's hours directly to n8n ───────────────────────────────
+async function saveTodayHours(){
+  const todayIdx=new Date().getDay();
+  const openVal=parseInt(document.getElementById('todayOpen')?.value||9);
+  const closeVal=parseInt(document.getElementById('todayClose')?.value||21);
+  const closeMinVal=parseInt(document.getElementById('todayCloseMin')?.value||0);
+
+  // Update local state for today
+  currentHours[todayIdx].open=openVal;
+  currentHours[todayIdx].close=closeVal;
+  currentHours[todayIdx].closeMin=closeMinVal;
+
+  const btn=document.getElementById('saveTodayBtn');
+  const msg=document.getElementById('saveTodayMsg');
+  if(btn){btn.textContent='⏳ Guardando...';btn.disabled=true;}
+
+  try{
+    const r=await fetch(N8N_UPDATE_HOURS,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({hours:currentHours, changedDay:todayIdx})
+    });
+    if(r.ok){
+      const openStr=fmt12(openVal,0);
+      const closeStr=fmt12(closeVal,closeMinVal);
+      if(btn){btn.textContent='✅ Guardado!';btn.style.background='#15803D';}
+      if(msg){
+        msg.style.display='block';
+        msg.style.background='#DCFCE7';msg.style.color='#166534';msg.style.border='1px solid #86EFAC';
+        msg.textContent='✅ Horario de hoy actualizado: '+openStr+' – '+closeStr+'. El bot ya usa el nuevo horario.';
+      }
+      // Update the "horario actual" display
+      const curHoursEl=document.getElementById('todayCurrentHours');
+      if(curHoursEl)curHoursEl.textContent='Horario actual: '+openStr+' – '+closeStr;
+      setTimeout(()=>{
+        if(btn){btn.textContent='💾 Guardar horario de hoy';btn.style.background='#166534';btn.disabled=false;}
+        setTimeout(()=>{if(msg)msg.style.display='none';},4000);
+      },2000);
+    }else throw new Error('Error '+r.status);
+  }catch(e){
+    if(btn){btn.textContent='❌ Error — reintentar';btn.style.background='#DC2626';btn.disabled=false;}
+    if(msg){
+      msg.style.display='block';
+      msg.style.background='#FEE2E2';msg.style.color='#DC2626';msg.style.border='1px solid #FCA5A5';
+      msg.textContent='❌ Error al guardar: '+e.message;
+    }
+    setTimeout(()=>{if(btn){btn.textContent='💾 Guardar horario de hoy';btn.style.background='#166534';}},3000);
+  }
+}
+
+// ── Close bot for today only ──────────────────────────────────────────
+async function closeTodayBot(){
+  if(!confirm('¿Cerrar el bot para hoy? Los clientes verán un mensaje de cerrado.'))return;
+  const todayIdx=new Date().getDay();
+  // Set open=0, close=0 = closed signal for bot
+  currentHours[todayIdx].open=0;
+  currentHours[todayIdx].close=0;
+  currentHours[todayIdx].closeMin=0;
+
+  const msg=document.getElementById('saveTodayMsg');
+  try{
+    const r=await fetch(N8N_UPDATE_HOURS,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({hours:currentHours, changedDay:todayIdx, closed:true})
+    });
+    if(r.ok){
+      if(msg){
+        msg.style.display='block';
+        msg.style.background='#FEE2E2';msg.style.color='#991B1B';msg.style.border='1px solid #FCA5A5';
+        msg.textContent='🔴 Bot cerrado para hoy. Los clientes recibirán mensaje de restaurante cerrado.';
+      }
+      // Update display
+      const curHoursEl=document.getElementById('todayCurrentHours');
+      if(curHoursEl)curHoursEl.textContent='🔴 CERRADO HOY';
+    }else throw new Error('Error '+r.status);
+  }catch(e){
+    if(msg){
+      msg.style.display='block';
+      msg.style.background='#FEE2E2';msg.style.color='#DC2626';msg.style.border='1px solid #FCA5A5';
+      msg.textContent='❌ Error: '+e.message;
+    }
+  }
+}
+
+// ── Apply preset to full week ─────────────────────────────────────────
 function applyPreset(type){
   if(type==='open24'){for(let d=0;d<7;d++)currentHours[d]={...currentHours[d],open:0,close:23,closeMin:59};}
   else if(type==='normal'){currentHours=JSON.parse(JSON.stringify(DEFAULT_HOURS));}
   else if(type==='extend1h'){for(let d=0;d<7;d++){let c=currentHours[d].close+1,cm=currentHours[d].closeMin;if(c>=24){c=23;cm=59;}currentHours[d]={...currentHours[d],close:c,closeMin:cm};}}
   else if(type==='closed'){for(let d=0;d<7;d++)currentHours[d]={...currentHours[d],open:0,close:0,closeMin:0};}
-  renderHoursEditor();generateAndShow();
+  renderHoursEditor();
 }
 
+// ── Render the weekly editor ──────────────────────────────────────────
 function renderHoursEditor(){
   const el=document.getElementById('hoursEditor');if(!el)return;
   el.innerHTML=Object.entries(currentHours).map(([d,h])=>
@@ -848,30 +1023,54 @@ function renderHoursEditor(){
   ).join('');
 }
 
-function onHourChange(){for(let d=0;d<7;d++){if(!document.getElementById('open_'+d))return;currentHours[d].open=parseInt(document.getElementById('open_'+d).value||9);currentHours[d].close=parseInt(document.getElementById('close_'+d).value||21);currentHours[d].closeMin=parseInt(document.getElementById('closemin_'+d).value||0);}}
+function onHourChange(){
+  for(let d=0;d<7;d++){
+    if(!document.getElementById('open_'+d))return;
+    currentHours[d].open=parseInt(document.getElementById('open_'+d).value||9);
+    currentHours[d].close=parseInt(document.getElementById('close_'+d).value||21);
+    currentHours[d].closeMin=parseInt(document.getElementById('closemin_'+d).value||0);
+  }
+}
 
-function generateAndShow(){
+// ── Save full week directly to n8n ────────────────────────────────────
+async function saveAllHoursToN8n(){
   onHourChange();
-  const parts=Object.entries(currentHours).map(([d,h])=>d+':{open:'+h.open+',close:'+h.close+',closeMin:'+h.closeMin+'}').join(',');
-  const code='hours:{'+parts+'}';
-  const ta=document.getElementById('generatedHoursCode');if(ta)ta.value=code;
-  const box=document.getElementById('generatedCodeBox');const inst=document.getElementById('hoursInstructions');
-  if(box)box.style.display='block';if(inst)inst.style.display='block';
+  const btn=document.getElementById('saveHoursBtn');
+  const msg=document.getElementById('saveWeekMsg');
+  if(btn){btn.textContent='⏳ Guardando...';btn.disabled=true;}
+  try{
+    const r=await fetch(N8N_UPDATE_HOURS,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({hours:currentHours})
+    });
+    if(r.ok){
+      if(btn){btn.textContent='✅ Guardado!';btn.style.background='#15803D';}
+      if(msg){
+        msg.style.display='block';
+        msg.style.background='#DCFCE7';msg.style.color='#166534';msg.style.border='1px solid #86EFAC';
+        msg.textContent='✅ Horario semanal guardado correctamente. El bot ya usa el nuevo horario.';
+      }
+      setTimeout(()=>{
+        if(btn){btn.textContent='💾 Guardar semana completa';btn.style.background='#166534';btn.disabled=false;}
+        setTimeout(()=>{if(msg)msg.style.display='none';},4000);
+      },2000);
+    }else throw new Error('Error '+r.status);
+  }catch(e){
+    if(btn){btn.textContent='❌ Error — reintentar';btn.style.background='#DC2626';btn.disabled=false;}
+    if(msg){
+      msg.style.display='block';
+      msg.style.background='#FEE2E2';msg.style.color='#DC2626';msg.style.border='1px solid #FCA5A5';
+      msg.textContent='❌ Error al guardar: '+e.message;
+    }
+    setTimeout(()=>{if(btn){btn.textContent='💾 Guardar semana completa';btn.style.background='#166534';}},3000);
+  }
 }
 
-function copyHoursCode(){
-  const ta=document.getElementById('generatedHoursCode');if(!ta)return;
-  navigator.clipboard.writeText(ta.value).then(()=>{
-    const btn=document.getElementById('copyHoursBtn');
-    if(btn){btn.textContent='✅ Copiado!';btn.style.background='#15803d';setTimeout(()=>{btn.textContent='📋 Copiar';btn.style.background='#166634';},2000);}
-  }).catch(()=>{ta.select();document.execCommand('copy');});
-}
-
-function initHoursPage(){
-  currentHours=JSON.parse(JSON.stringify(DEFAULT_HOURS));renderHoursEditor();
-  const box=document.getElementById('generatedCodeBox');const inst=document.getElementById('hoursInstructions');
-  if(box)box.style.display='none';if(inst)inst.style.display='none';
-}
+// ── Legacy alias (kept for any old references) ────────────────────────
+function saveHoursToN8n(){saveAllHoursToN8n();}
+function generateAndShow(){/* no longer needed — direct save */}
+function copyHoursCode(){/* no longer needed */}
 
 // ── AUDIO ──────────────────────────────────────────────────────────────────
 let audioUnlocked=false;
@@ -940,23 +1139,16 @@ async function loadAll(){
 
 function updateAll(conn){
   const today=new Date().toISOString().slice(0,10);
-
-  // ── COCINA: only Confirmed orders for today that are NOT yet dispatched ──
   const conf=allOrders.filter(o=>o.Status==='Confirmed').reverse();
   const confToday=conf.filter(o=>toDateStr(o.Timestamp)===today);
-
   const zel=allOrders.filter(o=>o.Status==='Zelle-Pending').reverse();
-
-  // ── DESPACHADOS: Enviado orders for today ──
   const despachados=allOrders.filter(o=>o.Status==='Enviado'&&toDateStr(o.Timestamp)===today).reverse();
-
   const todayRev=confToday.reduce((s,o)=>s+parseFloat(o.Total||0),0);
   const todayFees=confToday.reduce((s,o)=>s+parseFloat(o.StripeFee||0),0);
   const todayTips=confToday.reduce((s,o)=>s+parseFloat(o.Tip||0),0);
-  const enviadasToday=despachados;
 
   document.getElementById('kpiConf').textContent=confToday.length;
-  document.getElementById('kpiEnviadas').textContent=enviadasToday.length;
+  document.getElementById('kpiEnviadas').textContent=despachados.length;
   document.getElementById('kpiZelle').textContent=zel.length;
   document.getElementById('kpiConn').textContent=conn;
   document.getElementById('kpiRev').textContent='$'+todayRev.toFixed(2);
@@ -971,7 +1163,6 @@ function updateAll(conn){
   document.getElementById('dash-conf').innerHTML=confToday.length?confToday.slice(0,5).map(o=>card(o,'c',true)).join(''):'<div class="empty"><em>✅</em>Sin órdenes hoy</div>';
   document.getElementById('dash-zelle').innerHTML=zel.length?zel.slice(0,5).map(o=>card(o,'z',true)).join(''):'<div class="empty"><em>💸</em>Sin pendientes</div>';
 
-  // Cocina: show today's confirmed (not dispatched). If none today, show last 20 confirmed.
   const cocinaList=confToday.length?confToday:conf.slice(0,20);
   document.getElementById('cnt-cocina').textContent=confToday.length;
   document.getElementById('list-cocina').innerHTML=cocinaList.length?cocinaList.map(o=>card(o,'c',false)).join(''):'<div class="empty"><em>✅</em>No hay órdenes confirmadas pendientes de envío</div>';
@@ -979,7 +1170,6 @@ function updateAll(conn){
   document.getElementById('cnt-zelle').textContent=zel.length;
   document.getElementById('list-zelle').innerHTML=zel.length?zel.map(o=>card(o,'z',false)).join(''):'<div class="empty"><em>💸</em>No hay órdenes Zelle pendientes</div>';
 
-  // Despachados section
   document.getElementById('cnt-despachados').textContent=despachados.length;
   document.getElementById('list-despachados').innerHTML=despachados.length?despachados.map(o=>cardDispatched(o)).join(''):'<div class="empty"><em>🛵</em>No hay pedidos despachados hoy</div>';
 
@@ -988,7 +1178,6 @@ function updateAll(conn){
   if(currentPage==='reportes')renderReports();
 }
 
-// ── ORDER CARD (active orders with action buttons) ─────────────────────────
 function card(o,type,compact){
   try{
     const items=(o.Items||'').split(' | ').map(i=>'<div class="card-item">'+escH(i)+'</div>').join('');
@@ -1014,7 +1203,6 @@ function card(o,type,compact){
   }catch(e){return '<div class="order-card type-'+type+'"><div class="card-name" style="color:var(--red)">⚠️ Error: '+e.message+'</div></div>';}
 }
 
-// ── DISPATCHED CARD (read-only, ticket + maps only) ────────────────────────
 function cardDispatched(o){
   try{
     const items=(o.Items||'').split(' | ').map(i=>'<div class="card-item">'+escH(i)+'</div>').join('');
@@ -1041,7 +1229,6 @@ function escH(s){s=s||'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 function openTicketByIdx(idx){try{if(allOrders[idx])openTicket(allOrders[idx]);}catch(e){console.error(e);}}
 function openTicketById(id){const o=orderMap[id];if(o)openTicket(o);}
 
-// ── FILTER ORDERS ──────────────────────────────────────────────────────────
 function filterOrders(){
   const q=(document.getElementById('searchInput')?.value||'').toLowerCase();
   const st=document.getElementById('statusFilter')?.value||'';
@@ -1059,7 +1246,6 @@ function filterOrders(){
   document.getElementById('list-ordenes').innerHTML=filtered.length?filtered.map(o=>card(o,type(o),false)).join(''):'<div class="empty"><em>📋</em>No se encontraron órdenes</div>';
 }
 
-// ── REPORTS ────────────────────────────────────────────────────────────────
 function onRangeChange(){
   const v=document.getElementById('rpRange').value;
   const cd=document.getElementById('rpCustomDates');
@@ -1084,15 +1270,10 @@ function renderReports(){
   const allConf=allOrders.filter(o=>o.Status==='Confirmed'||o.Status==='Enviado');
   const zelleConf=allOrders.filter(o=>o.Status==='Confirmed'&&parseFloat(o.StripeFee||0)===0);
   const stripeConf=allOrders.filter(o=>o.Status==='Confirmed'&&parseFloat(o.StripeFee||0)>0);
-
-  // Period filter
   const periodOrders=allConf.filter(o=>{const d=toDateStr(o.Timestamp);return d>=from&&d<=to;});
   const periodZelle=periodOrders.filter(o=>parseFloat(o.StripeFee||0)===0);
   const periodStripe=periodOrders.filter(o=>parseFloat(o.StripeFee||0)>0);
-
   const sum=(arr,key)=>arr.reduce((s,o)=>s+parseFloat(o[key]||0),0);
-
-  // KPIs
   const periodRev=sum(periodOrders,'Total');
   const periodZelleRev=sum(periodZelle,'Total');
   const periodStripeRev=sum(periodStripe,'Total');
@@ -1101,28 +1282,15 @@ function renderReports(){
   const periodStripeFee=sum(periodStripe,'StripeFee');
   const periodTips=sum(periodOrders,'Tip');
   const avgOrder=periodOrders.length?periodRev/periodOrders.length:0;
-
   const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-  setEl('rpRevPeriod','$'+periodRev.toFixed(2));
-  setEl('rpOrdersPeriod',periodOrders.length);
-  setEl('rpZellePeriod','$'+periodZelleRev.toFixed(2));
-  setEl('rpStripePeriod','$'+periodStripeRev.toFixed(2));
-  setEl('rpTaxPeriod','$'+periodTax.toFixed(2));
-  setEl('rpGestionPeriod','$'+periodGestion.toFixed(2));
-  setEl('rpStripeFeePeriod','$'+periodStripeFee.toFixed(2));
-  setEl('rpAvgOrder','$'+avgOrder.toFixed(2));
+  setEl('rpRevPeriod','$'+periodRev.toFixed(2));setEl('rpOrdersPeriod',periodOrders.length);
+  setEl('rpZellePeriod','$'+periodZelleRev.toFixed(2));setEl('rpStripePeriod','$'+periodStripeRev.toFixed(2));
+  setEl('rpTaxPeriod','$'+periodTax.toFixed(2));setEl('rpGestionPeriod','$'+periodGestion.toFixed(2));
+  setEl('rpStripeFeePeriod','$'+periodStripeFee.toFixed(2));setEl('rpAvgOrder','$'+avgOrder.toFixed(2));
   setEl('rpTipPeriod','$'+periodTips.toFixed(2));
-
-  // Historical
-  setEl('rpRevAll','$'+sum(allConf,'Total').toFixed(2));
-  setEl('rpOrdersAll',allConf.length);
-  setEl('rpStripeAll','$'+sum(stripeConf,'StripeFee').toFixed(2));
-  setEl('rpGestionAll','$'+sum(allConf,'Gestion').toFixed(2));
-
-  // Chart title
+  setEl('rpRevAll','$'+sum(allConf,'Total').toFixed(2));setEl('rpOrdersAll',allConf.length);
+  setEl('rpStripeAll','$'+sum(stripeConf,'StripeFee').toFixed(2));setEl('rpGestionAll','$'+sum(allConf,'Gestion').toFixed(2));
   const ct=document.getElementById('rpChartTitle');if(ct)ct.textContent='Ingresos por día — '+label;
-
-  // Breakdown table
   const zelleAmt=periodZelle.length;const stripeAmt=periodStripe.length;
   const rows=[
     ['💳 Órdenes Stripe',stripeAmt,'$'+periodStripeRev.toFixed(2)],
@@ -1137,8 +1305,6 @@ function renderReports(){
   ];
   const tbody=document.getElementById('reportTbody');
   if(tbody)tbody.innerHTML=rows.map(([c,n,m])=>`<tr><td>${c}</td><td style="font-weight:700">${n}</td><td style="font-weight:700;color:var(--green)">${m}</td></tr>`).join('');
-
-  // Top items
   const itemCount={};
   periodOrders.forEach(o=>{(o.Items||'').split(' | ').forEach(line=>{const m=line.match(/^(\d+)x (.+?) - \$/);if(m){const name=m[2].trim();const qty=parseInt(m[1]);itemCount[name]=(itemCount[name]||0)+qty;}});});
   const sorted=Object.entries(itemCount).sort((a,b)=>b[1]-a[1]).slice(0,10);
@@ -1156,24 +1322,18 @@ function renderReports(){
         <span style="font-size:.78rem;font-weight:800;color:var(--green);white-space:nowrap;">${qty} uds</span>
       </div>`).join('');}
   }
-
-  // Daily breakdown table
   const dayMap={};
   periodOrders.forEach(o=>{const d=toDateStr(o.Timestamp);if(!dayMap[d])dayMap[d]={orders:0,subtotal:0,tax:0,gestion:0,tip:0,stripefee:0,total:0};dayMap[d].orders++;dayMap[d].subtotal+=parseFloat(o.Subtotal||0);dayMap[d].tax+=parseFloat(o.Tax||0);dayMap[d].gestion+=parseFloat(o.Gestion||0);dayMap[d].tip+=parseFloat(o.Tip||0);dayMap[d].stripefee+=parseFloat(o.StripeFee||0);dayMap[d].total+=parseFloat(o.Total||0);});
   const days=Object.keys(dayMap).sort().reverse();
   const dtbody=document.getElementById('rpDailyTbody');
   if(dtbody){dtbody.innerHTML=days.length?days.map(d=>{const r=dayMap[d];return`<tr><td style="font-weight:600">${d}</td><td style="font-weight:700">${r.orders}</td><td>$${r.subtotal.toFixed(2)}</td><td>$${r.tax.toFixed(2)}</td><td>$${r.gestion.toFixed(2)}</td><td style="color:#166534;font-weight:600">$${r.tip.toFixed(2)}</td><td>$${r.stripefee.toFixed(2)}</td><td style="font-weight:700;color:var(--green)">$${r.total.toFixed(2)}</td></tr>`;}).join(''):'<tr><td colspan="8" style="text-align:center;color:#94A3B8;padding:16px;">Sin órdenes en este período</td></tr>';}
-
-  // Chart — determine granularity
   renderChart('reportChart',14,from,to);
 }
 
-// ── CHART ──────────────────────────────────────────────────────────────────
 function renderChart(id,days,fromDate,toDate){
   const el=document.getElementById(id);if(!el)return;
   const data=[];
   if(fromDate&&toDate){
-    // Build day-by-day from fromDate to toDate
     let cur=new Date(fromDate+'T12:00:00Z');const end=new Date(toDate+'T12:00:00Z');
     while(cur<=end){
       const ds=cur.toISOString().slice(0,10);
@@ -1185,12 +1345,10 @@ function renderChart(id,days,fromDate,toDate){
     for(let i=days-1;i>=0;i--){const d=new Date(Date.now()-i*86400000);const ds=d.toISOString().slice(0,10);const lbl=d.toLocaleDateString('es-DO',{weekday:'short',day:'numeric'});const rev=allOrders.filter(o=>(o.Status==='Confirmed'||o.Status==='Enviado')&&toDateStr(o.Timestamp)===ds).reduce((s,o)=>s+parseFloat(o.Total||0),0);data.push({lbl,rev});}
   }
   const max=Math.max(...data.map(d=>d.rev),1);
-  // If many days, skip some labels
   const skip=data.length>30?4:data.length>14?2:1;
   el.innerHTML=data.map((d,i)=>`<div class="bar-wrap"><div class="bar-val">${d.rev>0&&i%skip===0?'$'+d.rev.toFixed(0):''}</div><div class="bar" style="height:${Math.max((d.rev/max)*100,d.rev>0?8:2)}%" title="${d.lbl}: $${d.rev.toFixed(2)}"></div><div class="bar-lbl">${i%skip===0?d.lbl:''}</div></div>`).join('');
 }
 
-// ── TICKET MODAL ───────────────────────────────────────────────────────────
 function openTicket(o){
   const addr=o.Address||'';const fee=parseFloat(o.StripeFee||0);
   var _oid=(o['Order ID']||'').trim();document.getElementById('tkId').textContent=_oid?('#'+_oid):'# SIN NÚMERO';
@@ -1216,7 +1374,6 @@ function openTicket(o){
 }
 function closeTicket(){document.getElementById('ticketModal').classList.remove('open');}
 
-// ── EDIT ORDER ─────────────────────────────────────────────────────────────
 let editingOrderIdx=null;
 function openEdit(idx){
   const o=allOrders[idx];if(!o)return;editingOrderIdx=idx;
@@ -1242,7 +1399,6 @@ async function saveEdit(){
   }catch(e){msg.style.display='block';msg.style.color='#DC2626';msg.textContent='❌ Error: '+e.message;btn.textContent='💾 Guardar Cambios';btn.disabled=false;}
 }
 
-// ── MENU MANAGEMENT ────────────────────────────────────────────────────────
 async function loadMenuData(){
   try{
     const r=await fetch(CSV_MENU+'&_='+Date.now());if(!r.ok)return;
@@ -1290,10 +1446,7 @@ async function toggleMenuItem(id,name,newAvail){
   }catch(e){alert('Error al actualizar: '+e.message);}
 }
 
-// ── ZELLE TOGGLE ──────────────────────────────────────────────────────────
 async function loadZelleSetting(){
-  // Read from settingsMap if available after loadAll, else call panel
-  // We'll just set based on localStorage cache; actual truth is in Settings sheet
   const cached=lsGet('py_zelle_enabled','true');
   const sel=document.getElementById('sZelleEnabled');
   if(sel)sel.value=cached;
@@ -1321,7 +1474,6 @@ async function saveZelleSetting(){
   }
 }
 
-// ── SETTINGS ───────────────────────────────────────────────────────────────
 function loadSettings(){
   document.getElementById('sBellOn').value=S.bellOn?'yes':'no';
   document.getElementById('sBellTones').value=S.tones;
@@ -1352,7 +1504,6 @@ function saveSettings(){
   alert('✅ Ajustes guardados correctamente.');
 }
 
-// ── AUTO PRINT ─────────────────────────────────────────────────────────────
 const _printedOrders=new Set(JSON.parse(lsGet('py_printed','[]')));
 function checkAndAutoPrint(orders){
   const autoPrint=lsGet('py_autoprint','yes')==='yes';const autoPrintZelle=lsGet('py_autoprint_zelle','yes')==='yes';
@@ -1376,7 +1527,6 @@ function checkAndAutoPrint(orders){
   });
 }
 
-// ── MISC ───────────────────────────────────────────────────────────────────
 function toggleDebug(){
   const p=document.getElementById('dbgPanel');
   if(p.style.display==='none'){p.style.display='block';if(allOrders.length>0){const o=allOrders[0];p.textContent='Columns: '+Object.keys(o).join(' | ')+' || OrderID='+o['Order ID']+' Status='+o.Status;}else{p.textContent='No orders loaded';}}
@@ -1393,17 +1543,13 @@ async function markDispatched(idx){
     const r=await fetch(N8N_DISPATCH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:o['Order ID'],phone:(o.Phone||'').replace(/^whatsapp:/i,''),name:o.Name||'',address:o.Address||'',total:o.Total||0,estTime:estTime||'20-30'})});
     if(r.ok){
       o.Status='Enviado';
-      // Re-render immediately without waiting for API reload
       updateAll(parseInt(document.getElementById('sbConn').textContent)||0);
       setTimeout(loadAll,1500);
     }else throw new Error('Error '+r.status);
   }catch(e){alert('Error al marcar como enviada: '+e.message);}
 }
 
-
-// ═══════════════════════════════════════════════════════════
-// PRINT / PDF REPORT
-// ═══════════════════════════════════════════════════════════
+// ── PRINT / PDF REPORT ──────────────────────────────────────────────────────
 function buildReportHTML(){
   const{from,to,label}=getReportDateRange();
   const now=new Date().toLocaleString('es-DO',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'});
@@ -1473,37 +1619,13 @@ function printReport(){
   window.print();
   if(wasOpen)ticketModal.classList.add('open');
 }
-
 function exportReportPDF(){printReport();}
-
-
-async function saveHoursToN8n(){
-  onHourChange();
-  const btn=document.getElementById('saveHoursBtn');
-  if(btn){btn.textContent='⏳ Guardando...';btn.disabled=true;}
-  try{
-    const r=await fetch(N8N_UPDATE_HOURS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hours:currentHours})});
-    if(r.ok){
-      if(btn){btn.textContent='✅ Guardado!';btn.style.background='#15803D';}
-      setTimeout(()=>{if(btn){btn.textContent='💾 Guardar Horario';btn.style.background='#166534';btn.disabled=false;}},2500);
-    }else throw new Error('Error '+r.status);
-  }catch(e){
-    if(btn){btn.textContent='❌ Error — reintentar';btn.style.background='#DC2626';btn.disabled=false;}
-    setTimeout(()=>{if(btn){btn.textContent='💾 Guardar Horario';btn.style.background='#166534';}},3000);
-  }
-}
-
 
 function toggleSidebar(){
   const sb=document.getElementById('sidebar');
   const ov=document.getElementById('sidebarOverlay');
-  if(sb.classList.contains('open')){
-    sb.classList.remove('open');
-    ov.classList.remove('open');
-  }else{
-    sb.classList.add('open');
-    ov.classList.add('open');
-  }
+  if(sb.classList.contains('open')){sb.classList.remove('open');ov.classList.remove('open');}
+  else{sb.classList.add('open');ov.classList.add('open');}
 }
 function closeSidebar(){
   document.getElementById('sidebar').classList.remove('open');
