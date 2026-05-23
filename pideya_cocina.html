@@ -623,7 +623,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
       <div style="padding:16px;display:flex;flex-direction:column;gap:14px;" id="hoursEditor"></div>
       <div style="padding:12px 16px;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
         <button onclick="applyPreset('normal')" style="background:#F1F5F9;color:#374151;border:none;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;">↩ Restablecer</button>
-        <button onclick="generateAndShow()" style="background:#166534;color:white;border:none;border-radius:8px;padding:9px 20px;font-family:Outfit,sans-serif;font-size:.85rem;font-weight:800;cursor:pointer;">📋 Generar código para n8n</button>
+        <button onclick="saveHoursToN8n()" id="saveHoursBtn" style="background:#166534;color:white;border:none;border-radius:8px;padding:9px 20px;font-family:Outfit,sans-serif;font-size:.85rem;font-weight:800;cursor:pointer;">💾 Guardar Horario</button>
       </div>
     </div>
     <div id="generatedCodeBox" style="display:none;background:#1E293B;border-radius:12px;padding:16px;margin-bottom:16px;">
@@ -723,6 +723,7 @@ const N8N_EDIT_ORDER='https://pideya.app.n8n.cloud/webhook/pideya-edit';
 const N8N_MENU_TOGGLE='https://pideya.app.n8n.cloud/webhook/pideya-menu-toggle';
 const N8N_DISPATCH='https://pideya.app.n8n.cloud/webhook/pideya-dispatch';
 const N8N_UPDATE_SETTINGS='https://pideya.app.n8n.cloud/webhook/pideya-update-settings';
+const N8N_UPDATE_HOURS='https://pideya.app.n8n.cloud/webhook/pideya-update-hours';
 
 function lsGet(k,def){try{const v=localStorage.getItem(k);return v!==null?v:def;}catch(e){return def;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
@@ -1464,6 +1465,23 @@ function printReport(){
 }
 
 function exportReportPDF(){printReport();}
+
+
+async function saveHoursToN8n(){
+  onHourChange();
+  const btn=document.getElementById('saveHoursBtn');
+  if(btn){btn.textContent='⏳ Guardando...';btn.disabled=true;}
+  try{
+    const r=await fetch(N8N_UPDATE_HOURS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hours:currentHours})});
+    if(r.ok){
+      if(btn){btn.textContent='✅ Guardado!';btn.style.background='#15803D';}
+      setTimeout(()=>{if(btn){btn.textContent='💾 Guardar Horario';btn.style.background='#166534';btn.disabled=false;}},2500);
+    }else throw new Error('Error '+r.status);
+  }catch(e){
+    if(btn){btn.textContent='❌ Error — reintentar';btn.style.background='#DC2626';btn.disabled=false;}
+    setTimeout(()=>{if(btn){btn.textContent='💾 Guardar Horario';btn.style.background='#166534';}},3000);
+  }
+}
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeTicket();closeEdit();}});
 </script>
