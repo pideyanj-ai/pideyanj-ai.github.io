@@ -992,7 +992,7 @@ async function loadAll(){
         allOrders=rows.slice(1).map(r=>{const o={};h.forEach((k,i)=>{if(k)o[k]=(r[i]||'').trim();});POS.forEach((k,i)=>{if(!o[k]&&r[i]!==undefined)o[k]=(r[i]||'').trim();});return o;});
         orderMap={};allOrders.forEach(o=>{if(o['Order ID'])orderMap[o['Order ID']]=o;});
         // ── FIX 2: Keep locally-dispatched orders as Enviado even if Sheets hasn't updated yet ──
-        _dispatchedLocally.forEach(id=>{if(orderMap[id]&&orderMap[id].Status==='Confirmed')orderMap[id].Status='Enviado';});
+        _dispatchedLocally.forEach(id=>{const _i=allOrders.findIndex(x=>x['Order ID']===id);if(_i>=0&&allOrders[_i].Status==='Confirmed')allOrders[_i].Status='Enviado';});
       }
     }
     let conn=0;
@@ -1015,7 +1015,7 @@ function updateAll(conn){
   const conf=allOrders.filter(o=>o.Status==='Confirmed').reverse();
   const confToday=conf.filter(o=>toDateStr(o.Timestamp)===today);
   const zel=allOrders.filter(o=>o.Status==='Zelle-Pending').reverse();
-  const despachados=allOrders.filter(o=>o.Status==='Enviado'&&toDateStr(o.Timestamp)===today).reverse();
+  const despachados=allOrders.filter(o=>(o.Status==='Enviado'||_dispatchedLocally.has(o['Order ID']))&&toDateStr(o.Timestamp)===today).reverse();
   const todayRev=confToday.reduce((s,o)=>s+parseFloat(o.Total||0),0);
   const todayFees=confToday.reduce((s,o)=>s+parseFloat(o.StripeFee||0),0);
   const todayTips=confToday.reduce((s,o)=>s+parseFloat(o.Tip||0),0);
@@ -1356,9 +1356,15 @@ async function markDispatched(idx){
     const r=await fetch(N8N_DISPATCH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:o['Order ID'],phone:(o.Phone||'').replace(/^whatsapp:/i,''),name:o.Name||'',address:o.Address||'',total:o.Total||0,estTime:estTime||'20-30'})});
     if(r.ok){
       o.Status='Enviado';
-      // ── FIX 3: Track this dispatch so 10s reload doesn't revert it ──
+      // ── FIX 3: Track + persist dispatch locally ──
       _dispatchedLocally.add(o['Order ID']);
       lsSet('py_dispatched',JSON.stringify([..._dispatchedLocally].slice(-200)));
+      // ── FIX 4: Force-update Despachados DOM immediately ──
+      const _today=new Date().toISOString().slice(0,10);
+      const _disp=allOrders.filter(x=>(x.Status==='Enviado'||_dispatchedLocally.has(x['Order ID']))&&toDateStr(x.Timestamp)===_today).reverse();
+      document.getElementById('cnt-despachados').textContent=_disp.length;
+      document.getElementById('nb-despachados').textContent=_disp.length;
+      document.getElementById('list-despachados').innerHTML=_disp.length?_disp.map(x=>cardDispatched(x)).join(''):'<div class="empty"><em>🛵</em>No hay pedidos despachados hoy</div>';
       updateAll(parseInt(document.getElementById('sbConn').textContent)||0);
       setTimeout(loadAll,10000);
     }else throw new Error('Error '+r.status);
