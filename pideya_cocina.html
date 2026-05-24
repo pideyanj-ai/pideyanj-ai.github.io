@@ -752,7 +752,7 @@ function toDateStr(ts){
 
 // ── FIX 1: Track locally-dispatched orders so reloads don't revert them ──
 let allOrders=[],orderMap={},audioCtx=null,knownIds=new Set(),firstLoad=true,refreshTimer=null,currentPage='dashboard',menuData=[];
-const _dispatchedLocally=new Set();
+const _dispatchedLocally=new Set(JSON.parse(lsGet('py_dispatched','[]')));
 
 function doLogin(){
   if(document.getElementById('passIn').value===PASS){
@@ -1358,6 +1358,7 @@ async function markDispatched(idx){
       o.Status='Enviado';
       // ── FIX 3: Track this dispatch so 10s reload doesn't revert it ──
       _dispatchedLocally.add(o['Order ID']);
+      lsSet('py_dispatched',JSON.stringify([..._dispatchedLocally].slice(-200)));
       updateAll(parseInt(document.getElementById('sbConn').textContent)||0);
       setTimeout(loadAll,10000);
     }else throw new Error('Error '+r.status);
