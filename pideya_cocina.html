@@ -604,13 +604,9 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════════════
-       HORARIO — REDESIGNED: direct save, no copy-paste to n8n
-       ══════════════════════════════════════════════════════════ -->
+  <!-- HORARIO -->
   <div class="page" id="page-horario">
     <div class="sec-head"><div class="sec-title"><div class="sec-dot dot-g"></div>Horario del Restaurante</div></div>
-
-    <!-- TODAY QUICK EDIT -->
     <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:2px solid #86EFAC;border-radius:16px;padding:20px;margin-bottom:20px;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
         <div style="background:#166534;color:#fff;border-radius:10px;padding:6px 14px;font-size:.82rem;font-weight:800;letter-spacing:.5px;">📅 HOY</div>
@@ -620,53 +616,33 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
         <div style="display:flex;align-items:center;gap:7px;">
           <label style="font-size:.8rem;font-weight:700;color:#374151;white-space:nowrap;">🌅 Abre:</label>
-          <select id="todayOpen" style="background:#fff;border:2px solid #86EFAC;color:#111827;border-radius:9px;padding:9px 11px;font-family:Outfit,sans-serif;font-size:.92rem;font-weight:700;outline:none;cursor:pointer;min-width:90px;">
-          </select>
+          <select id="todayOpen" style="background:#fff;border:2px solid #86EFAC;color:#111827;border-radius:9px;padding:9px 11px;font-family:Outfit,sans-serif;font-size:.92rem;font-weight:700;outline:none;cursor:pointer;min-width:90px;"></select>
         </div>
         <div style="display:flex;align-items:center;gap:7px;">
           <label style="font-size:.8rem;font-weight:700;color:#374151;white-space:nowrap;">🌙 Cierra:</label>
-          <select id="todayClose" style="background:#fff;border:2px solid #86EFAC;color:#111827;border-radius:9px;padding:9px 11px;font-family:Outfit,sans-serif;font-size:.92rem;font-weight:700;outline:none;cursor:pointer;min-width:90px;">
-          </select>
+          <select id="todayClose" style="background:#fff;border:2px solid #86EFAC;color:#111827;border-radius:9px;padding:9px 11px;font-family:Outfit,sans-serif;font-size:.92rem;font-weight:700;outline:none;cursor:pointer;min-width:90px;"></select>
           <select id="todayCloseMin" style="background:#fff;border:2px solid #86EFAC;color:#111827;border-radius:9px;padding:9px 9px;font-family:Outfit,sans-serif;font-size:.88rem;font-weight:700;outline:none;cursor:pointer;">
-            <option value="0">:00</option>
-            <option value="15">:15</option>
-            <option value="30">:30</option>
-            <option value="40">:40</option>
-            <option value="45">:45</option>
+            <option value="0">:00</option><option value="15">:15</option><option value="30">:30</option><option value="40">:40</option><option value="45">:45</option>
           </select>
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button onclick="saveTodayHours()" id="saveTodayBtn"
-          style="flex:2;min-width:170px;background:#166534;color:white;border:none;border-radius:11px;padding:13px;font-family:Outfit,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;transition:background .2s;"
-          onmouseover="this.style.background='#15803D'" onmouseout="this.style.background='#166534'">
-          💾 Guardar horario de hoy
-        </button>
-        <button onclick="closeTodayBot()"
-          style="flex:1;min-width:130px;background:#DC2626;color:white;border:none;border-radius:11px;padding:13px;font-family:Outfit,sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:background .2s;"
-          onmouseover="this.style.background='#B91C1C'" onmouseout="this.style.background='#DC2626'">
-          🔴 Cerrar bot hoy
-        </button>
+        <button onclick="saveTodayHours()" id="saveTodayBtn" style="flex:2;min-width:170px;background:#166534;color:white;border:none;border-radius:11px;padding:13px;font-family:Outfit,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='#15803D'" onmouseout="this.style.background='#166534'">💾 Guardar horario de hoy</button>
+        <button onclick="closeTodayBot()" style="flex:1;min-width:130px;background:#DC2626;color:white;border:none;border-radius:11px;padding:13px;font-family:Outfit,sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='#B91C1C'" onmouseout="this.style.background='#DC2626'">🔴 Cerrar bot hoy</button>
       </div>
       <div id="saveTodayMsg" style="display:none;margin-top:12px;border-radius:9px;padding:10px 14px;font-size:.82rem;font-weight:600;text-align:center;"></div>
     </div>
-
-    <!-- DIVIDER -->
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
       <div style="flex:1;height:1px;background:#E2E8F0;"></div>
       <div style="font-size:.72rem;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;">⚙️ Horario completo semanal</div>
       <div style="flex:1;height:1px;background:#E2E8F0;"></div>
     </div>
-
-    <!-- QUICK PRESETS -->
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
       <button onclick="applyPreset('normal')" style="background:#F1F5F9;color:#374151;border:1px solid #E2E8F0;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:110px;">↩ Horario Normal</button>
       <button onclick="applyPreset('open24')" style="background:#DCFCE7;color:#166534;border:1px solid #86EFAC;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:110px;">✅ Forzar Abierto</button>
       <button onclick="applyPreset('extend1h')" style="background:#DBEAFE;color:#1E40AF;border:1px solid #93C5FD;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:110px;">+1 hora extra</button>
       <button onclick="applyPreset('closed')" style="background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:110px;">🔴 Cerrar todo</button>
     </div>
-
-    <!-- WEEKLY EDITOR -->
     <div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;margin-bottom:16px;">
       <div style="background:#F8FAFC;padding:12px 16px;border-bottom:1px solid #E2E8F0;font-weight:800;font-size:.82rem;color:#374151;text-transform:uppercase;letter-spacing:.5px;">📅 Editar Horario por Día</div>
       <div style="padding:16px;display:flex;flex-direction:column;gap:14px;" id="hoursEditor"></div>
@@ -774,7 +750,9 @@ function toDateStr(ts){
   return ts.slice(0,10);
 }
 
+// ── FIX 1: Track locally-dispatched orders so reloads don't revert them ──
 let allOrders=[],orderMap={},audioCtx=null,knownIds=new Set(),firstLoad=true,refreshTimer=null,currentPage='dashboard',menuData=[];
+const _dispatchedLocally=new Set();
 
 function doLogin(){
   if(document.getElementById('passIn').value===PASS){
@@ -799,7 +777,6 @@ function showPage(id){closeSidebar();
   if(id==='horario')initHoursPage();
 }
 
-// ── DELIVERY RADIUS ZIP GENERATOR ──────────────────────────────────────────
 const ZIP_BY_RADIUS={
   3:['07030','07031','07086','07087','07093','07097','07302','07303','07306','07307','07308','07309','07310','07311','07395','07399'],
   5:['07030','07031','07047','07086','07087','07093','07094','07097','07302','07303','07304','07305','07306','07307','07308','07309','07310','07311','07395','07399'],
@@ -837,10 +814,6 @@ function copyZipCode(){
   }).catch(()=>{ta.select();document.execCommand('copy');});
 }
 
-// ════════════════════════════════════════════════════════════════
-// HORARIO — NEW DIRECT-SAVE SYSTEM (no copy-paste to n8n needed)
-// ════════════════════════════════════════════════════════════════
-
 const DAY_NAMES=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 const DEFAULT_HOURS={
   0:{open:9,close:21,closeMin:0,label:'Domingo'},
@@ -853,143 +826,68 @@ const DEFAULT_HOURS={
 };
 let currentHours=JSON.parse(JSON.stringify(DEFAULT_HOURS));
 
-// ── Build the 24-option dropdowns for "today" pickers ────────────────
-function buildHourOptions(selectId, selectedVal){
-  const sel=document.getElementById(selectId);
-  if(!sel)return;
-  sel.innerHTML='';
-  for(let h=0;h<24;h++){
-    const suffix=h<12?'am':'pm';
-    const display=h===0?'12:00 am':h<12?h+':00 am':h===12?'12:00 pm':(h-12)+':00 pm';
-    const opt=document.createElement('option');
-    opt.value=h;opt.textContent=display;
-    if(h===selectedVal)opt.selected=true;
-    sel.appendChild(opt);
-  }
+function buildHourOptions(selectId,selectedVal){
+  const sel=document.getElementById(selectId);if(!sel)return;sel.innerHTML='';
+  for(let h=0;h<24;h++){const display=h===0?'12:00 am':h<12?h+':00 am':h===12?'12:00 pm':(h-12)+':00 pm';const opt=document.createElement('option');opt.value=h;opt.textContent=display;if(h===selectedVal)opt.selected=true;sel.appendChild(opt);}
 }
 
-// ── Init horario page ─────────────────────────────────────────────────
 function initHoursPage(){
   currentHours=JSON.parse(JSON.stringify(DEFAULT_HOURS));
-
-  // Set "today" section
-  const todayIdx=new Date().getDay(); // 0=Sun, 6=Sat
-  const todayH=currentHours[todayIdx];
-  const dayEl=document.getElementById('todayDayName');
-  if(dayEl)dayEl.textContent=DAY_NAMES[todayIdx];
-
+  const todayIdx=new Date().getDay();const todayH=currentHours[todayIdx];
+  const dayEl=document.getElementById('todayDayName');if(dayEl)dayEl.textContent=DAY_NAMES[todayIdx];
   const curHoursEl=document.getElementById('todayCurrentHours');
-  if(curHoursEl){
-    const openStr=fmt12(todayH.open,0);
-    const closeStr=fmt12(todayH.close,todayH.closeMin);
-    curHoursEl.textContent='Horario actual: '+openStr+' – '+closeStr;
-  }
-
-  buildHourOptions('todayOpen', todayH.open);
-  buildHourOptions('todayClose', todayH.close);
-  const minSel=document.getElementById('todayCloseMin');
-  if(minSel)minSel.value=todayH.closeMin;
-
-  // Hide any previous messages
+  if(curHoursEl)curHoursEl.textContent='Horario actual: '+fmt12(todayH.open,0)+' – '+fmt12(todayH.close,todayH.closeMin);
+  buildHourOptions('todayOpen',todayH.open);buildHourOptions('todayClose',todayH.close);
+  const minSel=document.getElementById('todayCloseMin');if(minSel)minSel.value=todayH.closeMin;
   const tm=document.getElementById('saveTodayMsg');if(tm)tm.style.display='none';
   const wm=document.getElementById('saveWeekMsg');if(wm)wm.style.display='none';
-
   renderHoursEditor();
 }
 
 function fmt12(h,m){
-  const suffix=h<12?'am':'pm';
-  const display=h===0?'12':h<=12?''+h:''+(h-12);
-  const mm=m>0?':'+String(m).padStart(2,'0'):'';
-  return display+mm+' '+suffix;
+  const suffix=h<12?'am':'pm';const display=h===0?'12':h<=12?''+h:''+(h-12);const mm=m>0?':'+String(m).padStart(2,'0'):'';return display+mm+' '+suffix;
 }
 
-// ── Save today's hours directly to n8n ───────────────────────────────
 async function saveTodayHours(){
   const todayIdx=new Date().getDay();
   const openVal=parseInt(document.getElementById('todayOpen')?.value||9);
   const closeVal=parseInt(document.getElementById('todayClose')?.value||21);
   const closeMinVal=parseInt(document.getElementById('todayCloseMin')?.value||0);
-
-  // Update local state for today
-  currentHours[todayIdx].open=openVal;
-  currentHours[todayIdx].close=closeVal;
-  currentHours[todayIdx].closeMin=closeMinVal;
-
-  const btn=document.getElementById('saveTodayBtn');
-  const msg=document.getElementById('saveTodayMsg');
+  currentHours[todayIdx].open=openVal;currentHours[todayIdx].close=closeVal;currentHours[todayIdx].closeMin=closeMinVal;
+  const btn=document.getElementById('saveTodayBtn');const msg=document.getElementById('saveTodayMsg');
   if(btn){btn.textContent='⏳ Guardando...';btn.disabled=true;}
-
   try{
-    const r=await fetch(N8N_UPDATE_HOURS,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({hours:currentHours, changedDay:todayIdx})
-    });
+    const r=await fetch(N8N_UPDATE_HOURS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hours:currentHours,changedDay:todayIdx})});
     if(r.ok){
-      const openStr=fmt12(openVal,0);
-      const closeStr=fmt12(closeVal,closeMinVal);
+      const openStr=fmt12(openVal,0);const closeStr=fmt12(closeVal,closeMinVal);
       if(btn){btn.textContent='✅ Guardado!';btn.style.background='#15803D';}
-      if(msg){
-        msg.style.display='block';
-        msg.style.background='#DCFCE7';msg.style.color='#166534';msg.style.border='1px solid #86EFAC';
-        msg.textContent='✅ Horario de hoy actualizado: '+openStr+' – '+closeStr+'. El bot ya usa el nuevo horario.';
-      }
-      // Update the "horario actual" display
-      const curHoursEl=document.getElementById('todayCurrentHours');
-      if(curHoursEl)curHoursEl.textContent='Horario actual: '+openStr+' – '+closeStr;
-      setTimeout(()=>{
-        if(btn){btn.textContent='💾 Guardar horario de hoy';btn.style.background='#166534';btn.disabled=false;}
-        setTimeout(()=>{if(msg)msg.style.display='none';},4000);
-      },2000);
+      if(msg){msg.style.display='block';msg.style.background='#DCFCE7';msg.style.color='#166534';msg.style.border='1px solid #86EFAC';msg.textContent='✅ Horario de hoy actualizado: '+openStr+' – '+closeStr+'. El bot ya usa el nuevo horario.';}
+      const curHoursEl=document.getElementById('todayCurrentHours');if(curHoursEl)curHoursEl.textContent='Horario actual: '+openStr+' – '+closeStr;
+      setTimeout(()=>{if(btn){btn.textContent='💾 Guardar horario de hoy';btn.style.background='#166534';btn.disabled=false;}setTimeout(()=>{if(msg)msg.style.display='none';},4000);},2000);
     }else throw new Error('Error '+r.status);
   }catch(e){
     if(btn){btn.textContent='❌ Error — reintentar';btn.style.background='#DC2626';btn.disabled=false;}
-    if(msg){
-      msg.style.display='block';
-      msg.style.background='#FEE2E2';msg.style.color='#DC2626';msg.style.border='1px solid #FCA5A5';
-      msg.textContent='❌ Error al guardar: '+e.message;
-    }
+    if(msg){msg.style.display='block';msg.style.background='#FEE2E2';msg.style.color='#DC2626';msg.style.border='1px solid #FCA5A5';msg.textContent='❌ Error al guardar: '+e.message;}
     setTimeout(()=>{if(btn){btn.textContent='💾 Guardar horario de hoy';btn.style.background='#166534';}},3000);
   }
 }
 
-// ── Close bot for today only ──────────────────────────────────────────
 async function closeTodayBot(){
   if(!confirm('¿Cerrar el bot para hoy? Los clientes verán un mensaje de cerrado.'))return;
   const todayIdx=new Date().getDay();
-  // Set open=0, close=0 = closed signal for bot
-  currentHours[todayIdx].open=0;
-  currentHours[todayIdx].close=0;
-  currentHours[todayIdx].closeMin=0;
-
+  currentHours[todayIdx].open=0;currentHours[todayIdx].close=0;currentHours[todayIdx].closeMin=0;
   const msg=document.getElementById('saveTodayMsg');
   try{
-    const r=await fetch(N8N_UPDATE_HOURS,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({hours:currentHours, changedDay:todayIdx, closed:true})
-    });
+    const r=await fetch(N8N_UPDATE_HOURS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hours:currentHours,changedDay:todayIdx,closed:true})});
     if(r.ok){
-      if(msg){
-        msg.style.display='block';
-        msg.style.background='#FEE2E2';msg.style.color='#991B1B';msg.style.border='1px solid #FCA5A5';
-        msg.textContent='🔴 Bot cerrado para hoy. Los clientes recibirán mensaje de restaurante cerrado.';
-      }
-      // Update display
-      const curHoursEl=document.getElementById('todayCurrentHours');
-      if(curHoursEl)curHoursEl.textContent='🔴 CERRADO HOY';
+      if(msg){msg.style.display='block';msg.style.background='#FEE2E2';msg.style.color='#991B1B';msg.style.border='1px solid #FCA5A5';msg.textContent='🔴 Bot cerrado para hoy. Los clientes recibirán mensaje de restaurante cerrado.';}
+      const curHoursEl=document.getElementById('todayCurrentHours');if(curHoursEl)curHoursEl.textContent='🔴 CERRADO HOY';
     }else throw new Error('Error '+r.status);
   }catch(e){
-    if(msg){
-      msg.style.display='block';
-      msg.style.background='#FEE2E2';msg.style.color='#DC2626';msg.style.border='1px solid #FCA5A5';
-      msg.textContent='❌ Error: '+e.message;
-    }
+    if(msg){msg.style.display='block';msg.style.background='#FEE2E2';msg.style.color='#DC2626';msg.style.border='1px solid #FCA5A5';msg.textContent='❌ Error: '+e.message;}
   }
 }
 
-// ── Apply preset to full week ─────────────────────────────────────────
 function applyPreset(type){
   if(type==='open24'){for(let d=0;d<7;d++)currentHours[d]={...currentHours[d],open:0,close:23,closeMin:59};}
   else if(type==='normal'){currentHours=JSON.parse(JSON.stringify(DEFAULT_HOURS));}
@@ -998,7 +896,6 @@ function applyPreset(type){
   renderHoursEditor();
 }
 
-// ── Render the weekly editor ──────────────────────────────────────────
 function renderHoursEditor(){
   const el=document.getElementById('hoursEditor');if(!el)return;
   el.innerHTML=Object.entries(currentHours).map(([d,h])=>
@@ -1007,19 +904,14 @@ function renderHoursEditor(){
     +'<label style="font-size:.72rem;color:#6B7280;">Abre:</label>'
     +'<select id="open_'+d+'" onchange="onHourChange()" style="background:#F9FAFB;border:1px solid #E2E8F0;color:#111827;border-radius:6px;padding:5px 7px;font-family:Outfit,sans-serif;font-size:.8rem;">'
     +Array.from({length:24},(_,i)=>'<option value="'+i+'"'+(h.open===i?' selected':'')+'>'+String(i).padStart(2,'0')+':00</option>').join('')
-    +'</select>'
-    +'<label style="font-size:.72rem;color:#6B7280;">Cierra:</label>'
+    +'</select><label style="font-size:.72rem;color:#6B7280;">Cierra:</label>'
     +'<select id="close_'+d+'" onchange="onHourChange()" style="background:#F9FAFB;border:1px solid #E2E8F0;color:#111827;border-radius:6px;padding:5px 7px;font-family:Outfit,sans-serif;font-size:.8rem;">'
     +Array.from({length:24},(_,i)=>'<option value="'+i+'"'+(h.close===i?' selected':'')+'>'+String(i).padStart(2,'0')+':00</option>').join('')
     +'</select>'
     +'<select id="closemin_'+d+'" onchange="onHourChange()" style="background:#F9FAFB;border:1px solid #E2E8F0;color:#111827;border-radius:6px;padding:5px 7px;font-family:Outfit,sans-serif;font-size:.8rem;">'
-    +'<option value="0"'+(h.closeMin===0?' selected':'')+'>:00</option>'
-    +'<option value="15"'+(h.closeMin===15?' selected':'')+'>:15</option>'
-    +'<option value="30"'+(h.closeMin===30?' selected':'')+'>:30</option>'
-    +'<option value="40"'+(h.closeMin===40?' selected':'')+'>:40</option>'
-    +'<option value="45"'+(h.closeMin===45?' selected':'')+'>:45</option>'
-    +'</select>'
-    +'</div>'
+    +'<option value="0"'+(h.closeMin===0?' selected':'')+'>:00</option><option value="15"'+(h.closeMin===15?' selected':'')+'>:15</option>'
+    +'<option value="30"'+(h.closeMin===30?' selected':'')+'>:30</option><option value="40"'+(h.closeMin===40?' selected':'')+'>:40</option>'
+    +'<option value="45"'+(h.closeMin===45?' selected':'')+'>:45</option></select></div>'
   ).join('');
 }
 
@@ -1032,47 +924,28 @@ function onHourChange(){
   }
 }
 
-// ── Save full week directly to n8n ────────────────────────────────────
 async function saveAllHoursToN8n(){
   onHourChange();
-  const btn=document.getElementById('saveHoursBtn');
-  const msg=document.getElementById('saveWeekMsg');
+  const btn=document.getElementById('saveHoursBtn');const msg=document.getElementById('saveWeekMsg');
   if(btn){btn.textContent='⏳ Guardando...';btn.disabled=true;}
   try{
-    const r=await fetch(N8N_UPDATE_HOURS,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({hours:currentHours})
-    });
+    const r=await fetch(N8N_UPDATE_HOURS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hours:currentHours})});
     if(r.ok){
       if(btn){btn.textContent='✅ Guardado!';btn.style.background='#15803D';}
-      if(msg){
-        msg.style.display='block';
-        msg.style.background='#DCFCE7';msg.style.color='#166534';msg.style.border='1px solid #86EFAC';
-        msg.textContent='✅ Horario semanal guardado correctamente. El bot ya usa el nuevo horario.';
-      }
-      setTimeout(()=>{
-        if(btn){btn.textContent='💾 Guardar semana completa';btn.style.background='#166534';btn.disabled=false;}
-        setTimeout(()=>{if(msg)msg.style.display='none';},4000);
-      },2000);
+      if(msg){msg.style.display='block';msg.style.background='#DCFCE7';msg.style.color='#166534';msg.style.border='1px solid #86EFAC';msg.textContent='✅ Horario semanal guardado correctamente. El bot ya usa el nuevo horario.';}
+      setTimeout(()=>{if(btn){btn.textContent='💾 Guardar semana completa';btn.style.background='#166534';btn.disabled=false;}setTimeout(()=>{if(msg)msg.style.display='none';},4000);},2000);
     }else throw new Error('Error '+r.status);
   }catch(e){
     if(btn){btn.textContent='❌ Error — reintentar';btn.style.background='#DC2626';btn.disabled=false;}
-    if(msg){
-      msg.style.display='block';
-      msg.style.background='#FEE2E2';msg.style.color='#DC2626';msg.style.border='1px solid #FCA5A5';
-      msg.textContent='❌ Error al guardar: '+e.message;
-    }
+    if(msg){msg.style.display='block';msg.style.background='#FEE2E2';msg.style.color='#DC2626';msg.style.border='1px solid #FCA5A5';msg.textContent='❌ Error al guardar: '+e.message;}
     setTimeout(()=>{if(btn){btn.textContent='💾 Guardar semana completa';btn.style.background='#166534';}},3000);
   }
 }
 
-// ── Legacy alias (kept for any old references) ────────────────────────
 function saveHoursToN8n(){saveAllHoursToN8n();}
-function generateAndShow(){/* no longer needed — direct save */}
-function copyHoursCode(){/* no longer needed */}
+function generateAndShow(){}
+function copyHoursCode(){}
 
-// ── AUDIO ──────────────────────────────────────────────────────────────────
 let audioUnlocked=false;
 function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
 function unlockAudio(){
@@ -1099,7 +972,6 @@ function checkNewOrders(orders){
   if(news.length){news.forEach(o=>knownIds.add(o['Order ID']));playBell();let c=0;const orig=document.title;const iv=setInterval(()=>{document.title=c++%2?orig:'🔔 NUEVA ORDEN — PIDEYA';if(c>10){clearInterval(iv);document.title=orig;}},500);}
 }
 
-// ── CSV PARSER ─────────────────────────────────────────────────────────────
 function parseCSV(txt){
   const rows=[];let row=[],cell='',inQ=false;
   for(let i=0;i<txt.length;i++){const c=txt[i];if(inQ){if(c==='"'&&txt[i+1]==='"'){cell+='"';i++;}else if(c==='"')inQ=false;else cell+=c;}else{if(c==='"')inQ=true;else if(c===','){row.push(cell);cell='';}else if(c==='\n'||c==='\r'){row.push(cell);cell='';if(row.some(v=>v))rows.push(row);row=[];if(c==='\r'&&txt[i+1]==='\n')i++;}else cell+=c;}}
@@ -1107,7 +979,6 @@ function parseCSV(txt){
   return rows;
 }
 
-// ── LOAD DATA ──────────────────────────────────────────────────────────────
 async function loadAll(){
   const btn=document.getElementById('btnRef');btn.disabled=true;btn.textContent='⟳ Cargando...';
   try{
@@ -1120,6 +991,8 @@ async function loadAll(){
         const POS=['Order ID','Timestamp','Phone','Name','Address','Items','Subtotal','Tax','Gestion','StripeFee','Total','Status','StripeLink','Tip'];
         allOrders=rows.slice(1).map(r=>{const o={};h.forEach((k,i)=>{if(k)o[k]=(r[i]||'').trim();});POS.forEach((k,i)=>{if(!o[k]&&r[i]!==undefined)o[k]=(r[i]||'').trim();});return o;});
         orderMap={};allOrders.forEach(o=>{if(o['Order ID'])orderMap[o['Order ID']]=o;});
+        // ── FIX 2: Keep locally-dispatched orders as Enviado even if Sheets hasn't updated yet ──
+        _dispatchedLocally.forEach(id=>{if(orderMap[id]&&orderMap[id].Status==='Confirmed')orderMap[id].Status='Enviado';});
       }
     }
     let conn=0;
@@ -1274,27 +1147,20 @@ function renderReports(){
   const periodZelle=periodOrders.filter(o=>parseFloat(o.StripeFee||0)===0);
   const periodStripe=periodOrders.filter(o=>parseFloat(o.StripeFee||0)>0);
   const sum=(arr,key)=>arr.reduce((s,o)=>s+parseFloat(o[key]||0),0);
-  const periodRev=sum(periodOrders,'Total');
-  const periodZelleRev=sum(periodZelle,'Total');
-  const periodStripeRev=sum(periodStripe,'Total');
-  const periodTax=sum(periodOrders,'Tax');
-  const periodGestion=sum(periodOrders,'Gestion');
-  const periodStripeFee=sum(periodStripe,'StripeFee');
-  const periodTips=sum(periodOrders,'Tip');
+  const periodRev=sum(periodOrders,'Total');const periodZelleRev=sum(periodZelle,'Total');const periodStripeRev=sum(periodStripe,'Total');
+  const periodTax=sum(periodOrders,'Tax');const periodGestion=sum(periodOrders,'Gestion');const periodStripeFee=sum(periodStripe,'StripeFee');const periodTips=sum(periodOrders,'Tip');
   const avgOrder=periodOrders.length?periodRev/periodOrders.length:0;
   const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
   setEl('rpRevPeriod','$'+periodRev.toFixed(2));setEl('rpOrdersPeriod',periodOrders.length);
   setEl('rpZellePeriod','$'+periodZelleRev.toFixed(2));setEl('rpStripePeriod','$'+periodStripeRev.toFixed(2));
   setEl('rpTaxPeriod','$'+periodTax.toFixed(2));setEl('rpGestionPeriod','$'+periodGestion.toFixed(2));
-  setEl('rpStripeFeePeriod','$'+periodStripeFee.toFixed(2));setEl('rpAvgOrder','$'+avgOrder.toFixed(2));
-  setEl('rpTipPeriod','$'+periodTips.toFixed(2));
+  setEl('rpStripeFeePeriod','$'+periodStripeFee.toFixed(2));setEl('rpAvgOrder','$'+avgOrder.toFixed(2));setEl('rpTipPeriod','$'+periodTips.toFixed(2));
   setEl('rpRevAll','$'+sum(allConf,'Total').toFixed(2));setEl('rpOrdersAll',allConf.length);
   setEl('rpStripeAll','$'+sum(stripeConf,'StripeFee').toFixed(2));setEl('rpGestionAll','$'+sum(allConf,'Gestion').toFixed(2));
   const ct=document.getElementById('rpChartTitle');if(ct)ct.textContent='Ingresos por día — '+label;
-  const zelleAmt=periodZelle.length;const stripeAmt=periodStripe.length;
   const rows=[
-    ['💳 Órdenes Stripe',stripeAmt,'$'+periodStripeRev.toFixed(2)],
-    ['💸 Órdenes Zelle',zelleAmt,'$'+periodZelleRev.toFixed(2)],
+    ['💳 Órdenes Stripe',periodStripe.length,'$'+periodStripeRev.toFixed(2)],
+    ['💸 Órdenes Zelle',periodZelle.length,'$'+periodZelleRev.toFixed(2)],
     ['📦 Total órdenes',periodOrders.length,'$'+periodRev.toFixed(2)],
     ['🧾 Subtotal bruto','—','$'+sum(periodOrders,'Subtotal').toFixed(2)],
     ['🏛️ Tax NJ (6.625%)','—','$'+periodTax.toFixed(2)],
@@ -1307,21 +1173,10 @@ function renderReports(){
   if(tbody)tbody.innerHTML=rows.map(([c,n,m])=>`<tr><td>${c}</td><td style="font-weight:700">${n}</td><td style="font-weight:700;color:var(--green)">${m}</td></tr>`).join('');
   const itemCount={};
   periodOrders.forEach(o=>{(o.Items||'').split(' | ').forEach(line=>{const m=line.match(/^(\d+)x (.+?) - \$/);if(m){const name=m[2].trim();const qty=parseInt(m[1]);itemCount[name]=(itemCount[name]||0)+qty;}});});
-  const sorted=Object.entries(itemCount).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  const maxQty=sorted.length?sorted[0][1]:1;
+  const sorted=Object.entries(itemCount).sort((a,b)=>b[1]-a[1]).slice(0,10);const maxQty=sorted.length?sorted[0][1]:1;
   const topEl=document.getElementById('rpTopItems');
-  if(topEl){
-    if(!sorted.length){topEl.innerHTML='<div class="empty" style="padding:16px"><em>📊</em>Sin datos en este período</div>';}
-    else{topEl.innerHTML=sorted.map(([name,qty],i)=>`
-      <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid #F1F5F9;">
-        <span style="font-size:.68rem;font-weight:800;color:#94A3B8;width:18px;">#${i+1}</span>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:.78rem;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
-          <div style="background:#E2E8F0;border-radius:3px;height:4px;margin-top:3px;"><div style="background:var(--green);height:4px;border-radius:3px;width:${Math.round((qty/maxQty)*100)}%"></div></div>
-        </div>
-        <span style="font-size:.78rem;font-weight:800;color:var(--green);white-space:nowrap;">${qty} uds</span>
-      </div>`).join('');}
-  }
+  if(topEl){if(!sorted.length){topEl.innerHTML='<div class="empty" style="padding:16px"><em>📊</em>Sin datos en este período</div>';}
+  else{topEl.innerHTML=sorted.map(([name,qty],i)=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid #F1F5F9;"><span style="font-size:.68rem;font-weight:800;color:#94A3B8;width:18px;">#${i+1}</span><div style="flex:1;min-width:0;"><div style="font-size:.78rem;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div><div style="background:#E2E8F0;border-radius:3px;height:4px;margin-top:3px;"><div style="background:var(--green);height:4px;border-radius:3px;width:${Math.round((qty/maxQty)*100)}%"></div></div></div><span style="font-size:.78rem;font-weight:800;color:var(--green);white-space:nowrap;">${qty} uds</span></div>`).join('');}}
   const dayMap={};
   periodOrders.forEach(o=>{const d=toDateStr(o.Timestamp);if(!dayMap[d])dayMap[d]={orders:0,subtotal:0,tax:0,gestion:0,tip:0,stripefee:0,total:0};dayMap[d].orders++;dayMap[d].subtotal+=parseFloat(o.Subtotal||0);dayMap[d].tax+=parseFloat(o.Tax||0);dayMap[d].gestion+=parseFloat(o.Gestion||0);dayMap[d].tip+=parseFloat(o.Tip||0);dayMap[d].stripefee+=parseFloat(o.StripeFee||0);dayMap[d].total+=parseFloat(o.Total||0);});
   const days=Object.keys(dayMap).sort().reverse();
@@ -1331,21 +1186,10 @@ function renderReports(){
 }
 
 function renderChart(id,days,fromDate,toDate){
-  const el=document.getElementById(id);if(!el)return;
-  const data=[];
-  if(fromDate&&toDate){
-    let cur=new Date(fromDate+'T12:00:00Z');const end=new Date(toDate+'T12:00:00Z');
-    while(cur<=end){
-      const ds=cur.toISOString().slice(0,10);
-      const lbl=cur.toLocaleDateString('es-DO',{weekday:'short',day:'numeric'});
-      const rev=allOrders.filter(o=>(o.Status==='Confirmed'||o.Status==='Enviado')&&toDateStr(o.Timestamp)===ds).reduce((s,o)=>s+parseFloat(o.Total||0),0);
-      data.push({lbl,rev});cur=new Date(cur.getTime()+86400000);
-    }
-  }else{
-    for(let i=days-1;i>=0;i--){const d=new Date(Date.now()-i*86400000);const ds=d.toISOString().slice(0,10);const lbl=d.toLocaleDateString('es-DO',{weekday:'short',day:'numeric'});const rev=allOrders.filter(o=>(o.Status==='Confirmed'||o.Status==='Enviado')&&toDateStr(o.Timestamp)===ds).reduce((s,o)=>s+parseFloat(o.Total||0),0);data.push({lbl,rev});}
-  }
-  const max=Math.max(...data.map(d=>d.rev),1);
-  const skip=data.length>30?4:data.length>14?2:1;
+  const el=document.getElementById(id);if(!el)return;const data=[];
+  if(fromDate&&toDate){let cur=new Date(fromDate+'T12:00:00Z');const end=new Date(toDate+'T12:00:00Z');while(cur<=end){const ds=cur.toISOString().slice(0,10);const lbl=cur.toLocaleDateString('es-DO',{weekday:'short',day:'numeric'});const rev=allOrders.filter(o=>(o.Status==='Confirmed'||o.Status==='Enviado')&&toDateStr(o.Timestamp)===ds).reduce((s,o)=>s+parseFloat(o.Total||0),0);data.push({lbl,rev});cur=new Date(cur.getTime()+86400000);}}
+  else{for(let i=days-1;i>=0;i--){const d=new Date(Date.now()-i*86400000);const ds=d.toISOString().slice(0,10);const lbl=d.toLocaleDateString('es-DO',{weekday:'short',day:'numeric'});const rev=allOrders.filter(o=>(o.Status==='Confirmed'||o.Status==='Enviado')&&toDateStr(o.Timestamp)===ds).reduce((s,o)=>s+parseFloat(o.Total||0),0);data.push({lbl,rev});}}
+  const max=Math.max(...data.map(d=>d.rev),1);const skip=data.length>30?4:data.length>14?2:1;
   el.innerHTML=data.map((d,i)=>`<div class="bar-wrap"><div class="bar-val">${d.rev>0&&i%skip===0?'$'+d.rev.toFixed(0):''}</div><div class="bar" style="height:${Math.max((d.rev/max)*100,d.rev>0?8:2)}%" title="${d.lbl}: $${d.rev.toFixed(2)}"></div><div class="bar-lbl">${i%skip===0?d.lbl:''}</div></div>`).join('');
 }
 
@@ -1361,8 +1205,7 @@ function openTicket(o){
   document.getElementById('tkTax').textContent='$'+parseFloat(o.Tax||0).toFixed(2);
   document.getElementById('tkGes').textContent='$'+parseFloat(o.Gestion||0).toFixed(2);
   document.getElementById('tkTot').textContent='$'+parseFloat(o.Total||0).toFixed(2);
-  const tip=parseFloat(o.Tip||0);
-  const tipRow=document.getElementById('tkTipRow');
+  const tip=parseFloat(o.Tip||0);const tipRow=document.getElementById('tkTipRow');
   if(tip>0){document.getElementById('tkTip').textContent='$'+tip.toFixed(2);tipRow.style.display='flex';}else tipRow.style.display='none';
   const feeRow=document.getElementById('tkFeeRow');
   if(fee>0){document.getElementById('tkFee').textContent='$'+fee.toFixed(2);feeRow.style.display='flex';}else feeRow.style.display='none';
@@ -1413,13 +1256,11 @@ async function loadMenuData(){
   }catch(e){console.error('Menu load error:',e);}
 }
 function filterMenu(){
-  const q=(document.getElementById('menuSearch')?.value||'').toLowerCase();
-  const cat=(document.getElementById('menuCatFilter')?.value||'');
+  const q=(document.getElementById('menuSearch')?.value||'').toLowerCase();const cat=(document.getElementById('menuCatFilter')?.value||'');
   renderMenuGrid(menuData.filter(m=>{if(cat&&(m.Category||m.Cat||'General')!==cat)return false;if(q&&!(m.Name||'').toLowerCase().includes(q))return false;return true;}));
 }
 function renderMenuGrid(items){
-  const grid=document.getElementById('menu-grid');if(!grid)return;
-  const list=items||menuData;
+  const grid=document.getElementById('menu-grid');if(!grid)return;const list=items||menuData;
   if(!list.length){grid.innerHTML='<div class="empty"><em>📋</em>No se encontraron platos</div>';return;}
   grid.innerHTML=list.map(item=>{
     const avail=(item.Available||'').toUpperCase().trim();const isAvail=avail!=='NO';
@@ -1446,61 +1287,34 @@ async function toggleMenuItem(id,name,newAvail){
   }catch(e){alert('Error al actualizar: '+e.message);}
 }
 
-async function loadZelleSetting(){
-  const cached=lsGet('py_zelle_enabled','true');
-  const sel=document.getElementById('sZelleEnabled');
-  if(sel)sel.value=cached;
-}
+async function loadZelleSetting(){const cached=lsGet('py_zelle_enabled','true');const sel=document.getElementById('sZelleEnabled');if(sel)sel.value=cached;}
 
 async function saveZelleSetting(){
-  const sel=document.getElementById('sZelleEnabled');
-  const btn=document.getElementById('zelleToggleBtn');
-  const msg=document.getElementById('zelleToggleMsg');
-  if(!sel)return;
-  const val=sel.value;
-  btn.textContent='⏳ Guardando...';btn.disabled=true;
+  const sel=document.getElementById('sZelleEnabled');const btn=document.getElementById('zelleToggleBtn');const msg=document.getElementById('zelleToggleMsg');
+  if(!sel)return;const val=sel.value;btn.textContent='⏳ Guardando...';btn.disabled=true;
   try{
     const r=await fetch(N8N_UPDATE_SETTINGS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:'zelle_enabled',value:val})});
-    if(r.ok){
-      lsSet('py_zelle_enabled',val);
-      msg.style.display='block';msg.style.color='#166534';
-      msg.textContent=val==='true'?'✅ Zelle activado — el bot mostrará Zelle como opción de pago.':'🔴 Zelle desactivado — el bot solo mostrará Stripe.';
-      btn.textContent='💾 Guardar Configuración de Pago';btn.disabled=false;
-      setTimeout(()=>{msg.style.display='none';},4000);
-    }else throw new Error('Error '+r.status);
-  }catch(e){
-    msg.style.display='block';msg.style.color='#DC2626';msg.textContent='❌ Error: '+e.message;
-    btn.textContent='💾 Guardar Configuración de Pago';btn.disabled=false;
-  }
+    if(r.ok){lsSet('py_zelle_enabled',val);msg.style.display='block';msg.style.color='#166534';msg.textContent=val==='true'?'✅ Zelle activado — el bot mostrará Zelle como opción de pago.':'🔴 Zelle desactivado — el bot solo mostrará Stripe.';btn.textContent='💾 Guardar Configuración de Pago';btn.disabled=false;setTimeout(()=>{msg.style.display='none';},4000);}
+    else throw new Error('Error '+r.status);
+  }catch(e){msg.style.display='block';msg.style.color='#DC2626';msg.textContent='❌ Error: '+e.message;btn.textContent='💾 Guardar Configuración de Pago';btn.disabled=false;}
 }
 
 function loadSettings(){
-  document.getElementById('sBellOn').value=S.bellOn?'yes':'no';
-  document.getElementById('sBellTones').value=S.tones;
-  document.getElementById('sBellVol').value=S.vol;
-  document.getElementById('sVolVal').textContent=Math.round(S.vol*100)+'%';
-  document.getElementById('sRefresh').value=S.refreshMs;
-  const radius=lsGet('py_radius','5');
-  const el=document.getElementById('sDeliveryRadius');if(el)el.value=radius;
+  document.getElementById('sBellOn').value=S.bellOn?'yes':'no';document.getElementById('sBellTones').value=S.tones;document.getElementById('sBellVol').value=S.vol;
+  document.getElementById('sVolVal').textContent=Math.round(S.vol*100)+'%';document.getElementById('sRefresh').value=S.refreshMs;
+  const radius=lsGet('py_radius','5');const el=document.getElementById('sDeliveryRadius');if(el)el.value=radius;
   const rd=document.getElementById('radiusDisplay');if(rd)rd.textContent=radius+' millas';
-  const zc=document.getElementById('radiusZipCount');
-  if(zc){const zips=ZIP_BY_RADIUS[parseInt(radius)]||ZIP_BY_RADIUS[5];zc.textContent=zips.length+' códigos ZIP cubiertos.';}
+  const zc=document.getElementById('radiusZipCount');if(zc){const zips=ZIP_BY_RADIUS[parseInt(radius)]||ZIP_BY_RADIUS[5];zc.textContent=zips.length+' códigos ZIP cubiertos.';}
   const ap=document.getElementById('sAutoPrint');if(ap)ap.value=lsGet('py_autoprint','yes');
   const apz=document.getElementById('sAutoPrintZelle');if(apz)apz.value=lsGet('py_autoprint_zelle','yes');
   loadZelleSetting();
 }
 function saveSettings(){
-  S.bellOn=document.getElementById('sBellOn').value==='yes';
-  S.tones=parseInt(document.getElementById('sBellTones').value);
-  S.vol=parseFloat(document.getElementById('sBellVol').value);
-  S.refreshMs=parseInt(document.getElementById('sRefresh').value);
+  S.bellOn=document.getElementById('sBellOn').value==='yes';S.tones=parseInt(document.getElementById('sBellTones').value);S.vol=parseFloat(document.getElementById('sBellVol').value);S.refreshMs=parseInt(document.getElementById('sRefresh').value);
   lsSet('py_bOn',S.bellOn?'yes':'no');lsSet('py_tones',S.tones);lsSet('py_vol',S.vol);lsSet('py_ref',S.refreshMs);
-  const el=document.getElementById('sDeliveryRadius');
-  if(el){lsSet('py_radius',el.value);const rd=document.getElementById('radiusDisplay');if(rd)rd.textContent=el.value+' millas';}
-  const ap=document.getElementById('sAutoPrint');if(ap)lsSet('py_autoprint',ap.value);
-  const apz=document.getElementById('sAutoPrintZelle');if(apz)lsSet('py_autoprint_zelle',apz.value);
-  if(refreshTimer)clearInterval(refreshTimer);
-  refreshTimer=setInterval(loadAll,S.refreshMs);
+  const el=document.getElementById('sDeliveryRadius');if(el){lsSet('py_radius',el.value);const rd=document.getElementById('radiusDisplay');if(rd)rd.textContent=el.value+' millas';}
+  const ap=document.getElementById('sAutoPrint');if(ap)lsSet('py_autoprint',ap.value);const apz=document.getElementById('sAutoPrintZelle');if(apz)lsSet('py_autoprint_zelle',apz.value);
+  if(refreshTimer)clearInterval(refreshTimer);refreshTimer=setInterval(loadAll,S.refreshMs);
   alert('✅ Ajustes guardados correctamente.');
 }
 
@@ -1520,8 +1334,7 @@ function checkAndAutoPrint(orders){
         +'&address='+encodeURIComponent(o.Address||'')+'&items='+encodeURIComponent((o.Items||'').replace(/\s*\|\s*/g,'|'))
         +'&subtotal='+parseFloat(o.Subtotal||0).toFixed(2)+'&tax='+parseFloat(o.Tax||0).toFixed(2)
         +'&gestion='+parseFloat(o.Gestion||0).toFixed(2)+'&tip='+parseFloat(o.Tip||0).toFixed(2)
-        +'&stripefee='+parseFloat(o.StripeFee||0).toFixed(2)
-        +'&total='+parseFloat(o.Total||0).toFixed(2);
+        +'&stripefee='+parseFloat(o.StripeFee||0).toFixed(2)+'&total='+parseFloat(o.Total||0).toFixed(2);
       setTimeout(()=>{const pw=window.open(tUrl,'_blank');if(pw)setTimeout(()=>{try{pw.print();}catch(e){}},1200);},500);
     }
   });
@@ -1543,31 +1356,24 @@ async function markDispatched(idx){
     const r=await fetch(N8N_DISPATCH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:o['Order ID'],phone:(o.Phone||'').replace(/^whatsapp:/i,''),name:o.Name||'',address:o.Address||'',total:o.Total||0,estTime:estTime||'20-30'})});
     if(r.ok){
       o.Status='Enviado';
+      // ── FIX 3: Track this dispatch so 10s reload doesn't revert it ──
+      _dispatchedLocally.add(o['Order ID']);
       updateAll(parseInt(document.getElementById('sbConn').textContent)||0);
-      setTimeout(loadAll,1500);
+      setTimeout(loadAll,10000);
     }else throw new Error('Error '+r.status);
   }catch(e){alert('Error al marcar como enviada: '+e.message);}
 }
 
-// ── PRINT / PDF REPORT ──────────────────────────────────────────────────────
 function buildReportHTML(){
   const{from,to,label}=getReportDateRange();
   const now=new Date().toLocaleString('es-DO',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'});
   const allConf=allOrders.filter(o=>o.Status==='Confirmed'||o.Status==='Enviado');
   const periodOrders=allConf.filter(o=>{const d=toDateStr(o.Timestamp);return d>=from&&d<=to;});
-  const periodZelle=periodOrders.filter(o=>parseFloat(o.StripeFee||0)===0);
-  const periodStripe=periodOrders.filter(o=>parseFloat(o.StripeFee||0)>0);
+  const periodZelle=periodOrders.filter(o=>parseFloat(o.StripeFee||0)===0);const periodStripe=periodOrders.filter(o=>parseFloat(o.StripeFee||0)>0);
   const sum=(arr,key)=>arr.reduce((s,o)=>s+parseFloat(o[key]||0),0);
-  const periodRev=sum(periodOrders,'Total');
-  const periodZelleRev=sum(periodZelle,'Total');
-  const periodStripeRev=sum(periodStripe,'Total');
-  const periodTax=sum(periodOrders,'Tax');
-  const periodGestion=sum(periodOrders,'Gestion');
-  const periodStripeFee=sum(periodStripe,'StripeFee');
-  const periodTips=sum(periodOrders,'Tip');
-  const periodSubtotal=sum(periodOrders,'Subtotal');
-  const avgOrder=periodOrders.length?periodRev/periodOrders.length:0;
-  const netEst=periodRev-periodStripeFee;
+  const periodRev=sum(periodOrders,'Total');const periodZelleRev=sum(periodZelle,'Total');const periodStripeRev=sum(periodStripe,'Total');
+  const periodTax=sum(periodOrders,'Tax');const periodGestion=sum(periodOrders,'Gestion');const periodStripeFee=sum(periodStripe,'StripeFee');const periodTips=sum(periodOrders,'Tip');const periodSubtotal=sum(periodOrders,'Subtotal');
+  const avgOrder=periodOrders.length?periodRev/periodOrders.length:0;const netEst=periodRev-periodStripeFee;
   const itemCount={};
   periodOrders.forEach(o=>{(o.Items||'').split(' | ').forEach(line=>{const m=line.match(/^(\d+)x (.+?) - \$/);if(m){const name=m[2].trim();const qty=parseInt(m[1]);itemCount[name]=(itemCount[name]||0)+qty;}});});
   const topItems=Object.entries(itemCount).sort((a,b)=>b[1]-a[1]).slice(0,10);
@@ -1576,61 +1382,27 @@ function buildReportHTML(){
   const days=Object.keys(dayMap).sort();
   const kpis=[['💰 Ingresos totales','$'+periodRev.toFixed(2)],['📦 Total órdenes',periodOrders.length],['💸 Ingresos Zelle','$'+periodZelleRev.toFixed(2)],['💳 Ingresos Stripe','$'+periodStripeRev.toFixed(2)],['🏛️ Tax cobrado','$'+periodTax.toFixed(2)],['💼 Com. Gestión','$'+periodGestion.toFixed(2)],['🙏 Propinas repartidor','$'+periodTips.toFixed(2)],['📈 Ticket promedio','$'+avgOrder.toFixed(2)]];
   const breakdown=[['💳 Órdenes Stripe',periodStripe.length,'$'+periodStripeRev.toFixed(2)],['💸 Órdenes Zelle',periodZelle.length,'$'+periodZelleRev.toFixed(2)],['📦 Total órdenes',periodOrders.length,'$'+periodRev.toFixed(2)],['🧾 Subtotal bruto','—','$'+periodSubtotal.toFixed(2)],['🏛️ Tax NJ (6.625%)','—','$'+periodTax.toFixed(2)],['💼 Comisión Gestión','—','$'+periodGestion.toFixed(2)],['🙏 Propinas repartidor','—','$'+periodTips.toFixed(2)],['💳 Comisión Stripe','—','$'+periodStripeFee.toFixed(2)],['💰 Neto estimado','—','$'+netEst.toFixed(2)]];
-  return `
-    <div class="rp-header">
-      <div>
-        <div class="rp-logo">🍽️ PIDE<span>YA</span></div>
-        <div style="font-size:8pt;color:#555;margin-top:3px;">El Conuco Restaurante · 715 Summit Ave, Union City, NJ 07087 · +1 (201) 772-7540</div>
-      </div>
-      <div class="rp-meta">Generado: ${now}<br>Período: <strong>${label}</strong><br>${from!==to?from+' → '+to:from}</div>
-    </div>
+  return `<div class="rp-header"><div><div class="rp-logo">🍽️ PIDE<span>YA</span></div><div style="font-size:8pt;color:#555;margin-top:3px;">El Conuco Restaurante · 715 Summit Ave, Union City, NJ 07087 · +1 (201) 772-7540</div></div><div class="rp-meta">Generado: ${now}<br>Período: <strong>${label}</strong><br>${from!==to?from+' → '+to:from}</div></div>
     <div class="rp-title">📈 Reporte de Ventas — ${label}</div>
     <div class="rp-kpi-grid">${kpis.map(([l,v])=>`<div class="rp-kpi"><div class="rp-kpi-val">${v}</div><div class="rp-kpi-lbl">${l}</div></div>`).join('')}</div>
-    <div class="rp-two-col">
-      <div>
-        <div class="rp-section-title">Desglose del Período</div>
-        <table><thead><tr><th>Concepto</th><th style="text-align:center">Cant.</th><th style="text-align:right">Monto</th></tr></thead><tbody>
-          ${breakdown.map(([c,n,m],i)=>`<tr${i===breakdown.length-1?' class="rp-totals-row"':''}><td>${c}</td><td style="text-align:center;font-weight:700">${n}</td><td style="text-align:right;font-weight:700;color:#166534">${m}</td></tr>`).join('')}
-        </tbody></table>
-      </div>
-      <div>
-        <div class="rp-section-title">🏆 Top Platos Más Vendidos</div>
-        <table><thead><tr><th style="text-align:center">#</th><th>Plato</th><th style="text-align:center">Uds</th></tr></thead><tbody>
-          ${topItems.length?topItems.map(([name,qty],i)=>`<tr><td style="text-align:center;color:#64748B;font-weight:700">${i+1}</td><td>${name}</td><td style="text-align:center;font-weight:700;color:#166534">${qty}</td></tr>`).join(''):'<tr><td colspan="3" style="text-align:center;color:#94A3B8">Sin datos</td></tr>'}
-        </tbody></table>
-      </div>
-    </div>
-    ${days.length?`
-    <div class="rp-section-title">Ventas por Día — Detalle</div>
-    <table><thead><tr><th>Fecha</th><th style="text-align:center">Órdenes</th><th style="text-align:right">Subtotal</th><th style="text-align:right">Tax</th><th style="text-align:right">Gestión</th><th style="text-align:right">Propinas</th><th style="text-align:right">Stripe Fee</th><th style="text-align:right">Total</th></tr></thead><tbody>
-      ${days.map(d=>{const r=dayMap[d];return`<tr><td style="font-weight:600">${d}</td><td style="text-align:center">${r.orders}</td><td style="text-align:right">$${r.subtotal.toFixed(2)}</td><td style="text-align:right">$${r.tax.toFixed(2)}</td><td style="text-align:right">$${r.gestion.toFixed(2)}</td><td style="text-align:right;color:#166534;font-weight:600">$${r.tip.toFixed(2)}</td><td style="text-align:right">$${r.stripefee.toFixed(2)}</td><td style="text-align:right;font-weight:800;color:#166534">$${r.total.toFixed(2)}</td></tr>`;}).join('')}
-      <tr class="rp-totals-row"><td>TOTAL</td><td style="text-align:center">${periodOrders.length}</td><td style="text-align:right">$${periodSubtotal.toFixed(2)}</td><td style="text-align:right">$${periodTax.toFixed(2)}</td><td style="text-align:right">$${periodGestion.toFixed(2)}</td><td style="text-align:right">$${periodTips.toFixed(2)}</td><td style="text-align:right">$${periodStripeFee.toFixed(2)}</td><td style="text-align:right">$${periodRev.toFixed(2)}</td></tr>
-    </tbody></table>`:''}
-    <div class="rp-footer">PIDEYA LLC · El Conuco Restaurante · +1 (201) 772-7540 · Generado el ${now}</div>
-  `;
+    <div class="rp-two-col"><div><div class="rp-section-title">Desglose del Período</div><table><thead><tr><th>Concepto</th><th style="text-align:center">Cant.</th><th style="text-align:right">Monto</th></tr></thead><tbody>${breakdown.map(([c,n,m],i)=>`<tr${i===breakdown.length-1?' class="rp-totals-row"':''}><td>${c}</td><td style="text-align:center;font-weight:700">${n}</td><td style="text-align:right;font-weight:700;color:#166534">${m}</td></tr>`).join('')}</tbody></table></div>
+    <div><div class="rp-section-title">🏆 Top Platos Más Vendidos</div><table><thead><tr><th style="text-align:center">#</th><th>Plato</th><th style="text-align:center">Uds</th></tr></thead><tbody>${topItems.length?topItems.map(([name,qty],i)=>`<tr><td style="text-align:center;color:#64748B;font-weight:700">${i+1}</td><td>${name}</td><td style="text-align:center;font-weight:700;color:#166534">${qty}</td></tr>`).join(''):'<tr><td colspan="3" style="text-align:center;color:#94A3B8">Sin datos</td></tr>'}</tbody></table></div></div>
+    ${days.length?`<div class="rp-section-title">Ventas por Día — Detalle</div><table><thead><tr><th>Fecha</th><th style="text-align:center">Órdenes</th><th style="text-align:right">Subtotal</th><th style="text-align:right">Tax</th><th style="text-align:right">Gestión</th><th style="text-align:right">Propinas</th><th style="text-align:right">Stripe Fee</th><th style="text-align:right">Total</th></tr></thead><tbody>${days.map(d=>{const r=dayMap[d];return`<tr><td style="font-weight:600">${d}</td><td style="text-align:center">${r.orders}</td><td style="text-align:right">$${r.subtotal.toFixed(2)}</td><td style="text-align:right">$${r.tax.toFixed(2)}</td><td style="text-align:right">$${r.gestion.toFixed(2)}</td><td style="text-align:right;color:#166534;font-weight:600">$${r.tip.toFixed(2)}</td><td style="text-align:right">$${r.stripefee.toFixed(2)}</td><td style="text-align:right;font-weight:800;color:#166534">$${r.total.toFixed(2)}</td></tr>`;}).join('')}<tr class="rp-totals-row"><td>TOTAL</td><td style="text-align:center">${periodOrders.length}</td><td style="text-align:right">$${periodSubtotal.toFixed(2)}</td><td style="text-align:right">$${periodTax.toFixed(2)}</td><td style="text-align:right">$${periodGestion.toFixed(2)}</td><td style="text-align:right">$${periodTips.toFixed(2)}</td><td style="text-align:right">$${periodStripeFee.toFixed(2)}</td><td style="text-align:right">$${periodRev.toFixed(2)}</td></tr></tbody></table>`:''}
+    <div class="rp-footer">PIDEYA LLC · El Conuco Restaurante · +1 (201) 772-7540 · Generado el ${now}</div>`;
 }
 
 function printReport(){
-  renderReports();
-  document.getElementById('reportPrintArea').innerHTML=buildReportHTML();
-  const ticketModal=document.getElementById('ticketModal');
-  const wasOpen=ticketModal.classList.contains('open');
-  if(wasOpen)ticketModal.classList.remove('open');
-  window.print();
-  if(wasOpen)ticketModal.classList.add('open');
+  renderReports();document.getElementById('reportPrintArea').innerHTML=buildReportHTML();
+  const ticketModal=document.getElementById('ticketModal');const wasOpen=ticketModal.classList.contains('open');
+  if(wasOpen)ticketModal.classList.remove('open');window.print();if(wasOpen)ticketModal.classList.add('open');
 }
 function exportReportPDF(){printReport();}
 
 function toggleSidebar(){
-  const sb=document.getElementById('sidebar');
-  const ov=document.getElementById('sidebarOverlay');
-  if(sb.classList.contains('open')){sb.classList.remove('open');ov.classList.remove('open');}
-  else{sb.classList.add('open');ov.classList.add('open');}
+  const sb=document.getElementById('sidebar');const ov=document.getElementById('sidebarOverlay');
+  if(sb.classList.contains('open')){sb.classList.remove('open');ov.classList.remove('open');}else{sb.classList.add('open');ov.classList.add('open');}
 }
-function closeSidebar(){
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('open');
-}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeTicket();closeEdit();closeSidebar();}});
 </script>
