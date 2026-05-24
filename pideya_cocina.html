@@ -735,6 +735,8 @@ const N8N_MENU_TOGGLE='https://pideya.app.n8n.cloud/webhook/pideya-menu-toggle';
 const N8N_DISPATCH='https://pideya.app.n8n.cloud/webhook/pideya-dispatch';
 const N8N_UPDATE_SETTINGS='https://pideya.app.n8n.cloud/webhook/pideya-update-settings';
 const N8N_UPDATE_HOURS='https://pideya.app.n8n.cloud/webhook/pideya-update-hours';
+const N8N_DELETE_ORDER='https://pideya.app.n8n.cloud/webhook/pideya-delete';
+const MANAGER_PASS='conuco2024'; // Password for restaurant manager (different from main panel)
 
 function lsGet(k,def){try{const v=localStorage.getItem(k);return v!==null?v:def;}catch(e){return def;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
@@ -1070,6 +1072,7 @@ function card(o,type,compact){
           +'<button class="btn-xs bx-b" onclick="openMaps('+idx+')">🗺️</button>'
           +(type==='c'?'<button class="btn-xs" style="background:#DCFCE7;color:#166534;border:1px solid #86EFAC" onclick="markDispatched('+idx+')">🛵 Despachar</button>':'')
           +'<button class="btn-xs" style="background:#EEF2FF;color:#3730A3;border:1px solid #C7D2FE" onclick="openEdit('+idx+')">✏️</button>'
+          +'<button class="btn-xs" style="background:#FEE2E2;color:#DC2626;border:1px solid #FCA5A5" onclick="deleteOrder('+idx+')" title="Eliminar orden">🗑️</button>'
         +'</div>'
       +'</div>'
     +'</div>';
@@ -1404,6 +1407,26 @@ function printReport(){
   if(wasOpen)ticketModal.classList.remove('open');window.print();if(wasOpen)ticketModal.classList.add('open');
 }
 function exportReportPDF(){printReport();}
+
+async function deleteOrder(idx){
+  const o=allOrders[idx];if(!o)return;
+  const pwd=prompt('🔐 Contraseña del gerente para eliminar esta orden:');
+  if(pwd===null)return;
+  if(pwd!==MANAGER_PASS){alert('❌ Contraseña incorrecta. Contacta al administrador.');return;}
+  if(!confirm('⚠️ ¿Eliminar orden #'+(o['Order ID']||'—')+' de '+(o.Name||'—')+'?\nEsta acción no se puede deshacer.'))return;
+  try{
+    const r=await fetch(N8N_DELETE_ORDER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:o['Order ID'],name:o.Name||'',phone:o.Phone||''})});
+    if(r.ok){
+      allOrders.splice(idx,1);
+      delete orderMap[o['Order ID']];
+      updateAll(parseInt(document.getElementById('sbConn').textContent)||0);
+      const msg=document.createElement('div');
+      msg.style.cssText='position:fixed;top:16px;right:16px;background:#166534;color:#fff;padding:12px 18px;border-radius:10px;font-family:Outfit,sans-serif;font-size:.85rem;font-weight:700;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
+      msg.textContent='✅ Orden eliminada correctamente.';
+      document.body.appendChild(msg);setTimeout(()=>msg.remove(),3000);
+    }else throw new Error('Error '+r.status);
+  }catch(e){alert('❌ Error al eliminar: '+e.message);}
+}
 
 function toggleSidebar(){
   const sb=document.getElementById('sidebar');const ov=document.getElementById('sidebarOverlay');
