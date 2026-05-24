@@ -1015,7 +1015,7 @@ function updateAll(conn){
   const conf=allOrders.filter(o=>o.Status==='Confirmed').reverse();
   const confToday=conf.filter(o=>toDateStr(o.Timestamp)===today);
   const zel=allOrders.filter(o=>o.Status==='Zelle-Pending').reverse();
-  const despachados=allOrders.filter(o=>(o.Status==='Enviado'||_dispatchedLocally.has(o['Order ID']))&&toDateStr(o.Timestamp)===today).reverse();
+  const despachados=allOrders.filter(o=>(o.Status==='Enviado'&&toDateStr(o.Timestamp)===today)||_dispatchedLocally.has(o['Order ID'])).reverse();
   const todayRev=confToday.reduce((s,o)=>s+parseFloat(o.Total||0),0);
   const todayFees=confToday.reduce((s,o)=>s+parseFloat(o.StripeFee||0),0);
   const todayTips=confToday.reduce((s,o)=>s+parseFloat(o.Tip||0),0);
@@ -1361,7 +1361,7 @@ async function markDispatched(idx){
       lsSet('py_dispatched',JSON.stringify([..._dispatchedLocally].slice(-200)));
       // ── FIX 4: Force-update Despachados DOM immediately ──
       const _today=new Date().toISOString().slice(0,10);
-      const _disp=allOrders.filter(x=>(x.Status==='Enviado'||_dispatchedLocally.has(x['Order ID']))&&toDateStr(x.Timestamp)===_today).reverse();
+      const _disp=allOrders.filter(x=>(x.Status==='Enviado'&&toDateStr(x.Timestamp)===_today)||_dispatchedLocally.has(x['Order ID'])).reverse();
       document.getElementById('cnt-despachados').textContent=_disp.length;
       document.getElementById('nb-despachados').textContent=_disp.length;
       document.getElementById('list-despachados').innerHTML=_disp.length?_disp.map(x=>cardDispatched(x)).join(''):'<div class="empty"><em>🛵</em>No hay pedidos despachados hoy</div>';
