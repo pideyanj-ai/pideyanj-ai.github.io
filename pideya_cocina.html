@@ -896,6 +896,12 @@ function applyPreset(type){
   else if(type==='extend1h'){for(let d=0;d<7;d++){let c=currentHours[d].close+1,cm=currentHours[d].closeMin;if(c>=24){c=23;cm=59;}currentHours[d]={...currentHours[d],close:c,closeMin:cm};}}
   else if(type==='closed'){for(let d=0;d<7;d++)currentHours[d]={...currentHours[d],open:0,close:0,closeMin:0};}
   renderHoursEditor();
+  // Also sync the "today" quick-edit dropdowns
+  const _tid=new Date().getDay();const _th=currentHours[_tid];
+  buildHourOptions('todayOpen',_th.open);buildHourOptions('todayClose',_th.close);
+  const _ms=document.getElementById('todayCloseMin');if(_ms)_ms.value=_th.closeMin;
+  const _ce=document.getElementById('todayCurrentHours');
+  if(_ce)_ce.textContent='Horario actual: '+fmt12(_th.open,_th.openMin||0)+' – '+fmt12(_th.close,_th.closeMin);
 }
 
 function renderHoursEditor(){
