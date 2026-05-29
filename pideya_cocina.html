@@ -736,7 +736,7 @@ const N8N_DISPATCH='https://pideya.app.n8n.cloud/webhook/pideya-dispatch';
 const N8N_UPDATE_SETTINGS='https://pideya.app.n8n.cloud/webhook/pideya-update-settings';
 const N8N_UPDATE_HOURS='https://pideya.app.n8n.cloud/webhook/pideya-update-hours';
 const N8N_DELETE_ORDER='https://pideya.app.n8n.cloud/webhook/pideya-delete';
-const MANAGER_PASS='conuco2024'; // Password for restaurant manager (different from main panel)
+const MANAGER_PASS='conuco2024';
 
 function lsGet(k,def){try{const v=localStorage.getItem(k);return v!==null?v:def;}catch(e){return def;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
@@ -752,7 +752,6 @@ function toDateStr(ts){
   return ts.slice(0,10);
 }
 
-// ── FIX 1: Track locally-dispatched orders so reloads don't revert them ──
 let allOrders=[],orderMap={},audioCtx=null,knownIds=new Set(),firstLoad=true,refreshTimer=null,currentPage='dashboard',menuData=[];
 const _dispatchedLocally=new Set(JSON.parse(lsGet('py_dispatched','[]')));
 
@@ -890,18 +889,19 @@ async function closeTodayBot(){
   }
 }
 
+// ── UPDATED: applyPreset now auto-saves to n8n on every preset click ──
 function applyPreset(type){
   if(type==='open24'){for(let d=0;d<7;d++)currentHours[d]={...currentHours[d],open:0,close:23,closeMin:59};}
   else if(type==='normal'){currentHours=JSON.parse(JSON.stringify(DEFAULT_HOURS));}
   else if(type==='extend1h'){for(let d=0;d<7;d++){let c=currentHours[d].close+1,cm=currentHours[d].closeMin;if(c>=24){c=23;cm=59;}currentHours[d]={...currentHours[d],close:c,closeMin:cm};}}
   else if(type==='closed'){for(let d=0;d<7;d++)currentHours[d]={...currentHours[d],open:0,close:0,closeMin:0};}
   renderHoursEditor();
-  // Also sync the "today" quick-edit dropdowns
   const _tid=new Date().getDay();const _th=currentHours[_tid];
   buildHourOptions('todayOpen',_th.open);buildHourOptions('todayClose',_th.close);
   const _ms=document.getElementById('todayCloseMin');if(_ms)_ms.value=_th.closeMin;
   const _ce=document.getElementById('todayCurrentHours');
   if(_ce)_ce.textContent='Horario actual: '+fmt12(_th.open,_th.openMin||0)+' – '+fmt12(_th.close,_th.closeMin);
+  saveAllHoursToN8n();
 }
 
 function renderHoursEditor(){
@@ -999,7 +999,6 @@ async function loadAll(){
         const POS=['Order ID','Timestamp','Phone','Name','Address','Items','Subtotal','Tax','Gestion','StripeFee','Total','Status','StripeLink','Tip'];
         allOrders=rows.slice(1).map(r=>{const o={};h.forEach((k,i)=>{if(k)o[k]=(r[i]||'').trim();});POS.forEach((k,i)=>{if(!o[k]&&r[i]!==undefined)o[k]=(r[i]||'').trim();});return o;});
         orderMap={};allOrders.forEach(o=>{if(o['Order ID'])orderMap[o['Order ID']]=o;});
-        // ── FIX 2: Keep locally-dispatched orders as Enviado even if Sheets hasn't updated yet ──
         _dispatchedLocally.forEach(id=>{const _i=allOrders.findIndex(x=>x['Order ID']===id);if(_i>=0&&allOrders[_i].Status==='Confirmed')allOrders[_i].Status='Enviado';});
       }
     }
@@ -1365,10 +1364,8 @@ async function markDispatched(idx){
     const r=await fetch(N8N_DISPATCH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:o['Order ID'],phone:(o.Phone||'').replace(/^whatsapp:/i,''),name:o.Name||'',address:o.Address||'',total:o.Total||0,estTime:estTime||'20-30'})});
     if(r.ok){
       o.Status='Enviado';
-      // ── FIX 3: Track + persist dispatch locally ──
       _dispatchedLocally.add(o['Order ID']);
       lsSet('py_dispatched',JSON.stringify([..._dispatchedLocally].slice(-200)));
-      // ── FIX 4: Force-update Despachados DOM immediately ──
       const _today=new Date().toISOString().slice(0,10);
       const _disp=allOrders.filter(x=>(x.Status==='Enviado'&&toDateStr(x.Timestamp)===_today)||_dispatchedLocally.has(x['Order ID'])).reverse();
       document.getElementById('cnt-despachados').textContent=_disp.length;
