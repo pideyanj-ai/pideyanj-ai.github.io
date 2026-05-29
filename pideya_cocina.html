@@ -832,12 +832,34 @@ function buildHourOptions(selectId,selectedVal){
   for(let h=0;h<24;h++){const display=h===0?'12:00 am':h<12?h+':00 am':h===12?'12:00 pm':(h-12)+':00 pm';const opt=document.createElement('option');opt.value=h;opt.textContent=display;if(h===selectedVal)opt.selected=true;sel.appendChild(opt);}
 }
 
-function initHoursPage(){
+async function initHoursPage(){
+  // Load actual saved hours from Settings sheet first
   currentHours=JSON.parse(JSON.stringify(DEFAULT_HOURS));
+  try{
+    const resp=await fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet=Settings&_='+Date.now());
+    const text=await resp.text();
+    if(text&&text.length>2){
+      const rows=text.split('\n');
+      for(let i=1;i<rows.length;i++){
+        const row=rows[i].trim();if(!row)continue;
+        const parts=row.match(/^\"([^\"]*)\"[,\t]\"([^\"]*)\"/) || row.split(',');
+        const k=parts[1]?(parts[1].replace(/^\"|\"$/g,'').trim()):(parts[0]||'').trim();
+        const v=parts[2]?(parts[2].replace(/^\"|\"$/g,'').trim()):(parts[1]||'').trim();
+        if(!k||!k.startsWith('hours_'))continue;
+        const kp=k.split('_');
+        const d=parseInt(kp[1]);const type=kp[2];
+        const tp=v.split(':');const h=parseInt(tp[0]);const m=parseInt(tp[1]||'0');
+        if(!isNaN(d)&&!isNaN(h)){
+          if(type==='open'){currentHours[d].open=h;currentHours[d].openMin=m;}
+          else if(type==='close'){currentHours[d].close=h;currentHours[d].closeMin=m;}
+        }
+      }
+    }
+  }catch(e){}
   const todayIdx=new Date().getDay();const todayH=currentHours[todayIdx];
   const dayEl=document.getElementById('todayDayName');if(dayEl)dayEl.textContent=DAY_NAMES[todayIdx];
   const curHoursEl=document.getElementById('todayCurrentHours');
-  if(curHoursEl)curHoursEl.textContent='Horario actual: '+fmt12(todayH.open,0)+' – '+fmt12(todayH.close,todayH.closeMin);
+  if(curHoursEl)curHoursEl.textContent='Horario actual: '+fmt12(todayH.open,todayH.openMin||0)+' – '+fmt12(todayH.close,todayH.closeMin);
   buildHourOptions('todayOpen',todayH.open);buildHourOptions('todayClose',todayH.close);
   const minSel=document.getElementById('todayCloseMin');if(minSel)minSel.value=todayH.closeMin;
   const tm=document.getElementById('saveTodayMsg');if(tm)tm.style.display='none';
