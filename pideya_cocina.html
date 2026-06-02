@@ -14,7 +14,11 @@ const _broadcastHistory=JSON.parse(lsGet('py_bcast_hist','[]'));
 function initBroadcastPage(){
   const seen=new Set();
   allOrders.forEach(o=>{const p=(o.Phone||'').replace(/^whatsapp:/i,'').replace(/[^0-9]/g,'');if(p.length>=10)seen.add(p);});
-  const cnt=document.getElementById('broadcastCount');if(cnt)cnt.textContent=seen.size+' clientes';
+  const cnt=document.getElementById('broadcastCount');
+  if(cnt){
+    if(seen.size>0){cnt.textContent=seen.size+' clientes';}
+    else{cnt.textContent='Cargando...';setTimeout(()=>{const s2=new Set();allOrders.forEach(o=>{const p=(o.Phone||'').replace(/^whatsapp:/i,'').replace(/[^0-9]/g,'');if(p.length>=10)s2.add(p);});cnt.textContent=(s2.size||0)+' clientes';},2500);}
+  }
   const imgInput=document.getElementById('broadcastImageUrl');
   if(imgInput&&!imgInput._bound){imgInput._bound=true;imgInput.addEventListener('input',()=>{const url=imgInput.value.trim();const pv=document.getElementById('broadcastImagePreview');const img=document.getElementById('broadcastImgTag');if(url.startsWith('http')){img.src=url;pv.style.display='block';}else{pv.style.display='none';}});}
   renderBroadcastHistory();
@@ -25,7 +29,7 @@ function renderBroadcastHistory(){
   el.innerHTML=_broadcastHistory.slice(-5).reverse().map(h=>'<div style="padding:7px 0;border-bottom:1px solid #F1F5F9;"><div style="font-size:.78rem;font-weight:600;color:#111827;">'+escH(h.message.slice(0,60))+(h.message.length>60?'…':'')+'</div><div style="font-size:.68rem;color:#64748B;margin-top:2px;">'+h.date+' · '+h.count+' destinatarios</div></div>').join('');
 }
 async function sendBroadcast(){
-  const imageUrl=(document.getElementById('broadcastImageUrl')?.value||'').trim();
+  const imageUrl=_broadcastUploadedUrl||(document.getElementById('broadcastImageUrl')?.value||'').trim();
   const message=(document.getElementById('broadcastMessage')?.value||'').trim();
   const password=(document.getElementById('broadcastPassword')?.value||'').trim();
   const btn=document.getElementById('broadcastSendBtn');
@@ -47,13 +51,64 @@ async function sendBroadcast(){
       msg.style.display='block';msg.style.background='#DCFCE7';msg.style.color='#166534';msg.style.border='1px solid #86EFAC';
       msg.textContent='✅ Broadcast enviado a '+seen.size+' clientes. Los mensajes llegarán en los próximos minutos.';
       document.getElementById('broadcastMessage').value='';
-      document.getElementById('broadcastImageUrl').value='';
+      document.getElementById('broadcastImageUrl').value='';_broadcastUploadedUrl='';const fi2=document.getElementById('broadcastFileInput');if(fi2)fi2.value='';const us=document.getElementById('broadcastUploadStatus');if(us)us.style.display='none';
       document.getElementById('broadcastPassword').value='';
       document.getElementById('broadcastImagePreview').style.display='none';
       document.getElementById('broadcastCharCount').textContent='0/1000';
     }else throw new Error('Error '+r.status);
   }catch(e){showErr('❌ Error al enviar: '+e.message);}
   finally{btn.disabled=false;btn.textContent='📢 Enviar a todos los clientes';}
+}
+
+let _broadcastUploadedUrl='';
+function clearBroadcastFile(){
+  _broadcastUploadedUrl='';
+  const fi=document.getElementById('broadcastFileInput');if(fi)fi.value='';
+  const st=document.getElementById('broadcastUploadStatus');if(st)st.style.display='none';
+}
+async function onBroadcastFileSelect(input){
+  const file=input.files[0];
+  if(!file)return;
+  const allowed=['image/png','image/jpeg'];
+  if(!allowed.includes(file.type)){
+    showBroadcastUploadMsg('❌ Solo se aceptan PNG y JPG.','#FEE2E2','#DC2626');
+    input.value=''; return;
+  }
+  if(file.size>10*1024*1024){
+    showBroadcastUploadMsg('❌ La imagen es muy grande (máx 10 MB).','#FEE2E2','#DC2626');
+    input.value=''; return;
+  }
+  // Clear URL input
+  const urlInput=document.getElementById('broadcastImageUrl');
+  if(urlInput)urlInput.value='';
+  showBroadcastUploadMsg('⏳ Subiendo imagen...','#EFF6FF','#1D4ED8');
+  try{
+    const fd=new FormData();
+    fd.append('reqtype','fileupload');
+    fd.append('fileToUpload',file);
+    const r=await fetch('https://catbox.moe/user/api.php',{method:'POST',body:fd});
+    const url=(await r.text()).trim();
+    if(url.startsWith('https://')){
+      _broadcastUploadedUrl=url;
+      showBroadcastUploadMsg('✅ Imagen lista: '+file.name,'#DCFCE7','#166534');
+      const pv=document.getElementById('broadcastImagePreview');
+      const img=document.getElementById('broadcastImgTag');
+      const lbl=document.getElementById('broadcastImgLabel');
+      if(pv&&img){img.src=url;pv.style.display='block';}
+      if(lbl)lbl.textContent=file.name+' ('+Math.round(file.size/1024)+' KB)';
+    } else {
+      throw new Error(url||'Error al subir');
+    }
+  }catch(e){
+    showBroadcastUploadMsg('❌ Error al subir: '+e.message,'#FEE2E2','#DC2626');
+    input.value='';
+  }
+}
+function showBroadcastUploadMsg(text,bg,color){
+  const el=document.getElementById('broadcastUploadStatus');
+  if(!el)return;
+  el.textContent=text;el.style.background=bg;el.style.color=color;
+  el.style.border='1px solid '+color+'44';el.style.display='block';
 }
 // ── END BROADCAST ───────────────────────────────────────────────────────────
 
@@ -730,12 +785,31 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
     </div>
     <div class="setting-group">
       <h3>📸 Contenido del Broadcast</h3>
-      <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
-        <div><div class="setting-label">URL de la imagen <span style="color:#94A3B8;font-weight:400;font-size:.75rem;">(opcional)</span></div>
-        <div class="setting-desc">Pega un link público de imagen (Google Drive, Imgur, etc.)</div></div>
-        <input type="text" id="broadcastImageUrl" placeholder="https://..." style="width:100%;background:#F9FAFB;border:1px solid #E2E8F0;color:#111827;border-radius:8px;padding:10px 12px;font-family:Outfit,sans-serif;font-size:.85rem;outline:none;">
-        <div id="broadcastImagePreview" style="display:none;margin-top:6px;">
+      <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:12px;">
+        <div><div class="setting-label">Imagen <span style="color:#94A3B8;font-weight:400;font-size:.75rem;">(opcional)</span></div>
+        <div class="setting-desc">Sube un archivo PNG o JPG desde tu equipo, o pega un link público</div></div>
+
+        <!-- File upload -->
+        <div style="width:100%;">
+          <label for="broadcastFileInput" style="display:flex;align-items:center;gap:8px;cursor:pointer;background:#F0FDF4;border:1.5px dashed #86EFAC;border-radius:8px;padding:12px 14px;font-family:Outfit,sans-serif;font-size:.83rem;font-weight:600;color:#166534;transition:background .15s;" onmouseover="this.style.background='#DCFCE7'" onmouseout="this.style.background='#F0FDF4'">
+            <span style="font-size:1.2rem;">📁</span> Subir imagen (PNG / JPG)
+          </label>
+          <input type="file" id="broadcastFileInput" accept="image/png,image/jpeg" style="display:none;" onchange="onBroadcastFileSelect(this)">
+          <div id="broadcastUploadStatus" style="display:none;font-size:.75rem;margin-top:6px;padding:6px 10px;border-radius:6px;"></div>
+        </div>
+
+        <!-- URL fallback -->
+        <div style="width:100%;display:flex;align-items:center;gap:8px;">
+          <div style="flex:1;height:1px;background:#E2E8F0;"></div>
+          <span style="font-size:.72rem;color:#94A3B8;white-space:nowrap;">o pega un link</span>
+          <div style="flex:1;height:1px;background:#E2E8F0;"></div>
+        </div>
+        <input type="text" id="broadcastImageUrl" placeholder="https://..." style="width:100%;background:#F9FAFB;border:1px solid #E2E8F0;color:#111827;border-radius:8px;padding:10px 12px;font-family:Outfit,sans-serif;font-size:.85rem;outline:none;" oninput="clearBroadcastFile()">
+
+        <!-- Preview -->
+        <div id="broadcastImagePreview" style="display:none;margin-top:2px;">
           <img id="broadcastImgTag" src="" alt="Preview" style="max-height:160px;border-radius:8px;border:1px solid #E2E8F0;" onerror="this.parentElement.style.display='none'">
+          <div style="font-size:.72rem;color:#64748B;margin-top:4px;" id="broadcastImgLabel"></div>
         </div>
       </div>
       <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
