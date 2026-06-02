@@ -29,7 +29,16 @@ function renderBroadcastHistory(){
   el.innerHTML=_broadcastHistory.slice(-5).reverse().map(h=>'<div style="padding:7px 0;border-bottom:1px solid #F1F5F9;"><div style="font-size:.78rem;font-weight:600;color:#111827;">'+escH(h.message.slice(0,60))+(h.message.length>60?'…':'')+'</div><div style="font-size:.68rem;color:#64748B;margin-top:2px;">'+h.date+' · '+h.count+' destinatarios</div></div>').join('');
 }
 async function sendBroadcast(){
-  const imageUrl=_broadcastUploadedUrl||(document.getElementById('broadcastImageUrl')?.value||'').trim();
+  let imageUrl=_broadcastUploadedUrl||(document.getElementById('broadcastImageUrl')?.value||'').trim();
+  let imageBase64='';
+  // If file selected but no public URL yet, convert to base64 — n8n will upload it
+  if(!imageUrl&&_broadcastFile){
+    imageBase64=await new Promise(res=>{
+      const r=new FileReader();
+      r.onload=e=>res(e.target.result.split(',')[1]);
+      r.readAsDataURL(_broadcastFile);
+    });
+  }
   const message=(document.getElementById('broadcastMessage')?.value||'').trim();
   const password=(document.getElementById('broadcastPassword')?.value||'').trim();
   const btn=document.getElementById('broadcastSendBtn');
@@ -42,7 +51,7 @@ async function sendBroadcast(){
   if(!confirm('⚠️ ¿Confirmar envío a '+seen.size+' clientes?\n\nEsto enviará el mensaje a TODOS los clientes de la base de datos.'))return;
   btn.disabled=true;btn.textContent='⏳ Enviando a '+seen.size+' clientes...';msg.style.display='none';
   try{
-    const r=await fetch(N8N_BROADCAST,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,imageUrl})});
+    const r=await fetch(N8N_BROADCAST,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,imageUrl,imageBase64})});
     if(r.ok){
       const now=new Date().toLocaleString('es-DO',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'});
       _broadcastHistory.push({message,date:now,count:seen.size});
@@ -51,7 +60,7 @@ async function sendBroadcast(){
       msg.style.display='block';msg.style.background='#DCFCE7';msg.style.color='#166534';msg.style.border='1px solid #86EFAC';
       msg.textContent='✅ Broadcast enviado a '+seen.size+' clientes. Los mensajes llegarán en los próximos minutos.';
       document.getElementById('broadcastMessage').value='';
-      document.getElementById('broadcastImageUrl').value='';_broadcastUploadedUrl='';const fi2=document.getElementById('broadcastFileInput');if(fi2)fi2.value='';const us=document.getElementById('broadcastUploadStatus');if(us)us.style.display='none';
+      document.getElementById('broadcastImageUrl').value='';_broadcastUploadedUrl='';_broadcastFile=null;const fi2=document.getElementById('broadcastFileInput');if(fi2)fi2.value='';const us=document.getElementById('broadcastUploadStatus');if(us)us.style.display='none';
       document.getElementById('broadcastPassword').value='';
       document.getElementById('broadcastImagePreview').style.display='none';
       document.getElementById('broadcastCharCount').textContent='0/1000';
@@ -62,10 +71,11 @@ async function sendBroadcast(){
 
 let _broadcastUploadedUrl='';
 function clearBroadcastFile(){
-  _broadcastUploadedUrl='';
+  _broadcastUploadedUrl='';_broadcastFile=null;
   const fi=document.getElementById('broadcastFileInput');if(fi)fi.value='';
   const st=document.getElementById('broadcastUploadStatus');if(st)st.style.display='none';
 }
+let _broadcastFile=null;
 async function onBroadcastFileSelect(input){
   const file=input.files[0];
   if(!file)return;
@@ -74,35 +84,23 @@ async function onBroadcastFileSelect(input){
     showBroadcastUploadMsg('❌ Solo se aceptan PNG y JPG.','#FEE2E2','#DC2626');
     input.value=''; return;
   }
-  if(file.size>10*1024*1024){
-    showBroadcastUploadMsg('❌ La imagen es muy grande (máx 10 MB).','#FEE2E2','#DC2626');
+  if(file.size>15*1024*1024){
+    showBroadcastUploadMsg('❌ La imagen es muy grande (máx 15 MB).','#FEE2E2','#DC2626');
     input.value=''; return;
   }
   // Clear URL input
   const urlInput=document.getElementById('broadcastImageUrl');
   if(urlInput)urlInput.value='';
-  showBroadcastUploadMsg('⏳ Subiendo imagen...','#EFF6FF','#1D4ED8');
-  try{
-    const fd=new FormData();
-    fd.append('reqtype','fileupload');
-    fd.append('fileToUpload',file);
-    const r=await fetch('https://catbox.moe/user/api.php',{method:'POST',body:fd});
-    const url=(await r.text()).trim();
-    if(url.startsWith('https://')){
-      _broadcastUploadedUrl=url;
-      showBroadcastUploadMsg('✅ Imagen lista: '+file.name,'#DCFCE7','#166534');
-      const pv=document.getElementById('broadcastImagePreview');
-      const img=document.getElementById('broadcastImgTag');
-      const lbl=document.getElementById('broadcastImgLabel');
-      if(pv&&img){img.src=url;pv.style.display='block';}
-      if(lbl)lbl.textContent=file.name+' ('+Math.round(file.size/1024)+' KB)';
-    } else {
-      throw new Error(url||'Error al subir');
-    }
-  }catch(e){
-    showBroadcastUploadMsg('❌ Error al subir: '+e.message,'#FEE2E2','#DC2626');
-    input.value='';
-  }
+  _broadcastUploadedUrl='';
+  _broadcastFile=file;
+  // Show preview IMMEDIATELY from local file — no upload needed yet
+  const localUrl=URL.createObjectURL(file);
+  const pv=document.getElementById('broadcastImagePreview');
+  const img=document.getElementById('broadcastImgTag');
+  const lbl=document.getElementById('broadcastImgLabel');
+  if(pv&&img){img.src=localUrl;pv.style.display='block';}
+  if(lbl)lbl.textContent=file.name+' ('+Math.round(file.size/1024)+' KB)';
+  showBroadcastUploadMsg('✅ Imagen seleccionada: '+file.name,'#DCFCE7','#166534');
 }
 function showBroadcastUploadMsg(text,bg,color){
   const el=document.getElementById('broadcastUploadStatus');
