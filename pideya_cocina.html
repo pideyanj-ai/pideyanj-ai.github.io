@@ -108,6 +108,141 @@ function showBroadcastUploadMsg(text,bg,color){
   el.textContent=text;el.style.background=bg;el.style.color=color;
   el.style.border='1px solid '+color+'44';el.style.display='block';
 }
+
+// ── AGENTS ───────────────────────────────────────────────────────────────
+const SHEET_ID_AGENTS = '1qzvOElYXtlkdBpiqI3_1E3HRQKlnm4JFhYxtZoNT4r4';
+const AGENT_MANAGER_PASS = 'conuco2024';
+
+function parseSettingsCSV(csv) {
+  const map = {};
+  const lines = csv.split('\n');
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    const parts = line.match(/^"([^"]*)","([^"]*)"/) || line.split(',');
+    const k = parts[1] ? parts[1].replace(/^"|"$/g,'').trim() : (parts[0]||'').trim();
+    const v = parts[2] ? parts[2].replace(/^"|"$/g,'').trim() : (parts[1]||'').trim();
+    if (k) map[k] = v;
+  }
+  return map;
+}
+
+async function loadAgents() {
+  const list = document.getElementById('agentsList');
+  if (!list) return;
+  try {
+    const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID_AGENTS + '/gviz/tq?tqx=out:csv&sheet=Settings&_=' + Date.now();
+    const resp = await fetch(url);
+    const csv = await resp.text();
+    const settings = parseSettingsCSV(csv);
+
+    const agents = [];
+    for (let i = 1; i <= 10; i++) {
+      const phone = settings['agent_' + i + '_phone'];
+      if (!phone) break;
+      agents.push({
+        idx: i,
+        name: settings['agent_' + i + '_name'] || 'Agente ' + i,
+        phone,
+        active: (settings['agent_' + i + '_active'] || 'true') !== 'false'
+      });
+    }
+
+    if (!agents.length) {
+      list.innerHTML = '<div style="color:#94A3B8;font-size:.85rem;padding:8px 0;">No hay agentes configurados. Agrega el primero arriba.</div>';
+      return;
+    }
+
+    list.innerHTML = agents.map(a => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:${a.active ? '#F0FDF4' : '#FEF2F2'};border:1px solid ${a.active ? '#86EFAC' : '#FECACA'};border-radius:8px;">
+        <div>
+          <div style="font-weight:700;font-size:.85rem;color:#1E293B;">${a.name}</div>
+          <div style="font-size:.75rem;color:#64748B;">+${a.phone} — ${a.active ? '🟢 Activo' : '🔴 Pausado'}</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="toggleAgent(${a.idx}, ${!a.active})" style="background:${a.active ? '#FEF3C7' : '#DCFCE7'};color:${a.active ? '#92400E' : '#166534'};border:none;border-radius:6px;padding:6px 10px;font-size:.75rem;font-weight:600;cursor:pointer;">${a.active ? 'Pausar' : 'Activar'}</button>
+          <button onclick="deleteAgent(${a.idx})" style="background:#FEE2E2;color:#DC2626;border:none;border-radius:6px;padding:6px 10px;font-size:.75rem;font-weight:600;cursor:pointer;">Eliminar</button>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    list.innerHTML = '<div style="color:#DC2626;font-size:.85rem;">Error al cargar agentes.</div>';
+  }
+}
+
+async function saveAgentSettings(key, value) {
+  const pass = AGENT_MANAGER_PASS;
+  const resp = await fetch('https://pideya.app.n8n.cloud/webhook/pideya-update-settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pass, key, value })
+  });
+  return resp.ok;
+}
+
+async function getAgentsFromSheet() {
+  const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID_AGENTS + '/gviz/tq?tqx=out:csv&sheet=Settings&_=' + Date.now();
+  const resp = await fetch(url);
+  const csv = await resp.text();
+  return parseSettingsCSV(csv);
+}
+
+async function addAgent() {
+  const name = (document.getElementById('newAgentName')?.value || '').trim();
+  const phone = (document.getElementById('newAgentPhone')?.value || '').replace(/[^0-9]/g,'').trim();
+  const msg = document.getElementById('agentFormMsg');
+
+  function showMsg(text, ok) {
+    msg.style.display='block';
+    msg.style.background = ok ? '#DCFCE7' : '#FEE2E2';
+    msg.style.color = ok ? '#166534' : '#DC2626';
+    msg.style.border = '1px solid ' + (ok ? '#86EFAC' : '#FECACA');
+    msg.textContent = text;
+  }
+
+  if (!name) { showMsg('❌ Escribe el nombre del agente.', false); return; }
+  if (phone.length < 10) { showMsg('❌ Número inválido. Incluye código de país (ej: 12015551234).', false); return; }
+
+  showMsg('⏳ Guardando...', true);
+
+  try {
+    const settings = await getAgentsFromSheet();
+    let nextIdx = 1;
+    for (let i = 1; i <= 10; i++) {
+      if (!settings['agent_' + i + '_phone']) { nextIdx = i; break; }
+      if (i === 10) { showMsg('❌ Límite máximo de 10 agentes.', false); return; }
+    }
+
+    await saveAgentSettings('agent_' + nextIdx + '_name', name);
+    await saveAgentSettings('agent_' + nextIdx + '_phone', phone);
+    await saveAgentSettings('agent_' + nextIdx + '_active', 'true');
+
+    showMsg('✅ Agente agregado correctamente.', true);
+    document.getElementById('newAgentName').value = '';
+    document.getElementById('newAgentPhone').value = '';
+    setTimeout(() => loadAgents(), 1500);
+  } catch(e) {
+    showMsg('❌ Error al guardar: ' + e.message, false);
+  }
+}
+
+async function toggleAgent(idx, newActive) {
+  if (!confirm(newActive ? '¿Activar este agente?' : '¿Pausar este agente?')) return;
+  await saveAgentSettings('agent_' + idx + '_active', newActive ? 'true' : 'false');
+  setTimeout(() => loadAgents(), 1000);
+}
+
+async function deleteAgent(idx) {
+  if (!confirm('¿Eliminar este agente? Esta acción no se puede deshacer.')) return;
+  await saveAgentSettings('agent_' + idx + '_name', '');
+  await saveAgentSettings('agent_' + idx + '_phone', '');
+  await saveAgentSettings('agent_' + idx + '_active', '');
+  setTimeout(() => loadAgents(), 1000);
+}
+
+function initAgentesPage() { loadAgents(); }
+// ── END AGENTS ────────────────────────────────────────────────────────────
+
 // ── END BROADCAST ───────────────────────────────────────────────────────────
 
 </script>
@@ -393,6 +528,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
     <div class="nav-item" onclick="showPage('reportes')"><span class="nav-icon">📈</span>Reportes</div>
     <div class="nav-item" onclick="showPage('menu_mgmt')"><span class="nav-icon">📋</span>Menú</div>
     <div class="nav-item" onclick="showPage('horario')"><span class="nav-icon">🕐</span>Horario</div>
+    <div class="nav-item" onclick="showPage('agentes')"><span class="nav-icon">👥</span>Agentes</div>
     <div class="nav-item" onclick="showPage('broadcast')"><span class="nav-icon">📢</span>Broadcast</div>
     <div class="nav-item" onclick="showPage('ajustes')"><span class="nav-icon">⚙️</span>Ajustes</div>
   </nav>
@@ -773,7 +909,26 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
 </div>
 
   <!-- BROADCAST -->
-  <div class="page" id="page-broadcast">
+  <div class="page" id="page-agentes" style="display:none;">
+  <div class="page-header"><h2>👥 Gestión de Agentes</h2></div>
+  <div style="max-width:700px;margin:0 auto;padding:0 16px 40px;">
+    <div class="card" style="padding:20px;margin-bottom:20px;">
+      <div style="font-size:.75rem;font-weight:700;color:#64748B;letter-spacing:.05em;margin-bottom:14px;">AGENTES CONFIGURADOS</div>
+      <div id="agentsList"><div style="color:#94A3B8;font-size:.85rem;">Cargando...</div></div>
+    </div>
+    <div class="card" style="padding:20px;">
+      <div style="font-size:.75rem;font-weight:700;color:#64748B;letter-spacing:.05em;margin-bottom:14px;">➕ AGREGAR AGENTE</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div><label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Nombre</label><input type="text" id="newAgentName" placeholder="Ej: Jose Agente" style="width:100%;background:#F9FAFB;border:1px solid #E2E8F0;color:#111827;border-radius:8px;padding:10px 12px;font-family:Outfit,sans-serif;font-size:.85rem;outline:none;"></div>
+        <div><label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">WhatsApp (solo dígitos con código de país)</label><input type="text" id="newAgentPhone" placeholder="Ej: 12015551234" style="width:100%;background:#F9FAFB;border:1px solid #E2E8F0;color:#111827;border-radius:8px;padding:10px 12px;font-family:Outfit,sans-serif;font-size:.85rem;outline:none;"></div>
+        <div id="agentFormMsg" style="display:none;padding:8px 12px;border-radius:6px;font-size:.8rem;"></div>
+        <button onclick="addAgent()" style="background:#16A34A;color:#fff;border:none;border-radius:8px;padding:12px;font-family:Outfit,sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;">✅ Agregar Agente</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="page-broadcast">
     <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:12px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:flex-start;gap:10px;">
       <span style="font-size:1.4rem;">⚠️</span>
       <div>
@@ -948,6 +1103,7 @@ function showPage(id){closeSidebar();
   if(id==='menu_mgmt')loadMenuData();
   if(id==='horario')initHoursPage();
   if(id==='broadcast')initBroadcastPage();
+  if(id==='agentes')initAgentesPage();
 }
 
 const ZIP_BY_RADIUS={
