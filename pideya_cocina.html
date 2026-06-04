@@ -928,7 +928,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
   </div>
 </div>
 
-<div id="page-broadcast">
+<div class="page" id="page-broadcast">
     <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:12px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:flex-start;gap:10px;">
       <span style="font-size:1.4rem;">⚠️</span>
       <div>
@@ -1373,11 +1373,12 @@ function updateAll(conn){
   const confToday=conf.filter(o=>toDateStr(o.Timestamp)===today);
   const zel=allOrders.filter(o=>o.Status==='Zelle-Pending').reverse();
   const despachados=allOrders.filter(o=>(o.Status==='Enviado'&&toDateStr(o.Timestamp)===today)||_dispatchedLocally.has(o['Order ID'])).reverse();
-  const todayRev=confToday.reduce((s,o)=>s+parseFloat(o.Total||0),0);
+  const paidToday=allOrders.filter(o=>(o.Status==='Confirmed'||o.Status==='Enviado')&&toDateStr(o.Timestamp)===today);
+  const todayRev=paidToday.reduce((s,o)=>s+parseFloat(o.Total||0),0);
   const todayFees=confToday.reduce((s,o)=>s+parseFloat(o.StripeFee||0),0);
-  const todayTips=confToday.reduce((s,o)=>s+parseFloat(o.Tip||0),0);
+  const todayTips=paidToday.reduce((s,o)=>s+parseFloat(o.Tip||0),0);
 
-  document.getElementById('kpiConf').textContent=confToday.length;
+  document.getElementById('kpiConf').textContent=paidToday.length;
   document.getElementById('kpiEnviadas').textContent=despachados.length;
   document.getElementById('kpiZelle').textContent=zel.length;
   document.getElementById('kpiConn').textContent=conn;
