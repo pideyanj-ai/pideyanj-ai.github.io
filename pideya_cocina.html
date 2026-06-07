@@ -88,6 +88,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
 .dot-y{background:var(--yellow);}
 .dot-o{background:var(--orange);}
 .dot-b{background:var(--blue);}
+.dot-p{background:var(--purple);}
 .sec-cnt{background:#DCFCE7;color:#166534;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:20px;}
 
 /* TWO-COLUMN */
@@ -116,7 +117,6 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
 .card-total{font-size:.92rem;font-weight:800;color:#111827;}
 .card-time{font-size:.67rem;color:#6B7280;}
 .card-btns{display:flex;gap:5px;flex-wrap:wrap;}
-/* ── RESPONSIVE BUTTONS ── */
 .btn-xs{border:none;border-radius:7px;padding:7px 12px;font-family:'Outfit',sans-serif;font-size:.73rem;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s;white-space:nowrap;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
 .btn-xs:hover{opacity:.82;}
 .btn-xs:active{transform:scale(.95);opacity:.75;}
@@ -228,6 +228,13 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
   .login-card{padding:32px 24px;}
   .card-btns .btn-xs{font-size:.65rem;padding:8px 5px;}
 }
+
+/* HAMBURGER */
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:4px;flex-direction:column;gap:5px;}
+.hamburger span{display:block;width:22px;height:2px;background:#1E293B;border-radius:2px;}
+@media(max-width:720px){.hamburger{display:flex;}}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9;}
+.sidebar-overlay.open{display:block;}
 </style>
 </head>
 <body>
@@ -244,6 +251,9 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
   </div>
 </div>
 
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
 <!-- SIDEBAR -->
 <div id="sidebar">
   <div class="sb-logo">
@@ -259,6 +269,8 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
     <div class="nav-item" onclick="showPage('menu_mgmt')"><span class="nav-icon">📋</span>Menú</div>
     <div class="nav-item" onclick="showPage('horario')"><span class="nav-icon">🕐</span>Horario</div>
     <div class="nav-item" onclick="showPage('ajustes')"><span class="nav-icon">⚙️</span>Ajustes</div>
+    <div class="nav-item" onclick="showPage('agentes')"><span class="nav-icon">👥</span>Agentes</div>
+    <div class="nav-item" onclick="showPage('broadcast')"><span class="nav-icon">📢</span>Broadcast</div>
   </nav>
   <div class="sb-bottom">
     <div class="sb-connected"><div class="conn-dot"></div><span id="sbConn">0</span> clientes activos</div>
@@ -268,7 +280,12 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
 <!-- MAIN APP -->
 <div id="app">
   <div class="top-bar">
-    <div class="page-title" id="pageTitle">📊 Dashboard</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="page-title" id="pageTitle">📊 Dashboard</div>
+    </div>
     <div class="top-actions">
       <span class="refresh-time" id="refTime">—</span>
       <button class="btn-icon" onclick="testSound()" title="Probar timbre">🔔</button>
@@ -410,7 +427,17 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
       </div>
     </div>
 
-    <!-- ── DELIVERY RADIUS ── -->
+    <div class="setting-group">
+      <h3>💸 Métodos de Pago</h3>
+      <div class="setting-row">
+        <div><div class="setting-label">Pago con Zelle</div><div class="setting-desc">Permitir que clientes paguen con Zelle</div></div>
+        <div class="setting-control"><select id="sZelleEnabled"><option value="yes">Activado</option><option value="no">Desactivado</option></select></div>
+      </div>
+      <div style="margin-top:10px;background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;padding:10px 12px;font-size:.72rem;color:#92400E;">
+        💡 Para activar/desactivar Zelle en el bot, actualiza el setting en n8n o usa el toggle aquí para registrar la preferencia.
+      </div>
+    </div>
+
     <div class="setting-group">
       <h3>🚗 Radio de Entrega</h3>
       <div class="setting-row">
@@ -441,7 +468,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
       </div>
       <button onclick="generateZipCode(document.getElementById('sDeliveryRadius').value)"
         style="width:100%;margin-top:12px;background:#166534;color:white;border:none;border-radius:8px;padding:10px 18px;font-family:Outfit,sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:background .2s;"
-        onmouseover="this.style.background='#15803D'" onmouseout="this.style.background='#166534'">
+        onmouseover="this.style.background='#15803D'" onmouseout="this.style.background='#166634'">
         📋 Generar código ZIP para n8n
       </button>
       <div class="zip-code-box" id="zipCodeBox">
@@ -535,6 +562,71 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
       <div class="loading-state"><div class="spin"></div><p>Cargando menú...</p></div>
     </div>
   </div>
+
+  <!-- AGENTES -->
+  <div class="page" id="page-agentes">
+    <div class="sec-head">
+      <div class="sec-title"><div class="sec-dot dot-b"></div>Gestión de Agentes</div>
+      <button class="btn-icon btn-green" onclick="saveAgentes()">💾 Guardar Cambios</button>
+    </div>
+    <p style="font-size:.78rem;color:#4B5563;margin-bottom:16px;">Configura los números de WhatsApp de los agentes que reciben notificaciones de nuevas órdenes.</p>
+    <div id="agentes-list" style="display:flex;flex-direction:column;gap:12px;">
+      <div class="loading-state"><div class="spin"></div><p>Cargando...</p></div>
+    </div>
+    <button onclick="addAgenteRow()" style="margin-top:16px;width:100%;background:#EEF2FF;color:#3730A3;border:1px solid #C7D2FE;border-radius:10px;padding:12px;font-family:Outfit,sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;">➕ Agregar Agente</button>
+    <div id="agentes-msg" style="margin-top:12px;font-size:.8rem;text-align:center;display:none;"></div>
+    <div style="margin-top:20px;background:#FEF3C7;border:1px solid #FCD34D;border-radius:12px;padding:16px;">
+      <div style="font-weight:800;font-size:.85rem;color:#92400E;margin-bottom:8px;">ℹ️ Números actuales en el bot</div>
+      <div style="font-size:.75rem;color:#78350F;line-height:2;">
+        <div>🔹 <strong>Agente 1 / Jose:</strong> +1 201-325-1318</div>
+        <div>🔹 <strong>Agente 2:</strong> +1 347-888-7141</div>
+        <div>🔹 <strong>Agente 3:</strong> +1 914-572-8053</div>
+      </div>
+      <div style="font-size:.7rem;color:#92400E;margin-top:10px;">⚠️ Para cambiar los números permanentemente en el bot, actualiza el workflow en n8n.</div>
+    </div>
+  </div>
+
+  <!-- BROADCAST -->
+  <div class="page" id="page-broadcast">
+    <div class="sec-head">
+      <div class="sec-title"><div class="sec-dot dot-p"></div>Broadcast — Mensaje masivo</div>
+    </div>
+    <p style="font-size:.78rem;color:#4B5563;margin-bottom:16px;">Envía un mensaje a todos los clientes suscritos al bot. <strong style="color:#DC2626;">Úsalo con moderación.</strong></p>
+    <div class="setting-group">
+      <h3>✍️ Redactar Mensaje</h3>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:.72rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Mensaje</label>
+        <textarea id="broadcastMsg" rows="5" style="width:100%;background:#F9FAFB;border:1px solid #E2E8F0;color:#111827;border-radius:10px;padding:12px;font-family:Outfit,sans-serif;font-size:.88rem;outline:none;resize:vertical;line-height:1.6;" placeholder="Ej: 🎉 ¡Hoy tenemos especiales! Mondongo, Sancocho, y más. Haz tu pedido ahora 👉"></textarea>
+        <div style="font-size:.7rem;color:#6B7280;margin-top:4px;text-align:right;" id="broadcastCount">0 / 1000 caracteres</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <button onclick="insertEmoji('🎉')" class="btn-xs bx-ghost">🎉</button>
+        <button onclick="insertEmoji('🍽️')" class="btn-xs bx-ghost">🍽️</button>
+        <button onclick="insertEmoji('🔥')" class="btn-xs bx-ghost">🔥</button>
+        <button onclick="insertEmoji('✅')" class="btn-xs bx-ghost">✅</button>
+        <button onclick="insertEmoji('📢')" class="btn-xs bx-ghost">📢</button>
+        <button onclick="insertEmoji('⏰')" class="btn-xs bx-ghost">⏰</button>
+        <button onclick="insertEmoji('💸')" class="btn-xs bx-ghost">💸</button>
+        <button onclick="insertEmoji('🛵')" class="btn-xs bx-ghost">🛵</button>
+      </div>
+      <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:12px 14px;font-size:.75rem;color:#7F1D1D;line-height:1.8;margin-bottom:16px;">
+        ⚠️ <strong>Confirmación requerida:</strong> Este mensaje se enviará a <strong id="broadcastSubCount">— clientes</strong> suscritos. No se puede deshacer.
+      </div>
+      <button onclick="sendBroadcast()" id="broadcastSendBtn" style="width:100%;background:#7C3AED;color:white;border:none;border-radius:10px;padding:13px;font-family:Outfit,sans-serif;font-size:.9rem;font-weight:800;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='#6D28D9'" onmouseout="this.style.background='#7C3AED'">
+        📢 Enviar Broadcast
+      </button>
+      <div id="broadcastResult" style="margin-top:10px;font-size:.8rem;text-align:center;display:none;padding:10px;border-radius:8px;"></div>
+    </div>
+    <div class="setting-group" style="margin-top:4px;">
+      <h3>📋 Plantillas rápidas</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button onclick="setTemplate('special')" class="btn-xs bx-ghost" style="text-align:left;padding:10px 14px;font-size:.78rem;">🍽️ Especiales del día</button>
+        <button onclick="setTemplate('closed')" class="btn-xs bx-ghost" style="text-align:left;padding:10px 14px;font-size:.78rem;">🔴 Cerrado hoy</button>
+        <button onclick="setTemplate('open')" class="btn-xs bx-ghost" style="text-align:left;padding:10px 14px;font-size:.78rem;">✅ Abiertos / Regresamos</button>
+        <button onclick="setTemplate('promo')" class="btn-xs bx-ghost" style="text-align:left;padding:10px 14px;font-size:.78rem;">💸 Promoción especial</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- EDIT MODAL -->
@@ -625,23 +717,37 @@ function doLogin(){
   }else{document.getElementById('loginErr').style.display='block';}
 }
 
-const pageTitles={dashboard:'📊 Dashboard',cocina:'🍳 Cocina — Preparar ahora',zelle:'💸 Zelle Pendiente',ordenes:'📋 Todas las Órdenes',reportes:'📈 Reportes',horario:'🕐 Horario',menu_mgmt:'📋 Gestión del Menú',ajustes:'⚙️ Ajustes'};
+// Sidebar mobile toggle
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+const PAGE_KEYS=['dashboard','cocina','zelle','ordenes','reportes','menu_mgmt','horario','ajustes','agentes','broadcast'];
+const pageTitles={dashboard:'📊 Dashboard',cocina:'🍳 Cocina — Preparar ahora',zelle:'💸 Zelle Pendiente',ordenes:'📋 Todas las Órdenes',reportes:'📈 Reportes',menu_mgmt:'📋 Gestión del Menú',horario:'🕐 Horario',ajustes:'⚙️ Ajustes',agentes:'👥 Gestión de Agentes',broadcast:'📢 Broadcast'};
 
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  document.querySelectorAll('.nav-item')[['dashboard','cocina','zelle','ordenes','reportes','horario','menu_mgmt','ajustes'].indexOf(id)]?.classList.add('active');
-  document.getElementById('pageTitle').textContent=pageTitles[id];
+  const pg=document.getElementById('page-'+id);if(pg)pg.classList.add('active');
+  const idx=PAGE_KEYS.indexOf(id);
+  if(idx>=0)document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
+  document.getElementById('pageTitle').textContent=pageTitles[id]||id;
   currentPage=id;
+  closeSidebar();
   if(id==='ordenes')filterOrders();
   if(id==='reportes')renderReports();
   if(id==='menu_mgmt')loadMenuData();
   if(id==='horario')initHoursPage();
+  if(id==='agentes')initAgentesPage();
+  if(id==='broadcast')initBroadcastPage();
 }
 
 // ── DELIVERY RADIUS ZIP GENERATOR ──────────────────────────────────────────
-// Real NJ ZIPs within N miles of 715 Summit Ave, Union City NJ (40.7459, -74.0323)
 const ZIP_BY_RADIUS={
   3:['07030','07031','07086','07087','07093','07097','07302','07303','07306','07307','07308','07309','07310','07311','07395','07399'],
   5:['07030','07031','07047','07086','07087','07093','07094','07097','07302','07303','07304','07305','07306','07307','07308','07309','07310','07311','07395','07399'],
@@ -680,7 +786,7 @@ function copyZipCode(){
 }
 
 // ── HORARIO ────────────────────────────────────────────────────────────────
-const DEFAULT_HOURS={0:{open:9,close:21,closeMin:0,label:'Domingo'},1:{open:9,close:21,closeMin:40,label:'Lunes'},2:{open:9,close:21,closeMin:40,label:'Martes'},3:{open:9,close:21,closeMin:40,label:'Miércoles'},4:{open:9,close:21,closeMin:40,label:'Jueves'},5:{open:9,close:21,closeMin:40,label:'Viernes'},6:{open:9,close:21,closeMin:40,label:'Sábado'}};
+const DEFAULT_HOURS={0:{open:9,close:21,closeMin:0,label:'Domingo'},1:{open:9,close:21,closeMin:40,label:'Lunes'},2:{open:9,close:21,closeMin:40,label:'Martes'},3:{open:9,close:21,closeMin:40,label:'Mi\u00e9rcoles'},4:{open:9,close:21,closeMin:40,label:'Jueves'},5:{open:9,close:21,closeMin:40,label:'Viernes'},6:{open:9,close:21,closeMin:40,label:'S\u00e1bado'}};
 let currentHours=JSON.parse(JSON.stringify(DEFAULT_HOURS));
 
 function applyPreset(type){
@@ -730,7 +836,7 @@ function copyHoursCode(){
   const ta=document.getElementById('generatedHoursCode');if(!ta)return;
   navigator.clipboard.writeText(ta.value).then(()=>{
     const btn=document.getElementById('copyHoursBtn');
-    if(btn){btn.textContent='✅ Copiado!';btn.style.background='#15803d';setTimeout(()=>{btn.textContent='📋 Copiar';btn.style.background='#166634';},2000);}
+    if(btn){btn.textContent='\u2705 Copiado!';btn.style.background='#15803d';setTimeout(()=>{btn.textContent='\ud83d\udccb Copiar';btn.style.background='#166634';},2000);}
   }).catch(()=>{ta.select();document.execCommand('copy');});
 }
 
@@ -746,7 +852,7 @@ function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAu
 function unlockAudio(){
   try{
     const ctx=getCtx();
-    const doUnlock=()=>{const buf=ctx.createBuffer(1,1,22050);const src=ctx.createBufferSource();src.buffer=buf;src.connect(ctx.destination);src.start(0);audioUnlocked=true;const btn=document.getElementById('soundUnlockBtn');if(btn){btn.textContent='🔊 Sonido ON';btn.style.background='#DCFCE7';btn.style.color='#166534';btn.style.borderColor='#86EFAC';}};
+    const doUnlock=()=>{const buf=ctx.createBuffer(1,1,22050);const src=ctx.createBufferSource();src.buffer=buf;src.connect(ctx.destination);src.start(0);audioUnlocked=true;const btn=document.getElementById('soundUnlockBtn');if(btn){btn.textContent='\ud83d\udd0a Sonido ON';btn.style.background='#DCFCE7';btn.style.color='#166534';btn.style.borderColor='#86EFAC';}};
     if(ctx.state==='suspended')ctx.resume().then(doUnlock);else doUnlock();
   }catch(e){}
 }
@@ -764,7 +870,7 @@ function testSound(){unlockAudio();playBell();}
 function checkNewOrders(orders){
   if(firstLoad){orders.forEach(o=>knownIds.add(o['Order ID']));firstLoad=false;return;}
   const news=orders.filter(o=>(o.Status==='Confirmed'||o.Status==='Zelle-Pending')&&o['Order ID']&&!knownIds.has(o['Order ID']));
-  if(news.length){news.forEach(o=>knownIds.add(o['Order ID']));playBell();let c=0;const orig=document.title;const iv=setInterval(()=>{document.title=c++%2?orig:'🔔 NUEVA ORDEN — PIDEYA';if(c>10){clearInterval(iv);document.title=orig;}},500);}
+  if(news.length){news.forEach(o=>knownIds.add(o['Order ID']));playBell();let c=0;const orig=document.title;const iv=setInterval(()=>{document.title=c++%2?orig:'\ud83d\udd14 NUEVA ORDEN \u2014 PIDEYA';if(c>10){clearInterval(iv);document.title=orig;}},500);}
 }
 
 // ── CSV PARSER ─────────────────────────────────────────────────────────────
@@ -777,7 +883,7 @@ function parseCSV(txt){
 
 // ── LOAD DATA ──────────────────────────────────────────────────────────────
 async function loadAll(){
-  const btn=document.getElementById('btnRef');btn.disabled=true;btn.textContent='⟳ Cargando...';
+  const btn=document.getElementById('btnRef');btn.disabled=true;btn.textContent='\u27f3 Cargando...';
   try{
     const [or,sr]=await Promise.all([fetch(CSV_ORDERS+'&_='+Date.now()),fetch(CSV_SESSIONS+'&_='+Date.now())]);
     if(or.ok){
@@ -798,9 +904,9 @@ async function loadAll(){
     }
     checkNewOrders(allOrders);checkAndAutoPrint(allOrders);updateAll(conn);
   }catch(e){
-    document.getElementById('list-cocina').innerHTML=`<div class="err-msg">❌ Error cargando datos.<br><small>${e.message}</small></div>`;
+    document.getElementById('list-cocina').innerHTML=`<div class="err-msg">\u274c Error cargando datos.<br><small>${e.message}</small></div>`;
   }finally{
-    btn.disabled=false;btn.textContent='⟳ Actualizar';
+    btn.disabled=false;btn.textContent='\u27f3 Actualizar';
     document.getElementById('refTime').textContent='Actualizado: '+new Date().toLocaleTimeString('es-DO',{hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'});
   }
 }
@@ -826,15 +932,15 @@ function updateAll(conn){
   document.getElementById('nb-zelle').textContent=zel.length;
   document.getElementById('sbConn').textContent=conn;
 
-  document.getElementById('dash-conf').innerHTML=conf.length?conf.slice(0,5).map(o=>card(o,'c',true)).join(''):'<div class="empty"><em>✅</em>Sin órdenes hoy</div>';
-  document.getElementById('dash-zelle').innerHTML=zel.length?zel.slice(0,5).map(o=>card(o,'z',true)).join(''):'<div class="empty"><em>💸</em>Sin pendientes</div>';
+  document.getElementById('dash-conf').innerHTML=conf.length?conf.slice(0,5).map(o=>card(o,'c',true)).join(''):'<div class="empty"><em>\u2705</em>Sin \u00f3rdenes hoy</div>';
+  document.getElementById('dash-zelle').innerHTML=zel.length?zel.slice(0,5).map(o=>card(o,'z',true)).join(''):'<div class="empty"><em>\ud83d\udcb8</em>Sin pendientes</div>';
 
   const cocinaList=confRecent.length?confRecent:conf.slice(0,20);
   document.getElementById('cnt-cocina').textContent=confRecent.length;
-  document.getElementById('list-cocina').innerHTML=cocinaList.length?cocinaList.map(o=>card(o,'c',false)).join(''):'<div class="empty"><em>✅</em>No hay órdenes confirmadas hoy</div>';
+  document.getElementById('list-cocina').innerHTML=cocinaList.length?cocinaList.map(o=>card(o,'c',false)).join(''):'<div class="empty"><em>\u2705</em>No hay \u00f3rdenes confirmadas hoy</div>';
 
   document.getElementById('cnt-zelle').textContent=zel.length;
-  document.getElementById('list-zelle').innerHTML=zel.length?zel.map(o=>card(o,'z',false)).join(''):'<div class="empty"><em>💸</em>No hay órdenes Zelle pendientes</div>';
+  document.getElementById('list-zelle').innerHTML=zel.length?zel.map(o=>card(o,'z',false)).join(''):'<div class="empty"><em>\ud83d\udcb8</em>No hay \u00f3rdenes Zelle pendientes</div>';
 
   renderChart('revenueChart',7);
   if(currentPage==='ordenes')filterOrders();
@@ -846,25 +952,25 @@ function card(o,type,compact){
   try{
     const items=(o.Items||'').split(' | ').map(i=>'<div class="card-item">'+escH(i)+'</div>').join('');
     const time=o.Timestamp?new Date(o.Timestamp).toLocaleTimeString('es-DO',{hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'}):'—';
-    const badge=type==='c'?'<span class="badge bg-g">✅ Confirmada</span>':type==='z'?'<span class="badge bg-y">💸 Zelle</span>':'<span class="badge bg-b">'+escH(o.Status||type)+'</span>';
-    const phone=o.Phone?('<br>📱 +'+escH((o.Phone||'').replace(/^whatsapp:/i,''))):'';
+    const badge=type==='c'?'<span class="badge bg-g">\u2705 Confirmada</span>':type==='z'?'<span class="badge bg-y">\ud83d\udcb8 Zelle</span>':'<span class="badge bg-b">'+escH(o.Status||type)+'</span>';
+    const phone=o.Phone?('<br>\ud83d\udcf1 +'+escH((o.Phone||'').replace(/^whatsapp:/i,''))):'';
     const idx=allOrders.indexOf(o);
     return '<div class="order-card type-'+type+'">'
       +'<div class="card-row1"><span class="card-id">#'+escH(o['Order ID']||'—')+'</span>'+badge+'</div>'
       +'<div class="card-name">'+escH(o.Name||'—')+'</div>'
-      +'<div class="card-meta">📍 '+escH(o.Address||'—')+phone+'</div>'
+      +'<div class="card-meta">\ud83d\udccd '+escH(o.Address||'—')+phone+'</div>'
       +(compact?'':'<div class="card-items">'+(items||'(sin items)')+'</div>')
       +'<div class="card-foot">'
-        +'<div><div class="card-total">$'+parseFloat(o.Total||0).toFixed(2)+'</div><div class="card-time">⏰ '+time+'</div></div>'
+        +'<div><div class="card-total">$'+parseFloat(o.Total||0).toFixed(2)+'</div><div class="card-time">\u23f0 '+time+'</div></div>'
         +'<div class="card-btns">'
           +'<button class="btn-xs '+(type==='c'?'bx-g':'bx-y')+'" onclick="openTicketByIdx('+idx+')">🖨️ Ticket</button>'
-          +'<button class="btn-xs bx-b" onclick="openMaps('+idx+')">🗺️</button>'
-          +(type==='c'?'<button class="btn-xs" style="background:#DCFCE7;color:#166534;border:1px solid #86EFAC" onclick="markDispatched('+idx+')">🛵</button>':'')
-          +'<button class="btn-xs" style="background:#EEF2FF;color:#3730A3;border:1px solid #C7D2FE" onclick="openEdit('+idx+')">✏️</button>'
+          +'<button class="btn-xs bx-b" onclick="openMaps('+idx+')">\ud83d\uddfa\ufe0f</button>'
+          +(type==='c'?'<button class="btn-xs" style="background:#DCFCE7;color:#166534;border:1px solid #86EFAC" onclick="markDispatched('+idx+')">\ud83d\udef5</button>':'')
+          +'<button class="btn-xs" style="background:#EEF2FF;color:#3730A3;border:1px solid #C7D2FE" onclick="openEdit('+idx+')">\u270f\ufe0f</button>'
         +'</div>'
       +'</div>'
     +'</div>';
-  }catch(e){return '<div class="order-card type-'+type+'"><div class="card-name" style="color:var(--red)">⚠️ Error: '+e.message+'</div></div>';}
+  }catch(e){return '<div class="order-card type-'+type+'"><div class="card-name" style="color:var(--red)">\u26a0\ufe0f Error: '+e.message+'</div></div>';}
 }
 
 function escH(s){s=s||'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
@@ -886,7 +992,7 @@ function filterOrders(){
     return true;
   }).reverse();
   const type=o=>o.Status==='Confirmed'?'c':o.Status==='Zelle-Pending'?'z':'d';
-  document.getElementById('list-ordenes').innerHTML=filtered.length?filtered.map(o=>card(o,type(o),false)).join(''):'<div class="empty"><em>📋</em>No se encontraron órdenes</div>';
+  document.getElementById('list-ordenes').innerHTML=filtered.length?filtered.map(o=>card(o,type(o),false)).join(''):'<div class="empty"><em>\ud83d\udccb</em>No se encontraron \u00f3rdenes</div>';
 }
 
 // ── REPORTS ────────────────────────────────────────────────────────────────
@@ -903,12 +1009,12 @@ function renderReports(){
   document.getElementById('rpGestion').textContent='$'+conf.reduce((s,o)=>s+parseFloat(o.Gestion||0),0).toFixed(2);
   const zelleToday=allOrders.filter(o=>o.Status==='Zelle-Pending'&&toDateStr(o.Timestamp)===today);
   const rows=[
-    ['Órdenes tarjeta hoy',todayO.length,'$'+todayO.reduce((s,o)=>s+parseFloat(o.Total||0),0).toFixed(2)],
-    ['Órdenes Zelle hoy',zelleToday.length,'$'+zelleToday.reduce((s,o)=>s+parseFloat(o.Total||0),0).toFixed(2)],
+    ['\u00d3rdenes tarjeta hoy',todayO.length,'$'+todayO.reduce((s,o)=>s+parseFloat(o.Total||0),0).toFixed(2)],
+    ['\u00d3rdenes Zelle hoy',zelleToday.length,'$'+zelleToday.reduce((s,o)=>s+parseFloat(o.Total||0),0).toFixed(2)],
     ['Subtotal bruto',todayO.length+zelleToday.length,'$'+[...todayO,...zelleToday].reduce((s,o)=>s+parseFloat(o.Subtotal||0),0).toFixed(2)],
     ['Tax NJ cobrado','—','$'+[...todayO,...zelleToday].reduce((s,o)=>s+parseFloat(o.Tax||0),0).toFixed(2)],
-    ['Comisión Gestión','—','$'+todayO.reduce((s,o)=>s+parseFloat(o.Gestion||0),0).toFixed(2)],
-    ['Comisión Stripe','—','$'+todayO.reduce((s,o)=>s+parseFloat(o.StripeFee||0),0).toFixed(2)],
+    ['Comisi\u00f3n Gesti\u00f3n','—','$'+todayO.reduce((s,o)=>s+parseFloat(o.Gestion||0),0).toFixed(2)],
+    ['Comisi\u00f3n Stripe','—','$'+todayO.reduce((s,o)=>s+parseFloat(o.StripeFee||0),0).toFixed(2)],
   ];
   document.getElementById('reportTbody').innerHTML=rows.map(([c,n,m])=>`<tr><td>${c}</td><td style="font-weight:700">${n}</td><td style="font-weight:700;color:var(--green)">${m}</td></tr>`).join('');
   renderChart('reportChart',14);
@@ -926,22 +1032,22 @@ function renderChart(id,days){
 // ── TICKET MODAL ───────────────────────────────────────────────────────────
 function openTicket(o){
   const addr=o.Address||'';const fee=parseFloat(o.StripeFee||0);
-  var _oid=(o['Order ID']||'').trim();document.getElementById('tkId').textContent=_oid?('#'+_oid):'# SIN NÚMERO';
+  var _oid=(o['Order ID']||'').trim();document.getElementById('tkId').textContent=_oid?('#'+_oid):'# SIN N\u00daMERO';
   document.getElementById('tkName').textContent=o.Name||'—';
   document.getElementById('tkPhone').textContent=o.Phone?'+'+(o.Phone+'').replace(/^whatsapp:/i,''):'—';
   document.getElementById('tkAddr').textContent=addr;
   document.getElementById('tkTime').textContent=o.Timestamp?new Date(o.Timestamp).toLocaleString('es-DO',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'}):'—';
-  document.getElementById('tkPay').textContent=o.Status==='Zelle-Pending'?'💸 Zelle (Pendiente)':'✅ Tarjeta — Pagado';
+  document.getElementById('tkPay').textContent=o.Status==='Zelle-Pending'?'\ud83d\udcb8 Zelle (Pendiente)':'\u2705 Tarjeta \u2014 Pagado';
   document.getElementById('tkSub').textContent='$'+parseFloat(o.Subtotal||0).toFixed(2);
   document.getElementById('tkTax').textContent='$'+parseFloat(o.Tax||0).toFixed(2);
   document.getElementById('tkGes').textContent='$'+parseFloat(o.Gestion||0).toFixed(2);
   document.getElementById('tkTot').textContent='$'+parseFloat(o.Total||0).toFixed(2);
   const feeRow=document.getElementById('tkFeeRow');
   if(fee>0){document.getElementById('tkFee').textContent='$'+fee.toFixed(2);feeRow.style.display='flex';}else feeRow.style.display='none';
-  document.getElementById('tkItems').innerHTML=(o.Items||'').split(' | ').map(i=>`<div class="t-item">• ${i}</div>`).join('');
+  document.getElementById('tkItems').innerHTML=(o.Items||'').split(' | ').map(i=>`<div class="t-item">\u2022 ${i}</div>`).join('');
   const qrEl=document.getElementById('tkQR');qrEl.innerHTML='';
   const mapsUrl='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(addr);
-  try{new QRCode(qrEl,{text:mapsUrl,width:140,height:140,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});}catch(e){qrEl.innerHTML='<p style="color:#F59E0B;font-weight:bold;padding:14px;font-family:Courier New">📍 Escanea para navegar</p>';}
+  try{new QRCode(qrEl,{text:mapsUrl,width:140,height:140,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});}catch(e){qrEl.innerHTML='<p style="color:#F59E0B;font-weight:bold;padding:14px;font-family:Courier New">\ud83d\udccd Escanea para navegar</p>';}
   document.getElementById('ticketModal').classList.add('open');
 }
 function closeTicket(){document.getElementById('ticketModal').classList.remove('open');}
@@ -956,20 +1062,20 @@ function openEdit(idx){
   document.getElementById('editAddress').value=o.Address||'';
   document.getElementById('editNotes').value=o.Notes||'';
   document.getElementById('editMsg').style.display='none';
-  document.getElementById('editSaveBtn').textContent='💾 Guardar Cambios';
+  document.getElementById('editSaveBtn').textContent='\ud83d\udcbe Guardar Cambios';
   document.getElementById('editModal').classList.add('open');
 }
 function closeEdit(){document.getElementById('editModal').classList.remove('open');editingOrderIdx=null;}
 async function saveEdit(){
   const o=allOrders[editingOrderIdx];if(!o)return;
   const btn=document.getElementById('editSaveBtn');const msg=document.getElementById('editMsg');
-  btn.textContent='⏳ Guardando...';btn.disabled=true;
+  btn.textContent='\u23f3 Guardando...';btn.disabled=true;
   const body={orderId:o['Order ID'],name:document.getElementById('editName').value.trim(),phone:document.getElementById('editPhone').value.trim(),address:document.getElementById('editAddress').value.trim(),notes:document.getElementById('editNotes').value.trim()};
   try{
     const r=await fetch(N8N_EDIT_ORDER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    if(r.ok){o.Name=body.name;o.Phone=body.phone;o.Address=body.address;o.Notes=body.notes;msg.style.display='block';msg.style.color='#166534';msg.textContent='✅ Cambios guardados.';btn.textContent='✅ Guardado';setTimeout(()=>{closeEdit();loadAll();},1200);}
+    if(r.ok){o.Name=body.name;o.Phone=body.phone;o.Address=body.address;o.Notes=body.notes;msg.style.display='block';msg.style.color='#166534';msg.textContent='\u2705 Cambios guardados.';btn.textContent='\u2705 Guardado';setTimeout(()=>{closeEdit();loadAll();},1200);}
     else throw new Error('Error '+r.status);
-  }catch(e){msg.style.display='block';msg.style.color='#DC2626';msg.textContent='❌ Error: '+e.message;btn.textContent='💾 Guardar Cambios';btn.disabled=false;}
+  }catch(e){msg.style.display='block';msg.style.color='#DC2626';msg.textContent='\u274c Error: '+e.message;btn.textContent='\ud83d\udcbe Guardar Cambios';btn.disabled=false;}
 }
 
 // ── MENU MANAGEMENT ────────────────────────────────────────────────────────
@@ -994,23 +1100,23 @@ function filterMenu(){
 function renderMenuGrid(items){
   const grid=document.getElementById('menu-grid');if(!grid)return;
   const list=items||menuData;
-  if(!list.length){grid.innerHTML='<div class="empty"><em>📋</em>No se encontraron platos</div>';return;}
+  if(!list.length){grid.innerHTML='<div class="empty"><em>\ud83d\udccb</em>No se encontraron platos</div>';return;}
   grid.innerHTML=list.map(item=>{
     const avail=(item.Available||'').toUpperCase().trim();const isAvail=avail!=='NO';
     const id=item.ID||item.id||'';const cat=item.Category||item.Cat||'General';const price=parseFloat(item.Price||0).toFixed(2);
     const newA=isAvail?'NO':'YES';const safeName=(item.Name||'').replace(/"/g,'&quot;');const safeId=(id||'').replace(/"/g,'&quot;');
-    const bg=isAvail?'background:#FEE2E2;color:#991B1B;':'background:#DCFCE7;color:#166534;';const label=isAvail?'⛔ Agotado':'✅ Disponible';
+    const bg=isAvail?'background:#FEE2E2;color:#991B1B;':'background:#DCFCE7;color:#166534;';const label=isAvail?'\u26d4 Agotado':'\u2705 Disponible';
     return '<div style="background:#fff;border:1px solid '+(isAvail?'#E2E8F0':'#FECACA')+';border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);">'
       +'<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:.88rem;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(item.Name||'—')+'</div>'
-      +'<div style="font-size:.7rem;color:#6B7280;margin-top:2px;">'+escH(cat)+' · $'+price+'</div>'
-      +(isAvail?'':'<div style="font-size:.68rem;color:#DC2626;font-weight:700;margin-top:3px;">⛔ AGOTADO</div>')+'</div>'
+      +'<div style="font-size:.7rem;color:#6B7280;margin-top:2px;">'+escH(cat)+' \u00b7 $'+price+'</div>'
+      +(isAvail?'':'<div style="font-size:.68rem;color:#DC2626;font-weight:700;margin-top:3px;">\u26d4 AGOTADO</div>')+'</div>'
       +'<button data-itemid="'+safeId+'" data-name="'+safeName+'" data-avail="'+newA+'" onclick="handleMenuToggle(this)" style="flex-shrink:0;border:none;border-radius:8px;padding:7px 12px;font-family:Outfit,sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;'+bg+'">'+label+'</button>'
       +'</div>';
   }).join('');
 }
 function handleMenuToggle(btn){toggleMenuItem(btn.dataset.itemid,btn.dataset.name,btn.dataset.avail);}
 async function toggleMenuItem(id,name,newAvail){
-  if(!id){alert('Este plato no tiene ID en la hoja de menú.');return;}
+  if(!id){alert('Este plato no tiene ID en la hoja de men\u00fa.');return;}
   const msg=newAvail==='NO'?('¿Marcar "'+name+'" como AGOTADO?'):('¿Marcar "'+name+'" como DISPONIBLE?');
   if(!confirm(msg))return;
   try{
@@ -1031,7 +1137,7 @@ function loadSettings(){
   const el=document.getElementById('sDeliveryRadius');if(el)el.value=radius;
   const rd=document.getElementById('radiusDisplay');if(rd)rd.textContent=radius+' millas';
   const zc=document.getElementById('radiusZipCount');
-  if(zc){const zips=ZIP_BY_RADIUS[parseInt(radius)]||ZIP_BY_RADIUS[5];zc.textContent=zips.length+' códigos ZIP cubiertos.';}
+  if(zc){const zips=ZIP_BY_RADIUS[parseInt(radius)]||ZIP_BY_RADIUS[5];zc.textContent=zips.length+' c\u00f3digos ZIP cubiertos.';}
   const ap=document.getElementById('sAutoPrint');if(ap)ap.value=lsGet('py_autoprint','yes');
   const apz=document.getElementById('sAutoPrintZelle');if(apz)apz.value=lsGet('py_autoprint_zelle','yes');
 }
@@ -1047,7 +1153,7 @@ function saveSettings(){
   const apz=document.getElementById('sAutoPrintZelle');if(apz)lsSet('py_autoprint_zelle',apz.value);
   if(refreshTimer)clearInterval(refreshTimer);
   refreshTimer=setInterval(loadAll,S.refreshMs);
-  alert('✅ Ajustes guardados correctamente.');
+  alert('\u2705 Ajustes guardados correctamente.');
 }
 
 // ── AUTO PRINT ─────────────────────────────────────────────────────────────
@@ -1084,8 +1190,8 @@ function openMaps(idxOrAddr){const addr=typeof idxOrAddr==='number'?(allOrders[i
 
 async function markDispatched(idx){
   const o=allOrders[idx];if(!o)return;
-  const estTime=prompt('⏱️ Tiempo estimado (minutos):','20-30');if(estTime===null)return;
-  if(!confirm('¿Marcar orden #'+(o['Order ID']||'—')+' de '+(o.Name||'el cliente')+' como ENVIADA?'))return;
+  const estTime=prompt('\u23f1\ufe0f Tiempo estimado (minutos):','20-30');if(estTime===null)return;
+  if(!confirm('\u00bfMarcar orden #'+(o['Order ID']||'—')+' de '+(o.Name||'el cliente')+' como ENVIADA?'))return;
   try{
     const r=await fetch(N8N_DISPATCH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:o['Order ID'],phone:(o.Phone||'').replace(/^whatsapp:/i,''),name:o.Name||'',address:o.Address||'',total:o.Total||0,estTime:estTime||'20-30'})});
     if(r.ok){o.Status='Enviado';setTimeout(loadAll,800);}else throw new Error('Error '+r.status);
@@ -1094,235 +1200,175 @@ async function markDispatched(idx){
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeTicket();closeEdit();}});
 
-// ── ESC/POS BLUETOOTH PRINTING (80mm, 48 chars/line, auto-cut) ───────────
-let btDevice = null;
-let btCharacteristic = null;
+// ── AGENTES PAGE ───────────────────────────────────────────────────────────
+const DEFAULT_AGENTES=[
+  {id:'ag1',name:'Jose (Agente 1)',phone:'12013251318',active:true},
+  {id:'ag2',name:'Agente 2',phone:'13478887141',active:true},
+  {id:'ag3',name:'Agente 3',phone:'19145728053',active:true}
+];
+let agentesData=[];
 
-// ESC/POS command helpers
-const ESC = 0x1B;
-const GS  = 0x1D;
+function initAgentesPage(){
+  const saved=lsGet('py_agentes','');
+  try{agentesData=saved?JSON.parse(saved):JSON.parse(JSON.stringify(DEFAULT_AGENTES));}catch(e){agentesData=JSON.parse(JSON.stringify(DEFAULT_AGENTES));}
+  renderAgentes();
+}
 
-function escpos(bytes) {
+function renderAgentes(){
+  const el=document.getElementById('agentes-list');if(!el)return;
+  if(!agentesData.length){el.innerHTML='<div class="empty"><em>\ud83d\udc65</em>No hay agentes configurados</div>';return;}
+  el.innerHTML=agentesData.map((ag,i)=>`
+    <div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+      <div style="width:36px;height:36px;border-radius:50%;background:${ag.active?'#DCFCE7':'#F1F5F9'};display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">${ag.active?'\ud83d\udc64':'\ud83d\udca4'}</div>
+      <div style="flex:1;min-width:0;">
+        <input value="${escH(ag.name)}" onchange="agentesData[${i}].name=this.value" style="width:100%;font-weight:700;font-size:.88rem;color:#111827;background:transparent;border:none;border-bottom:1px dashed #CBD5E1;outline:none;font-family:Outfit,sans-serif;padding:2px 0;margin-bottom:4px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+          <span style="font-size:.7rem;color:#6B7280;">\ud83d\udcf1 +</span>
+          <input value="${escH(ag.phone)}" onchange="agentesData[${i}].phone=this.value.replace(/\\D/g,'')" placeholder="12015550000" style="flex:1;font-size:.82rem;color:#374151;background:#F9FAFB;border:1px solid #E2E8F0;border-radius:6px;padding:4px 8px;font-family:Outfit,sans-serif;outline:none;">
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <label style="display:flex;align-items:center;gap:5px;font-size:.75rem;color:#374151;cursor:pointer;">
+          <input type="checkbox" ${ag.active?'checked':''} onchange="agentesData[${i}].active=this.checked;renderAgentes()" style="width:15px;height:15px;accent-color:#16A34A;">
+          Activo
+        </label>
+        <button onclick="removeAgente(${i})" style="background:#FEE2E2;color:#DC2626;border:none;border-radius:8px;padding:6px 10px;font-size:.75rem;font-weight:700;cursor:pointer;">\u2715</button>
+      </div>
+    </div>`).join('');
+}
+
+function addAgenteRow(){
+  agentesData.push({id:'ag_'+Date.now(),name:'Nuevo Agente',phone:'',active:true});
+  renderAgentes();
+}
+
+function removeAgente(i){
+  if(!confirm('\u00bfEliminar este agente?'))return;
+  agentesData.splice(i,1);renderAgentes();
+}
+
+function saveAgentes(){
+  lsSet('py_agentes',JSON.stringify(agentesData));
+  const msg=document.getElementById('agentes-msg');
+  if(msg){msg.style.display='block';msg.style.color='#166534';msg.textContent='\u2705 Guardado localmente. Para aplicar cambios en el bot, actualiza n8n.';setTimeout(()=>msg.style.display='none',4000);}
+}
+
+// ── BROADCAST PAGE ─────────────────────────────────────────────────────────
+function initBroadcastPage(){
+  const phones=new Set(allOrders.filter(o=>o.Phone).map(o=>o.Phone));
+  const el=document.getElementById('broadcastSubCount');
+  if(el)el.textContent=phones.size+' clientes';
+  const ta=document.getElementById('broadcastMsg');
+  if(ta&&!ta._listenerAdded){ta._listenerAdded=true;ta.addEventListener('input',()=>{const cnt=document.getElementById('broadcastCount');if(cnt)cnt.textContent=ta.value.length+' / 1000 caracteres';});}
+}
+
+const BROADCAST_TEMPLATES={
+  special:'\ud83c\udf7d\ufe0f \u00a1Hola! Hoy en El Conuco tenemos especiales deliciosos. Escr\u00edbenos MENU para ver todas las opciones y hacer tu pedido. \ud83d\udef5 Delivery disponible. \u00a1Te esperamos!',
+  closed:'\ud83d\udd34 Hola, hoy El Conuco estar\u00e1 cerrado. \u00a1Gracias por tu comprensi\u00f3n! Regresamos pronto con m\u00e1s sabor. \ud83c\udf7d\ufe0f',
+  open:'\u2705 \u00a1Buenas noticias! El Conuco ya est\u00e1 abierto y listo para atenderte. Escribe MENU para ver nuestros platos del d\u00eda. \ud83d\udef5 Hacemos delivery.',
+  promo:'\ud83d\udcb8 \u00a1OFERTA ESPECIAL HOY! \ud83d\udd25 Escr\u00edbenos MENU ahora y pide tu comida favorita. Entrega r\u00e1pida a tu puerta. \ud83d\udef5 El Conuco Restaurante.'
+};
+
+function setTemplate(key){
+  const ta=document.getElementById('broadcastMsg');if(!ta)return;
+  ta.value=BROADCAST_TEMPLATES[key]||'';
+  const cnt=document.getElementById('broadcastCount');if(cnt)cnt.textContent=ta.value.length+' / 1000 caracteres';
+}
+
+function insertEmoji(emoji){
+  const ta=document.getElementById('broadcastMsg');if(!ta)return;
+  const start=ta.selectionStart,end=ta.selectionEnd;
+  ta.value=ta.value.slice(0,start)+emoji+ta.value.slice(end);
+  ta.selectionStart=ta.selectionEnd=start+emoji.length;
+  ta.focus();
+  const cnt=document.getElementById('broadcastCount');if(cnt)cnt.textContent=ta.value.length+' / 1000 caracteres';
+}
+
+async function sendBroadcast(){
+  const ta=document.getElementById('broadcastMsg');
+  const msg=(ta?.value||'').trim();
+  if(!msg){alert('Escribe un mensaje primero.');return;}
+  if(msg.length>1000){alert('El mensaje no puede superar 1000 caracteres.');return;}
+  if(!confirm('\u00bfEnviar este mensaje a todos los suscriptores? No se puede deshacer.'))return;
+  const btn=document.getElementById('broadcastSendBtn');
+  const res=document.getElementById('broadcastResult');
+  btn.disabled=true;btn.textContent='\ud83d\udce4 Enviando...';
+  try{
+    const r=await fetch('https://pideya.app.n8n.cloud/webhook/pideya-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,timestamp:new Date().toISOString()})});
+    if(r.ok){
+      res.style.display='block';res.style.background='#DCFCE7';res.style.color='#166534';res.style.border='1px solid #86EFAC';
+      res.textContent='\u2705 Broadcast enviado correctamente.';
+      ta.value='';if(document.getElementById('broadcastCount'))document.getElementById('broadcastCount').textContent='0 / 1000 caracteres';
+    }else throw new Error('Error '+r.status);
+  }catch(e){
+    res.style.display='block';res.style.background='#FEE2E2';res.style.color='#DC2626';res.style.border='1px solid #FECACA';
+    res.textContent='\u274c Error: '+e.message;
+  }finally{btn.disabled=false;btn.textContent='\ud83d\udce2 Enviar Broadcast';}
+}
+
+// ── ESC/POS BLUETOOTH PRINTING ─────────────────────────────────────────────
+let btDevice=null,btCharacteristic=null;
+const ESC=0x1B,GS=0x1D;
+function textToBytes(str){const b=[];for(let i=0;i<str.length;i++){const c=str.charCodeAt(i);b.push(c<256?c:0x3F);}return b;}
+function wrapText(text,maxLen){const words=text.split(' ');const lines=[];let cur='';for(const w of words){if((cur+(cur?' ':'')+w).length<=maxLen)cur+=(cur?' ':'')+w;else{if(cur)lines.push(cur);cur=w;}}if(cur)lines.push(cur);return lines.length?lines:[text.substring(0,maxLen)];}
+function padLine(label,value,width){const v=(value||'').trim(),l=(label||'').trim();return l+' '.repeat(Math.max(1,width-l.length-v.length))+v;}
+function buildESCPOSTicket(){
+  const bytes=[];
+  bytes.push(ESC,0x40);bytes.push(GS,0x21,0x00);bytes.push(ESC,0x33,30);bytes.push(ESC,0x61,0x01);
+  bytes.push(ESC,0x21,0x38);bytes.push(...textToBytes('PIDEYA LLC\n'));
+  bytes.push(ESC,0x21,0x08);bytes.push(...textToBytes('El Conuco Restaurante\n'));
+  bytes.push(ESC,0x21,0x00);bytes.push(...textToBytes('715 Summit Ave, Union City, NJ\n'));
+  bytes.push(...textToBytes('+1 (201) 772-7540\n'));bytes.push(...textToBytes('-'.repeat(48)+'\n'));
+  bytes.push(ESC,0x61,0x00);
+  const ordId=document.getElementById('tkId')?.textContent||'';
+  bytes.push(ESC,0x21,0x08);bytes.push(...textToBytes('Orden: '+ordId+'\n'));bytes.push(ESC,0x21,0x00);
+  const name=document.getElementById('tkName')?.textContent||'';
+  const addr=document.getElementById('tkAddr')?.textContent||'';
+  const phone=document.getElementById('tkPhone')?.textContent||'';
+  bytes.push(...textToBytes('Cliente: '+name+'\n'));bytes.push(...textToBytes('Tel: '+phone+'\n'));
+  wrapText('Dir: '+addr,48).forEach(l=>bytes.push(...textToBytes(l+'\n')));
+  bytes.push(...textToBytes('-'.repeat(48)+'\n'));bytes.push(ESC,0x21,0x08);bytes.push(...textToBytes('ITEMS\n'));bytes.push(ESC,0x21,0x00);
+  const itemsEl=document.getElementById('tkItems');
+  if(itemsEl)itemsEl.querySelectorAll('.t-item').forEach(el=>{wrapText(el.textContent.trim(),48).forEach(l=>bytes.push(...textToBytes(l+'\n')));});
+  bytes.push(...textToBytes('-'.repeat(48)+'\n'));
+  const rows=[['Subtotal',document.getElementById('tkSub')?.textContent],['Tax NJ (6.625%)',document.getElementById('tkTax')?.textContent],['Gestion',document.getElementById('tkGes')?.textContent]];
+  const feeRow=document.getElementById('tkFeeRow');if(feeRow&&feeRow.style.display!=='none')rows.push(['Cargo Stripe (3.5%)',document.getElementById('tkFee')?.textContent]);
+  rows.forEach(([label,val])=>{if(val)bytes.push(...textToBytes(padLine(label,val,48)+'\n'));});
+  bytes.push(...textToBytes('='.repeat(48)+'\n'));bytes.push(ESC,0x21,0x38);
+  const total=document.getElementById('tkTot')?.textContent||'';
+  bytes.push(...textToBytes(padLine('TOTAL',total,24)+'\n'));bytes.push(ESC,0x21,0x00);
+  bytes.push(...textToBytes('='.repeat(48)+'\n'));bytes.push(ESC,0x61,0x01);
+  bytes.push(...textToBytes('\nGracias por usar PIDEYA!\n'));bytes.push(...textToBytes('pideya.co\n'));
+  bytes.push(0x0A,0x0A,0x0A);bytes.push(GS,0x56,0x42,0x00);
   return new Uint8Array(bytes);
 }
-
-function textToBytes(str) {
-  // Convert string to Latin-1 bytes (ESC/POS compatible)
-  const bytes = [];
-  for (let i = 0; i < str.length; i++) {
-    const c = str.charCodeAt(i);
-    bytes.push(c < 256 ? c : 0x3F); // fallback to '?' for non-Latin chars
-  }
-  return bytes;
-}
-
-function buildESCPOSTicket() {
-  const bytes = [];
-
-  // Init printer
-  bytes.push(ESC, 0x40); // ESC @ — reset
-
-  // Set character size — normal (1x1)
-  bytes.push(GS, 0x21, 0x00);
-
-  // Set line spacing to 30 dots
-  bytes.push(ESC, 0x33, 30);
-
-  // Center align
-  bytes.push(ESC, 0x61, 0x01);
-
-  // Header: bold + double width/height
-  bytes.push(ESC, 0x21, 0x38); // bold + double height + double width
-  bytes.push(...textToBytes('PIDEYA LLC\n'));
-  bytes.push(ESC, 0x21, 0x08); // bold only
-  bytes.push(...textToBytes('El Conuco Restaurante\n'));
-  bytes.push(ESC, 0x21, 0x00); // normal
-  bytes.push(...textToBytes('715 Summit Ave, Union City, NJ\n'));
-  bytes.push(...textToBytes('+1 (201) 772-7540\n'));
-
-  // Divider
-  bytes.push(...textToBytes('-'.repeat(48) + '\n'));
-
-  // Left align for order details
-  bytes.push(ESC, 0x61, 0x00);
-
-  // Order ID + timestamp
-  const ordId = document.getElementById('tkId')?.textContent || '';
-  const ordTs = document.getElementById('tkTs')?.textContent || '';
-  bytes.push(ESC, 0x21, 0x08); // bold
-  bytes.push(...textToBytes('Orden: ' + ordId + '\n'));
-  bytes.push(ESC, 0x21, 0x00); // normal
-  bytes.push(...textToBytes(ordTs + '\n'));
-
-  // Customer info
-  const name = document.getElementById('tkName')?.textContent || '';
-  const addr = document.getElementById('tkAddr')?.textContent || '';
-  const phone = document.getElementById('tkPhone')?.textContent || '';
-  bytes.push(...textToBytes('Cliente: ' + name + '\n'));
-  bytes.push(...textToBytes('Tel: ' + phone + '\n'));
-
-  // Word-wrap address to 48 chars
-  const addrLines = wrapText('Dir: ' + addr, 48);
-  addrLines.forEach(l => bytes.push(...textToBytes(l + '\n')));
-
-  // Items divider
-  bytes.push(...textToBytes('-'.repeat(48) + '\n'));
-  bytes.push(ESC, 0x21, 0x08); // bold
-  bytes.push(...textToBytes('ITEMS\n'));
-  bytes.push(ESC, 0x21, 0x00);
-
-  // Items list
-  const itemsEl = document.getElementById('tkItems');
-  if (itemsEl) {
-    itemsEl.querySelectorAll('.t-item').forEach(el => {
-      const itemLines = wrapText(el.textContent.trim(), 48);
-      itemLines.forEach(l => bytes.push(...textToBytes(l + '\n')));
-    });
-  }
-
-  // Totals divider
-  bytes.push(...textToBytes('-'.repeat(48) + '\n'));
-
-  // Subtotal / Tax / Gestion / Fee / Total
-  const rows = [
-    ['Subtotal', document.getElementById('tkSub')?.textContent],
-    ['Tax NJ (6.625%)', document.getElementById('tkTax')?.textContent],
-    ['Gestion', document.getElementById('tkGes')?.textContent],
-  ];
-  const feeRow = document.getElementById('tkFeeRow');
-  if (feeRow && feeRow.style.display !== 'none') {
-    rows.push(['Cargo Stripe (3.5%)', document.getElementById('tkFee')?.textContent]);
-  }
-  rows.forEach(([label, val]) => {
-    if (val) bytes.push(...textToBytes(padLine(label, val, 48) + '\n'));
-  });
-
-  // Total — bold + double size
-  bytes.push(...textToBytes('='.repeat(48) + '\n'));
-  bytes.push(ESC, 0x21, 0x38);
-  const total = document.getElementById('tkTot')?.textContent || '';
-  bytes.push(...textToBytes(padLine('TOTAL', total, 24) + '\n'));
-  bytes.push(ESC, 0x21, 0x00);
-  bytes.push(...textToBytes('='.repeat(48) + '\n'));
-
-  // Footer — center
-  bytes.push(ESC, 0x61, 0x01);
-  bytes.push(...textToBytes('\nGracias por usar PIDEYA!\n'));
-  bytes.push(...textToBytes('pideya.co\n'));
-  bytes.push('\n'.charCodeAt(0), '\n'.charCodeAt(0), '\n'.charCodeAt(0));
-
-  // AUTO CUT — GS V 66 (partial cut with feed)
-  bytes.push(GS, 0x56, 0x42, 0x00);
-
-  return new Uint8Array(bytes);
-}
-
-function wrapText(text, maxLen) {
-  const words = text.split(' ');
-  const lines = [];
-  let current = '';
-  for (const word of words) {
-    if ((current + (current ? ' ' : '') + word).length <= maxLen) {
-      current += (current ? ' ' : '') + word;
-    } else {
-      if (current) lines.push(current);
-      current = word;
+async function printESCPOS(){
+  const statusEl=document.getElementById('btStatus'),btn=document.getElementById('btPrintBtn');
+  if(!navigator.bluetooth){statusEl.textContent='\u274c Tu navegador no soporta Web Bluetooth.';return;}
+  try{
+    statusEl.textContent='\ud83d\udd0d Buscando impresora Bluetooth...';btn.disabled=true;
+    if(!btDevice||!btDevice.gatt.connected){
+      btDevice=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:['000018f0-0000-1000-8000-00805f9b34fb','49535343-fe7d-4ae5-8fa9-9fafd205e455','e7810a71-73ae-499d-8c15-faa9aef0c3f2','0000ff00-0000-1000-8000-00805f9b34fb','0000ffe0-0000-1000-8000-00805f9b34fb']});
+      statusEl.textContent='\ud83d\udd17 Conectando a '+btDevice.name+'...';
+      const server=await btDevice.gatt.connect();
+      const serviceUUIDs=['000018f0-0000-1000-8000-00805f9b34fb','49535343-fe7d-4ae5-8fa9-9fafd205e455','e7810a71-73ae-499d-8c15-faa9aef0c3f2','0000ff00-0000-1000-8000-00805f9b34fb','0000ffe0-0000-1000-8000-00805f9b34fb'];
+      let service=null;for(const uuid of serviceUUIDs){try{service=await server.getPrimaryService(uuid);break;}catch(e){}}
+      if(!service){const services=await server.getPrimaryServices();if(services.length)service=services[0];}
+      if(!service)throw new Error('No se encontr\u00f3 servicio de impresi\u00f3n compatible.');
+      const chars=await service.getCharacteristics();
+      btCharacteristic=chars.find(c=>c.properties.write||c.properties.writeWithoutResponse);
+      if(!btCharacteristic)throw new Error('No se encontr\u00f3 caracter\u00edstica de escritura.');
     }
-  }
-  if (current) lines.push(current);
-  return lines.length ? lines : [text.substring(0, maxLen)];
-}
-
-function padLine(label, value, width) {
-  const v = (value || '').trim();
-  const l = (label || '').trim();
-  const spaces = Math.max(1, width - l.length - v.length);
-  return l + ' '.repeat(spaces) + v;
-}
-
-async function printESCPOS() {
-  const statusEl = document.getElementById('btStatus');
-  const btn = document.getElementById('btPrintBtn');
-
-  if (!navigator.bluetooth) {
-    statusEl.textContent = '❌ Tu navegador no soporta Web Bluetooth. Usa Chrome en Android o Chrome desktop.';
-    return;
-  }
-
-  try {
-    statusEl.textContent = '🔍 Buscando impresora Bluetooth...';
-    btn.disabled = true;
-
-    // Connect to BT printer if not already connected
-    if (!btDevice || !btDevice.gatt.connected) {
-      btDevice = await navigator.bluetooth.requestDevice({
-        acceptAllDevices: true,
-        optionalServices: [
-          '000018f0-0000-1000-8000-00805f9b34fb', // common BT printer service
-          '49535343-fe7d-4ae5-8fa9-9fafd205e455', // ISSC transparent service
-          'e7810a71-73ae-499d-8c15-faa9aef0c3f2', // common thermal printer
-          '0000ff00-0000-1000-8000-00805f9b34fb', // generic serial
-          '0000ffe0-0000-1000-8000-00805f9b34fb', // HM-10 style
-        ]
-      });
-
-      statusEl.textContent = '🔗 Conectando a ' + btDevice.name + '...';
-      const server = await btDevice.gatt.connect();
-
-      // Try known thermal printer service UUIDs
-      const serviceUUIDs = [
-        '000018f0-0000-1000-8000-00805f9b34fb',
-        '49535343-fe7d-4ae5-8fa9-9fafd205e455',
-        'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
-        '0000ff00-0000-1000-8000-00805f9b34fb',
-        '0000ffe0-0000-1000-8000-00805f9b34fb',
-      ];
-
-      let service = null;
-      for (const uuid of serviceUUIDs) {
-        try { service = await server.getPrimaryService(uuid); break; } catch(e) {}
-      }
-      if (!service) {
-        // Try getting any primary service
-        const services = await server.getPrimaryServices();
-        if (services.length) service = services[0];
-      }
-      if (!service) throw new Error('No se encontró servicio de impresión compatible.');
-
-      const characteristics = await service.getCharacteristics();
-      // Find writable characteristic
-      btCharacteristic = characteristics.find(c =>
-        c.properties.write || c.properties.writeWithoutResponse
-      );
-      if (!btCharacteristic) throw new Error('No se encontró característica de escritura.');
+    statusEl.textContent='\ud83d\udda8\ufe0f Enviando ticket a la impresora...';
+    const data=buildESCPOSTicket();const CHUNK=512;
+    for(let i=0;i<data.length;i+=CHUNK){
+      const chunk=data.slice(i,i+CHUNK);
+      if(btCharacteristic.properties.writeWithoutResponse)await btCharacteristic.writeValueWithoutResponse(chunk);
+      else await btCharacteristic.writeValue(chunk);
+      await new Promise(r=>setTimeout(r,50));
     }
-
-    statusEl.textContent = '🖨️ Enviando ticket a la impresora...';
-
-    const data = buildESCPOSTicket();
-
-    // Send in 512-byte chunks (BT MTU limit)
-    const CHUNK = 512;
-    for (let i = 0; i < data.length; i += CHUNK) {
-      const chunk = data.slice(i, i + CHUNK);
-      if (btCharacteristic.properties.writeWithoutResponse) {
-        await btCharacteristic.writeValueWithoutResponse(chunk);
-      } else {
-        await btCharacteristic.writeValue(chunk);
-      }
-      // Small delay between chunks
-      await new Promise(r => setTimeout(r, 50));
-    }
-
-    statusEl.textContent = '✅ Ticket enviado correctamente. Cortando...';
-    btn.disabled = false;
-
-  } catch(e) {
-    statusEl.textContent = '❌ Error: ' + e.message;
-    btn.disabled = false;
-    btDevice = null;
-    btCharacteristic = null;
-  }
+    statusEl.textContent='\u2705 Ticket enviado correctamente.';btn.disabled=false;
+  }catch(e){statusEl.textContent='\u274c Error: '+e.message;btn.disabled=false;btDevice=null;btCharacteristic=null;}
 }
 </script>
 </body>
