@@ -7,6 +7,244 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
 
+// ── BROADCAST ──────────────────────────────────────────────────────────────
+const BROADCAST_PASS='conuco2024';
+const N8N_BROADCAST='https://pideya.app.n8n.cloud/webhook/pideya-broadcast';
+const _broadcastHistory=JSON.parse(lsGet('py_bcast_hist','[]'));
+function initBroadcastPage(){
+  const seen=new Set();
+  allOrders.forEach(o=>{const p=(o.Phone||'').replace(/^whatsapp:/i,'').replace(/[^0-9]/g,'');if(p.length>=10)seen.add(p);});
+  const cnt=document.getElementById('broadcastCount');
+  if(cnt){
+    if(seen.size>0){cnt.textContent=seen.size+' clientes';}
+    else{cnt.textContent='Cargando...';setTimeout(()=>{const s2=new Set();allOrders.forEach(o=>{const p=(o.Phone||'').replace(/^whatsapp:/i,'').replace(/[^0-9]/g,'');if(p.length>=10)s2.add(p);});cnt.textContent=(s2.size||0)+' clientes';},2500);}
+  }
+  const imgInput=document.getElementById('broadcastImageUrl');
+  if(imgInput&&!imgInput._bound){imgInput._bound=true;imgInput.addEventListener('input',()=>{const url=imgInput.value.trim();const pv=document.getElementById('broadcastImagePreview');const img=document.getElementById('broadcastImgTag');if(url.startsWith('http')){img.src=url;pv.style.display='block';}else{pv.style.display='none';}});}
+  renderBroadcastHistory();
+}
+function renderBroadcastHistory(){
+  const el=document.getElementById('broadcastHistory');if(!el)return;
+  if(!_broadcastHistory.length){el.textContent='No hay broadcasts enviados aún.';return;}
+  el.innerHTML=_broadcastHistory.slice(-5).reverse().map(h=>'<div style="padding:7px 0;border-bottom:1px solid #F1F5F9;"><div style="font-size:.78rem;font-weight:600;color:#111827;">'+escH(h.message.slice(0,60))+(h.message.length>60?'…':'')+'</div><div style="font-size:.68rem;color:#64748B;margin-top:2px;">'+h.date+' · '+h.count+' destinatarios</div></div>').join('');
+}
+async function sendBroadcast(){
+  let imageUrl=_broadcastUploadedUrl||(document.getElementById('broadcastImageUrl')?.value||'').trim();
+  let imageBase64='';
+  // If file selected but no public URL yet, convert to base64 — n8n will upload it
+  if(!imageUrl&&_broadcastFile){
+    imageBase64=await new Promise(res=>{
+      const r=new FileReader();
+      r.onload=e=>res(e.target.result.split(',')[1]);
+      r.readAsDataURL(_broadcastFile);
+    });
+  }
+  const message=(document.getElementById('broadcastMessage')?.value||'').trim();
+  const password=(document.getElementById('broadcastPassword')?.value||'').trim();
+  const btn=document.getElementById('broadcastSendBtn');
+  const msg=document.getElementById('broadcastMsg');
+  function showErr(t){msg.style.display='block';msg.style.background='#FEE2E2';msg.style.color='#DC2626';msg.style.border='1px solid #FCA5A5';msg.textContent=t;}
+  if(!message){showErr('❌ El mensaje no puede estar vacío.');return;}
+  if(password!==BROADCAST_PASS){showErr('❌ Contraseña incorrecta.');return;}
+  const seen=new Set();
+  allOrders.forEach(o=>{const p=(o.Phone||'').replace(/^whatsapp:/i,'').replace(/[^0-9]/g,'');if(p.length>=10)seen.add(p);});
+  if(!confirm('⚠️ ¿Confirmar envío a '+seen.size+' clientes?\n\nEsto enviará el mensaje a TODOS los clientes de la base de datos.'))return;
+  btn.disabled=true;btn.textContent='⏳ Enviando a '+seen.size+' clientes...';msg.style.display='none';
+  try{
+    const r=await fetch(N8N_BROADCAST,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,imageUrl,imageBase64})});
+    if(r.ok){
+      const now=new Date().toLocaleString('es-DO',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'});
+      _broadcastHistory.push({message,date:now,count:seen.size});
+      lsSet('py_bcast_hist',JSON.stringify(_broadcastHistory.slice(-20)));
+      renderBroadcastHistory();
+      msg.style.display='block';msg.style.background='#DCFCE7';msg.style.color='#166534';msg.style.border='1px solid #86EFAC';
+      msg.textContent='✅ Broadcast enviado a '+seen.size+' clientes. Los mensajes llegarán en los próximos minutos.';
+      document.getElementById('broadcastMessage').value='';
+      document.getElementById('broadcastImageUrl').value='';_broadcastUploadedUrl='';_broadcastFile=null;const fi2=document.getElementById('broadcastFileInput');if(fi2)fi2.value='';const us=document.getElementById('broadcastUploadStatus');if(us)us.style.display='none';
+      document.getElementById('broadcastPassword').value='';
+      document.getElementById('broadcastImagePreview').style.display='none';
+      document.getElementById('broadcastCharCount').textContent='0/1000';
+    }else throw new Error('Error '+r.status);
+  }catch(e){showErr('❌ Error al enviar: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='📢 Enviar a todos los clientes';}
+}
+
+let _broadcastUploadedUrl='';
+function clearBroadcastFile(){
+  _broadcastUploadedUrl='';_broadcastFile=null;
+  const fi=document.getElementById('broadcastFileInput');if(fi)fi.value='';
+  const st=document.getElementById('broadcastUploadStatus');if(st)st.style.display='none';
+}
+let _broadcastFile=null;
+async function onBroadcastFileSelect(input){
+  const file=input.files[0];
+  if(!file)return;
+  const allowed=['image/png','image/jpeg'];
+  if(!allowed.includes(file.type)){
+    showBroadcastUploadMsg('❌ Solo se aceptan PNG y JPG.','#FEE2E2','#DC2626');
+    input.value=''; return;
+  }
+  if(file.size>15*1024*1024){
+    showBroadcastUploadMsg('❌ La imagen es muy grande (máx 15 MB).','#FEE2E2','#DC2626');
+    input.value=''; return;
+  }
+  // Clear URL input
+  const urlInput=document.getElementById('broadcastImageUrl');
+  if(urlInput)urlInput.value='';
+  _broadcastUploadedUrl='';
+  _broadcastFile=file;
+  // Show preview IMMEDIATELY from local file — no upload needed yet
+  const localUrl=URL.createObjectURL(file);
+  const pv=document.getElementById('broadcastImagePreview');
+  const img=document.getElementById('broadcastImgTag');
+  const lbl=document.getElementById('broadcastImgLabel');
+  if(pv&&img){img.src=localUrl;pv.style.display='block';}
+  if(lbl)lbl.textContent=file.name+' ('+Math.round(file.size/1024)+' KB)';
+  showBroadcastUploadMsg('✅ Imagen seleccionada: '+file.name,'#DCFCE7','#166534');
+}
+function showBroadcastUploadMsg(text,bg,color){
+  const el=document.getElementById('broadcastUploadStatus');
+  if(!el)return;
+  el.textContent=text;el.style.background=bg;el.style.color=color;
+  el.style.border='1px solid '+color+'44';el.style.display='block';
+}
+
+// ── AGENTS ───────────────────────────────────────────────────────────────
+const SHEET_ID_AGENTS = '1qzvOElYXtlkdBpiqI3_1E3HRQKlnm4JFhYxtZoNT4r4';
+const AGENT_MANAGER_PASS = 'conuco2024';
+
+function parseSettingsCSV(csv) {
+  const map = {};
+  const lines = csv.split('\n');
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    const parts = line.match(/^"([^"]*)","([^"]*)"/) || line.split(',');
+    const k = parts[1] ? parts[1].replace(/^"|"$/g,'').trim() : (parts[0]||'').trim();
+    const v = parts[2] ? parts[2].replace(/^"|"$/g,'').trim() : (parts[1]||'').trim();
+    if (k) map[k] = v;
+  }
+  return map;
+}
+
+async function loadAgents() {
+  const list = document.getElementById('agentsList');
+  if (!list) return;
+  try {
+    const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID_AGENTS + '/gviz/tq?tqx=out:csv&sheet=Settings&_=' + Date.now();
+    const resp = await fetch(url);
+    const csv = await resp.text();
+    const settings = parseSettingsCSV(csv);
+
+    const agents = [];
+    for (let i = 1; i <= 10; i++) {
+      const phone = settings['agent_' + i + '_phone'];
+      if (!phone) break;
+      agents.push({
+        idx: i,
+        name: settings['agent_' + i + '_name'] || 'Agente ' + i,
+        phone,
+        active: (settings['agent_' + i + '_active'] || 'true') !== 'false'
+      });
+    }
+
+    if (!agents.length) {
+      list.innerHTML = '<div style="color:#94A3B8;font-size:.85rem;padding:8px 0;">No hay agentes configurados. Agrega el primero arriba.</div>';
+      return;
+    }
+
+    list.innerHTML = agents.map(a => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:${a.active ? '#F0FDF4' : '#FEF2F2'};border:1px solid ${a.active ? '#86EFAC' : '#FECACA'};border-radius:8px;">
+        <div>
+          <div style="font-weight:700;font-size:.85rem;color:#1E293B;">${a.name}</div>
+          <div style="font-size:.75rem;color:#64748B;">+${a.phone} — ${a.active ? '🟢 Activo' : '🔴 Pausado'}</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="toggleAgent(${a.idx}, ${!a.active})" style="background:${a.active ? '#FEF3C7' : '#DCFCE7'};color:${a.active ? '#92400E' : '#166534'};border:none;border-radius:6px;padding:6px 10px;font-size:.75rem;font-weight:600;cursor:pointer;">${a.active ? 'Pausar' : 'Activar'}</button>
+          <button onclick="deleteAgent(${a.idx})" style="background:#FEE2E2;color:#DC2626;border:none;border-radius:6px;padding:6px 10px;font-size:.75rem;font-weight:600;cursor:pointer;">Eliminar</button>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    list.innerHTML = '<div style="color:#DC2626;font-size:.85rem;">Error al cargar agentes.</div>';
+  }
+}
+
+async function saveAgentSettings(key, value) {
+  const pass = AGENT_MANAGER_PASS;
+  const resp = await fetch('https://pideya.app.n8n.cloud/webhook/pideya-update-settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pass, key, value })
+  });
+  return resp.ok;
+}
+
+async function getAgentsFromSheet() {
+  const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID_AGENTS + '/gviz/tq?tqx=out:csv&sheet=Settings&_=' + Date.now();
+  const resp = await fetch(url);
+  const csv = await resp.text();
+  return parseSettingsCSV(csv);
+}
+
+async function addAgent() {
+  const name = (document.getElementById('newAgentName')?.value || '').trim();
+  const phone = (document.getElementById('newAgentPhone')?.value || '').replace(/[^0-9]/g,'').trim();
+  const msg = document.getElementById('agentFormMsg');
+
+  function showMsg(text, ok) {
+    msg.style.display='block';
+    msg.style.background = ok ? '#DCFCE7' : '#FEE2E2';
+    msg.style.color = ok ? '#166534' : '#DC2626';
+    msg.style.border = '1px solid ' + (ok ? '#86EFAC' : '#FECACA');
+    msg.textContent = text;
+  }
+
+  if (!name) { showMsg('❌ Escribe el nombre del agente.', false); return; }
+  if (phone.length < 10) { showMsg('❌ Número inválido. Incluye código de país (ej: 12015551234).', false); return; }
+
+  showMsg('⏳ Guardando...', true);
+
+  try {
+    const settings = await getAgentsFromSheet();
+    let nextIdx = 1;
+    for (let i = 1; i <= 10; i++) {
+      if (!settings['agent_' + i + '_phone']) { nextIdx = i; break; }
+      if (i === 10) { showMsg('❌ Límite máximo de 10 agentes.', false); return; }
+    }
+
+    await saveAgentSettings('agent_' + nextIdx + '_name', name);
+    await saveAgentSettings('agent_' + nextIdx + '_phone', phone);
+    await saveAgentSettings('agent_' + nextIdx + '_active', 'true');
+
+    showMsg('✅ Agente agregado correctamente.', true);
+    document.getElementById('newAgentName').value = '';
+    document.getElementById('newAgentPhone').value = '';
+    setTimeout(() => loadAgents(), 1500);
+  } catch(e) {
+    showMsg('❌ Error al guardar: ' + e.message, false);
+  }
+}
+
+async function toggleAgent(idx, newActive) {
+  if (!confirm(newActive ? '¿Activar este agente?' : '¿Pausar este agente?')) return;
+  await saveAgentSettings('agent_' + idx + '_active', newActive ? 'true' : 'false');
+  setTimeout(() => loadAgents(), 1000);
+}
+
+async function deleteAgent(idx) {
+  if (!confirm('¿Eliminar este agente? Esta acción no se puede deshacer.')) return;
+  await saveAgentSettings('agent_' + idx + '_name', '');
+  await saveAgentSettings('agent_' + idx + '_phone', '');
+  await saveAgentSettings('agent_' + idx + '_active', '');
+  setTimeout(() => loadAgents(), 1000);
+}
+
+function initAgentesPage() { loadAgents(); }
+// ── END AGENTS ────────────────────────────────────────────────────────────
+
+// ── END BROADCAST ───────────────────────────────────────────────────────────
+
 </script>
 <style>
 :root{
@@ -88,7 +326,6 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
 .dot-y{background:var(--yellow);}
 .dot-o{background:var(--orange);}
 .dot-b{background:var(--blue);}
-.dot-p{background:var(--purple);}
 .sec-cnt{background:#DCFCE7;color:#166534;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:20px;}
 
 /* TWO-COLUMN */
@@ -100,7 +337,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
 .order-card:hover{border-color:#94A3B8;box-shadow:0 4px 12px rgba(0,0,0,.1);}
 .order-card.type-c{border-left:3px solid var(--green);}
 .order-card.type-z{border-left:3px solid var(--yellow);}
-.order-card.type-d{border-left:3px solid var(--blue);opacity:.65;}
+.order-card.type-d{border-left:3px solid var(--blue);opacity:.75;}
 .card-row1{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
 .card-id{font-size:.67rem;font-weight:800;color:#6B7280;letter-spacing:.8px;}
 .badge{font-size:.62rem;font-weight:800;padding:2px 7px;border-radius:20px;text-transform:uppercase;}
@@ -200,7 +437,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
 
 /* PRINT */
 @media print{
-  @page{margin:0;size:80mm auto;}
+  @page{margin:.5cm;size:auto;}
   body>*:not(.modal-overlay){display:none!important;}
   .modal-overlay{position:static!important;background:none!important;display:block!important;padding:0!important;}
   .ticket-paper{max-height:none!important;border-radius:0!important;box-shadow:none!important;border:none!important;}
@@ -214,6 +451,8 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
   #sidebar{transform:translateX(-100%);}
   #sidebar.open{transform:translateX(0);}
   #app{margin-left:0;}
+  #menuToggleBtn{display:block!important;}
+  #sidebarOverlay.open{display:block!important;}
   .page{padding:12px 14px;}
   .kpi-grid{grid-template-columns:repeat(2,1fr);}
   .card-btns{width:100%;display:flex;flex-wrap:wrap;}
@@ -229,12 +468,35 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
   .card-btns .btn-xs{font-size:.65rem;padding:8px 5px;}
 }
 
-/* HAMBURGER */
-.hamburger{display:none;background:none;border:none;cursor:pointer;padding:4px;flex-direction:column;gap:5px;}
-.hamburger span{display:block;width:22px;height:2px;background:#1E293B;border-radius:2px;}
-@media(max-width:720px){.hamburger{display:flex;}}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9;}
-.sidebar-overlay.open{display:block;}
+/* REPORT PRINT / PDF STYLES */
+#reportPrintArea{display:none;}
+@media print{
+  body>*{display:none!important;}
+  .modal-overlay.open{position:static!important;background:none!important;display:block!important;padding:0!important;}
+  .ticket-paper{max-height:none!important;border-radius:0!important;box-shadow:none!important;border:none!important;}
+  .t-x,.t-print-btn{display:none!important;}
+  #tkQR canvas{display:none!important;}
+  #tkQR img{display:block!important;width:140px!important;height:140px!important;}
+  #reportPrintArea{display:block!important;font-family:'Outfit',Arial,sans-serif;color:#111;padding:10mm 14mm;font-size:9pt;}
+  #reportPrintArea .rp-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #166534;padding-bottom:10px;margin-bottom:16px;}
+  #reportPrintArea .rp-logo{font-size:17pt;font-weight:900;color:#1a3a1a;}
+  #reportPrintArea .rp-logo span{color:#D97706;}
+  #reportPrintArea .rp-meta{text-align:right;font-size:7.5pt;color:#555;line-height:1.7;}
+  #reportPrintArea .rp-title{font-size:13pt;font-weight:800;color:#111;margin-bottom:14px;padding-bottom:6px;border-bottom:1px solid #E2E8F0;}
+  #reportPrintArea .rp-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+  #reportPrintArea .rp-kpi{border:1px solid #E2E8F0;border-radius:6px;padding:8px 10px;background:#F9FAFB;}
+  #reportPrintArea .rp-kpi-val{font-size:12pt;font-weight:900;color:#111;}
+  #reportPrintArea .rp-kpi-lbl{font-size:6.5pt;color:#6B7280;text-transform:uppercase;letter-spacing:.7px;margin-top:2px;}
+  #reportPrintArea .rp-section-title{font-size:8pt;font-weight:800;color:#555;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid #E2E8F0;padding-bottom:4px;margin-bottom:8px;margin-top:14px;}
+  #reportPrintArea table{width:100%;border-collapse:collapse;font-size:8pt;}
+  #reportPrintArea table th{text-align:left;background:#F1F5F9;color:#374151;font-weight:700;padding:5px 7px;border:1px solid #E2E8F0;}
+  #reportPrintArea table td{padding:4px 7px;border:1px solid #E2E8F0;color:#111;}
+  #reportPrintArea table tr:nth-child(even) td{background:#F9FAFB;}
+  #reportPrintArea .rp-totals-row td{font-weight:800;background:#DCFCE7!important;color:#166534;}
+  #reportPrintArea .rp-two-col{display:grid;grid-template-columns:55% 43%;gap:2%;margin-bottom:14px;}
+  #reportPrintArea .rp-footer{margin-top:16px;border-top:1px dashed #bbb;padding-top:8px;text-align:center;font-size:7pt;color:#aaa;}
+  @page{margin:0.8cm;size:A4;}
+}
 </style>
 </head>
 <body>
@@ -251,9 +513,6 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
   </div>
 </div>
 
-<!-- SIDEBAR OVERLAY (mobile) -->
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-
 <!-- SIDEBAR -->
 <div id="sidebar">
   <div class="sb-logo">
@@ -264,13 +523,14 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
     <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">📊</span>Dashboard</div>
     <div class="nav-item" onclick="showPage('cocina')"><span class="nav-icon">🍳</span>Cocina<span class="nav-badge" id="nb-cocina">0</span></div>
     <div class="nav-item" onclick="showPage('zelle')"><span class="nav-icon">💸</span>Zelle Pendiente<span class="nav-badge" id="nb-zelle" style="background:var(--yellow)">0</span></div>
+    <div class="nav-item" onclick="showPage('despachados')"><span class="nav-icon">🛵</span>Despachados<span class="nav-badge" id="nb-despachados" style="background:var(--blue)">0</span></div>
     <div class="nav-item" onclick="showPage('ordenes')"><span class="nav-icon">📋</span>Todas las Órdenes</div>
     <div class="nav-item" onclick="showPage('reportes')"><span class="nav-icon">📈</span>Reportes</div>
     <div class="nav-item" onclick="showPage('menu_mgmt')"><span class="nav-icon">📋</span>Menú</div>
     <div class="nav-item" onclick="showPage('horario')"><span class="nav-icon">🕐</span>Horario</div>
-    <div class="nav-item" onclick="showPage('ajustes')"><span class="nav-icon">⚙️</span>Ajustes</div>
     <div class="nav-item" onclick="showPage('agentes')"><span class="nav-icon">👥</span>Agentes</div>
     <div class="nav-item" onclick="showPage('broadcast')"><span class="nav-icon">📢</span>Broadcast</div>
+    <div class="nav-item" onclick="showPage('ajustes')"><span class="nav-icon">⚙️</span>Ajustes</div>
   </nav>
   <div class="sb-bottom">
     <div class="sb-connected"><div class="conn-dot"></div><span id="sbConn">0</span> clientes activos</div>
@@ -278,11 +538,14 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
 </div>
 
 <!-- MAIN APP -->
+<div id="sidebarOverlay" onclick="closeSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9;backdrop-filter:blur(2px);"></div>
 <div id="app">
   <div class="top-bar">
     <div style="display:flex;align-items:center;gap:10px;">
-      <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
-        <span></span><span></span><span></span>
+      <button id="menuToggleBtn" onclick="toggleSidebar()" style="display:none;background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:8px;transition:background .15s;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='none'">
+        <div style="width:22px;height:2px;background:#1E293B;margin:4px 0;border-radius:2px;"></div>
+        <div style="width:22px;height:2px;background:#1E293B;margin:4px 0;border-radius:2px;"></div>
+        <div style="width:22px;height:2px;background:#1E293B;margin:4px 0;border-radius:2px;"></div>
       </button>
       <div class="page-title" id="pageTitle">📊 Dashboard</div>
     </div>
@@ -306,6 +569,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
       <div class="kpi p"><div class="kpi-icon">📦</div><div class="kpi-val" id="kpiTotal">—</div><div class="kpi-lbl">Órdenes totales</div></div>
       <div class="kpi g"><div class="kpi-icon">💳</div><div class="kpi-val" id="kpiFees">—</div><div class="kpi-lbl">Comisión Stripe</div></div>
       <div class="kpi b"><div class="kpi-icon">🛵</div><div class="kpi-val" id="kpiEnviadas">—</div><div class="kpi-lbl">Enviadas hoy</div></div>
+      <div class="kpi g"><div class="kpi-icon">🙏</div><div class="kpi-val" id="kpiTips">—</div><div class="kpi-lbl">Propinas hoy</div></div>
     </div>
     <div class="chart-box">
       <div class="chart-title">Ingresos — últimos 7 días</div>
@@ -328,7 +592,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
     <div class="sec-head">
       <div class="sec-title"><div class="sec-dot dot-g"></div>Órdenes Confirmadas — Preparar ahora<span class="sec-cnt" id="cnt-cocina">0</span></div>
     </div>
-    <p style="font-size:.78rem;color:#4B5563;margin-bottom:16px;">🖨️ Haz clic en <strong style="color:#166534">Imprimir Ticket</strong> para imprimir el recibo con QR. Solo se muestran órdenes de <strong>hoy</strong> con pago confirmado.</p>
+    <p style="font-size:.78rem;color:#4B5563;margin-bottom:16px;">🖨️ Haz clic en <strong style="color:#166534">Imprimir Ticket</strong> para imprimir el recibo con QR. Solo se muestran órdenes de <strong>hoy</strong> con pago confirmado y <strong>pendientes de envío</strong>. Las ya enviadas aparecen en 🛵 Despachados.</p>
     <div id="list-cocina"><div class="loading-state"><div class="spin"></div><p>Cargando...</p></div></div>
   </div>
 
@@ -341,6 +605,15 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
     <div id="list-zelle"><div class="loading-state"><div class="spin"></div><p>Cargando...</p></div></div>
   </div>
 
+  <!-- DESPACHADOS -->
+  <div class="page" id="page-despachados">
+    <div class="sec-head">
+      <div class="sec-title"><div class="sec-dot dot-b"></div>Pedidos Despachados<span class="sec-cnt" id="cnt-despachados" style="background:#DBEAFE;color:#1E40AF">0</span></div>
+    </div>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:16px;">Órdenes ya enviadas al cliente hoy. Historial de despachos del día.</p>
+    <div id="list-despachados"><div class="loading-state"><div class="spin"></div><p>Cargando...</p></div></div>
+  </div>
+
   <!-- TODAS LAS ÓRDENES -->
   <div class="page" id="page-ordenes">
     <div class="filter-bar">
@@ -349,6 +622,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
         <option value="">Todos los estados</option>
         <option value="Confirmed">✅ Confirmadas</option>
         <option value="Zelle-Pending">💸 Zelle Pendiente</option>
+        <option value="Enviado">🛵 Enviadas</option>
       </select>
       <select id="dateFilter" onchange="filterOrders()">
         <option value="today">Hoy</option>
@@ -361,20 +635,66 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
 
   <!-- REPORTES -->
   <div class="page" id="page-reportes">
-    <div class="kpi-grid" style="margin-bottom:20px">
-      <div class="kpi g"><div class="kpi-icon">💰</div><div class="kpi-val" id="rpRevHoy">—</div><div class="kpi-lbl">Ingresos hoy</div></div>
-      <div class="kpi o"><div class="kpi-icon">📅</div><div class="kpi-val" id="rpRevSem">—</div><div class="kpi-lbl">Esta semana</div></div>
-      <div class="kpi g"><div class="kpi-icon">📦</div><div class="kpi-val" id="rpRevAll">—</div><div class="kpi-lbl">Total histórico</div></div>
-      <div class="kpi p"><div class="kpi-icon">💳</div><div class="kpi-val" id="rpStripe">—</div><div class="kpi-lbl">Comisión Stripe</div></div>
-      <div class="kpi b"><div class="kpi-icon">💼</div><div class="kpi-val" id="rpGestion">—</div><div class="kpi-lbl">Comisión Gestión</div></div>
+    <div style="background:#FFF;border:1px solid #E2E8F0;border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <div style="font-size:.8rem;font-weight:700;color:#374151;white-space:nowrap;">📅 Período:</div>
+      <select id="rpRange" onchange="onRangeChange()" style="background:#F8FAFC;border:1px solid #CBD5E1;color:#1E293B;border-radius:8px;padding:7px 12px;font-family:Outfit,sans-serif;font-size:.82rem;outline:none;">
+        <option value="today">Hoy</option>
+        <option value="yesterday">Ayer</option>
+        <option value="week" selected>Esta semana</option>
+        <option value="month">Este mes</option>
+        <option value="lastmonth">Mes anterior</option>
+        <option value="custom">Personalizado</option>
+      </select>
+      <div id="rpCustomDates" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input type="date" id="rpFrom" style="background:#F8FAFC;border:1px solid #CBD5E1;color:#1E293B;border-radius:8px;padding:7px 10px;font-family:Outfit,sans-serif;font-size:.82rem;outline:none;">
+        <span style="color:#64748B;font-size:.8rem;">→</span>
+        <input type="date" id="rpTo" style="background:#F8FAFC;border:1px solid #CBD5E1;color:#1E293B;border-radius:8px;padding:7px 10px;font-family:Outfit,sans-serif;font-size:.82rem;outline:none;">
+        <button onclick="renderReports()" style="background:#166534;color:white;border:none;border-radius:8px;padding:7px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;">Aplicar</button>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
+        <button onclick="printReport()" style="background:#1E293B;color:#fff;border:none;border-radius:9px;padding:8px 16px;font-family:Outfit,sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#1E293B'">🖨️ Imprimir Reporte</button>
+        <button onclick="exportReportPDF()" style="background:#166534;color:#fff;border:none;border-radius:9px;padding:8px 16px;font-family:Outfit,sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;" onmouseover="this.style.background='#15803D'" onmouseout="this.style.background='#166634'">📄 Exportar PDF</button>
+      </div>
+    </div>
+    <div class="kpi-grid" style="margin-bottom:16px">
+      <div class="kpi g"><div class="kpi-icon">💰</div><div class="kpi-val" id="rpRevPeriod">—</div><div class="kpi-lbl">Ingresos período</div></div>
+      <div class="kpi o"><div class="kpi-icon">📦</div><div class="kpi-val" id="rpOrdersPeriod">—</div><div class="kpi-lbl">Órdenes período</div></div>
+      <div class="kpi b"><div class="kpi-icon">💸</div><div class="kpi-val" id="rpZellePeriod">—</div><div class="kpi-lbl">Ingresos Zelle</div></div>
+      <div class="kpi g"><div class="kpi-icon">💳</div><div class="kpi-val" id="rpStripePeriod">—</div><div class="kpi-lbl">Ingresos Stripe</div></div>
+      <div class="kpi p"><div class="kpi-icon">🏛️</div><div class="kpi-val" id="rpTaxPeriod">—</div><div class="kpi-lbl">Tax cobrado</div></div>
+      <div class="kpi g"><div class="kpi-icon">💼</div><div class="kpi-val" id="rpGestionPeriod">—</div><div class="kpi-lbl">Com. Gestión</div></div>
+      <div class="kpi p"><div class="kpi-icon">💳</div><div class="kpi-val" id="rpStripeFeePeriod">—</div><div class="kpi-lbl">Com. Stripe</div></div>
+      <div class="kpi b"><div class="kpi-icon">📈</div><div class="kpi-val" id="rpAvgOrder">—</div><div class="kpi-lbl">Ticket promedio</div></div>
+      <div class="kpi g"><div class="kpi-icon">🙏</div><div class="kpi-val" id="rpTipPeriod">—</div><div class="kpi-lbl">Propinas período</div></div>
     </div>
     <div class="chart-box">
-      <div class="chart-title">Ingresos por día — últimos 14 días</div>
+      <div class="chart-title" id="rpChartTitle">Ingresos por día</div>
       <div class="bar-chart" id="reportChart" style="height:140px"></div>
     </div>
+    <div class="two-col" style="margin-bottom:16px;">
+      <div class="chart-box" style="margin-bottom:0">
+        <div class="chart-title">Desglose del período</div>
+        <table class="report-table"><thead><tr><th>Concepto</th><th>Cant.</th><th>Monto</th></tr></thead><tbody id="reportTbody"></tbody></table>
+      </div>
+      <div class="chart-box" style="margin-bottom:0">
+        <div class="chart-title">🏆 Top platos más vendidos</div>
+        <div id="rpTopItems"><div class="empty" style="padding:16px"><em>📊</em>Sin datos</div></div>
+      </div>
+    </div>
     <div class="chart-box">
-      <div class="chart-title">Resumen del día</div>
-      <table class="report-table"><thead><tr><th>Concepto</th><th>Cantidad</th><th>Monto</th></tr></thead><tbody id="reportTbody"></tbody></table>
+      <div class="chart-title">Ventas por día — detalle</div>
+      <div style="overflow-x:auto;">
+        <table class="report-table" id="rpDailyTable">
+          <thead><tr><th>Fecha</th><th>Órdenes</th><th>Subtotal</th><th>Tax</th><th>Gestión</th><th>Propinas</th><th>Stripe Fee</th><th>Total</th></tr></thead>
+          <tbody id="rpDailyTbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi g"><div class="kpi-icon">📦</div><div class="kpi-val" id="rpRevAll">—</div><div class="kpi-lbl">Total histórico</div></div>
+      <div class="kpi o"><div class="kpi-icon">🧾</div><div class="kpi-val" id="rpOrdersAll">—</div><div class="kpi-lbl">Órdenes totales</div></div>
+      <div class="kpi p"><div class="kpi-icon">💳</div><div class="kpi-val" id="rpStripeAll">—</div><div class="kpi-lbl">Com. Stripe total</div></div>
+      <div class="kpi b"><div class="kpi-icon">💼</div><div class="kpi-val" id="rpGestionAll">—</div><div class="kpi-lbl">Com. Gestión total</div></div>
     </div>
   </div>
 
@@ -424,17 +744,6 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
             <option value="300000">Cada 5 minutos</option>
           </select>
         </div>
-      </div>
-    </div>
-
-    <div class="setting-group">
-      <h3>💸 Métodos de Pago</h3>
-      <div class="setting-row">
-        <div><div class="setting-label">Pago con Zelle</div><div class="setting-desc">Permitir que clientes paguen con Zelle</div></div>
-        <div class="setting-control"><select id="sZelleEnabled"><option value="yes">Activado</option><option value="no">Desactivado</option></select></div>
-      </div>
-      <div style="margin-top:10px;background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;padding:10px 12px;font-size:.72rem;color:#92400E;">
-        💡 Para activar/desactivar Zelle en el bot, actualiza el setting en n8n o usa el toggle aquí para registrar la preferencia.
       </div>
     </div>
 
@@ -504,50 +813,85 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
     </div>
 
     <div class="setting-group">
+      <h3>💸 Métodos de Pago</h3>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Pago por Zelle</div>
+          <div class="setting-desc">Activar o desactivar Zelle como opción de pago en el bot</div>
+        </div>
+        <div class="setting-control">
+          <select id="sZelleEnabled">
+            <option value="true">✅ Activado</option>
+            <option value="false">🔴 Desactivado</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;">
+        <button onclick="saveZelleSetting()" id="zelleToggleBtn"
+          style="flex:1;background:#166534;color:white;border:none;border-radius:9px;padding:11px;font-family:Outfit,sans-serif;font-size:.88rem;font-weight:800;cursor:pointer;">
+          💾 Guardar Configuración de Pago
+        </button>
+      </div>
+      <div id="zelleToggleMsg" style="margin-top:8px;font-size:.78rem;text-align:center;display:none;"></div>
+    </div>
+
+    <div class="setting-group">
       <h3>ℹ️ Información del Sistema</h3>
       <div class="setting-row"><div class="setting-label">Restaurante</div><div style="font-size:.82rem;color:var(--muted)">El Conuco Restaurante</div></div>
       <div class="setting-row"><div class="setting-label">Dirección</div><div style="font-size:.82rem;color:var(--muted)">715 Summit Ave, Union City, NJ 07087</div></div>
       <div class="setting-row"><div class="setting-label">WhatsApp Bot</div><div style="font-size:.82rem;color:var(--green)">+1 (201) 772-7540</div></div>
-      <div class="setting-row"><div class="setting-label">Panel versión</div><div style="font-size:.82rem;color:var(--muted)">PIDEYA v3.0</div></div>
+      <div class="setting-row"><div class="setting-label">Panel versión</div><div style="font-size:.82rem;color:var(--muted)">PIDEYA v3.2</div></div>
     </div>
   </div>
 
   <!-- HORARIO -->
   <div class="page" id="page-horario">
     <div class="sec-head"><div class="sec-title"><div class="sec-dot dot-g"></div>Horario del Restaurante</div></div>
-    <p style="font-size:.78rem;color:#4B5563;margin-bottom:20px;">Edita el horario, genera el código y pégalo en n8n.</p>
-    <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:12px;padding:16px;margin-bottom:16px;">
-      <div style="font-weight:800;font-size:.88rem;color:#92400E;margin-bottom:8px;">⚡ Acciones Rápidas</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button onclick="applyPreset('open24')" style="background:#166534;color:white;border:none;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:120px;">✅ Forzar Abierto</button>
-        <button onclick="applyPreset('normal')" style="background:#1E293B;color:white;border:none;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:120px;">🕐 Horario Normal</button>
-        <button onclick="applyPreset('extend1h')" style="background:#0369A1;color:white;border:none;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:120px;">+1 hora extra</button>
-        <button onclick="applyPreset('closed')" style="background:#DC2626;color:white;border:none;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:120px;">🔴 Cerrar Bot</button>
+    <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:2px solid #86EFAC;border-radius:16px;padding:20px;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <div style="background:#166534;color:#fff;border-radius:10px;padding:6px 14px;font-size:.82rem;font-weight:800;letter-spacing:.5px;">📅 HOY</div>
+        <div id="todayDayName" style="font-size:1.1rem;font-weight:900;color:#166534;"></div>
+        <div id="todayCurrentHours" style="font-size:.8rem;color:#4B5563;background:#fff;border:1px solid #BBF7D0;border-radius:8px;padding:5px 12px;"></div>
       </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <label style="font-size:.8rem;font-weight:700;color:#374151;white-space:nowrap;">🌅 Abre:</label>
+          <select id="todayOpen" style="background:#fff;border:2px solid #86EFAC;color:#111827;border-radius:9px;padding:9px 11px;font-family:Outfit,sans-serif;font-size:.92rem;font-weight:700;outline:none;cursor:pointer;min-width:90px;"></select>
+        </div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <label style="font-size:.8rem;font-weight:700;color:#374151;white-space:nowrap;">🌙 Cierra:</label>
+          <select id="todayClose" style="background:#fff;border:2px solid #86EFAC;color:#111827;border-radius:9px;padding:9px 11px;font-family:Outfit,sans-serif;font-size:.92rem;font-weight:700;outline:none;cursor:pointer;min-width:90px;"></select>
+          <select id="todayCloseMin" style="background:#fff;border:2px solid #86EFAC;color:#111827;border-radius:9px;padding:9px 9px;font-family:Outfit,sans-serif;font-size:.88rem;font-weight:700;outline:none;cursor:pointer;">
+            <option value="0">:00</option><option value="15">:15</option><option value="30">:30</option><option value="40">:40</option><option value="45">:45</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button onclick="saveTodayHours()" id="saveTodayBtn" style="flex:2;min-width:170px;background:#166534;color:white;border:none;border-radius:11px;padding:13px;font-family:Outfit,sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='#15803D'" onmouseout="this.style.background='#166534'">💾 Guardar horario de hoy</button>
+        <button onclick="closeTodayBot()" style="flex:1;min-width:130px;background:#DC2626;color:white;border:none;border-radius:11px;padding:13px;font-family:Outfit,sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='#B91C1C'" onmouseout="this.style.background='#DC2626'">🔴 Cerrar bot hoy</button>
+      </div>
+      <div id="saveTodayMsg" style="display:none;margin-top:12px;border-radius:9px;padding:10px 14px;font-size:.82rem;font-weight:600;text-align:center;"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+      <div style="flex:1;height:1px;background:#E2E8F0;"></div>
+      <div style="font-size:.72rem;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;">⚙️ Horario completo semanal</div>
+      <div style="flex:1;height:1px;background:#E2E8F0;"></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+      <button onclick="applyPreset('normal')" style="background:#F1F5F9;color:#374151;border:1px solid #E2E8F0;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:110px;">↩ Horario Normal</button>
+      <button onclick="applyPreset('open24')" style="background:#DCFCE7;color:#166534;border:1px solid #86EFAC;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:110px;">✅ Forzar Abierto</button>
+      <button onclick="applyPreset('extend1h')" style="background:#DBEAFE;color:#1E40AF;border:1px solid #93C5FD;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:110px;">+1 hora extra</button>
+      <button onclick="applyPreset('closed')" style="background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex:1;min-width:110px;">🔴 Cerrar todo</button>
     </div>
     <div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;margin-bottom:16px;">
       <div style="background:#F8FAFC;padding:12px 16px;border-bottom:1px solid #E2E8F0;font-weight:800;font-size:.82rem;color:#374151;text-transform:uppercase;letter-spacing:.5px;">📅 Editar Horario por Día</div>
       <div style="padding:16px;display:flex;flex-direction:column;gap:14px;" id="hoursEditor"></div>
       <div style="padding:12px 16px;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
         <button onclick="applyPreset('normal')" style="background:#F1F5F9;color:#374151;border:none;border-radius:8px;padding:8px 14px;font-family:Outfit,sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;">↩ Restablecer</button>
-        <button onclick="generateAndShow()" style="background:#166534;color:white;border:none;border-radius:8px;padding:9px 20px;font-family:Outfit,sans-serif;font-size:.85rem;font-weight:800;cursor:pointer;">📋 Generar código para n8n</button>
+        <button onclick="saveAllHoursToN8n()" id="saveHoursBtn" style="background:#166534;color:white;border:none;border-radius:8px;padding:9px 20px;font-family:Outfit,sans-serif;font-size:.85rem;font-weight:800;cursor:pointer;">💾 Guardar semana completa</button>
       </div>
     </div>
-    <div id="generatedCodeBox" style="display:none;background:#1E293B;border-radius:12px;padding:16px;margin-bottom:16px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <div style="font-weight:800;font-size:.85rem;color:#94A3B8;">📋 Código generado</div>
-        <button onclick="copyHoursCode()" id="copyHoursBtn" style="background:#166534;color:white;border:none;border-radius:7px;padding:6px 14px;font-family:Outfit,sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;">📋 Copiar</button>
-      </div>
-      <textarea id="generatedHoursCode" readonly style="width:100%;background:#0F172A;color:#4ADE80;border:1px solid #334155;border-radius:8px;padding:10px;font-family:monospace;font-size:.72rem;line-height:1.5;resize:none;height:80px;outline:none;"></textarea>
-    </div>
-    <div id="hoursInstructions" style="display:none;background:#EEF2FF;border:1px solid #C7D2FE;border-radius:10px;padding:14px 16px;font-size:.78rem;color:#1E293B;line-height:1.8;">
-      <div style="font-weight:800;margin-bottom:8px;color:#3730A3;">📌 Cómo aplicar:</div>
-      <div>1️⃣ Clic en <strong>📋 Copiar</strong></div>
-      <div>2️⃣ Ve a <strong>n8n → Build Response</strong></div>
-      <div>3️⃣ Busca <code style="background:#E0E7FF;padding:1px 4px;border-radius:3px;">const RESTAURANT=</code></div>
-      <div>4️⃣ Reemplaza solo <code style="background:#E0E7FF;padding:1px 4px;border-radius:3px;">hours:{...}</code></div>
-      <div>5️⃣ Guarda y publica ✅</div>
-    </div>
+    <div id="saveWeekMsg" style="display:none;border-radius:10px;padding:12px 16px;font-size:.82rem;font-weight:600;text-align:center;margin-bottom:12px;"></div>
   </div>
 
   <!-- MENÚ -->
@@ -562,8 +906,9 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
       <div class="loading-state"><div class="spin"></div><p>Cargando menú...</p></div>
     </div>
   </div>
+</div>
 
-  <!-- AGENTES -->
+  <!-- BROADCAST -->
   <div class="page" id="page-agentes">
     <div class="sec-head">
       <div class="sec-title"><div class="sec-dot dot-b"></div>Gestión de Agentes</div>
@@ -627,7 +972,9 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
       </div>
     </div>
   </div>
-</div>
+
+<!-- REPORT PRINT AREA -->
+<div id="reportPrintArea"></div>
 
 <!-- EDIT MODAL -->
 <div class="modal-overlay" id="editModal" onclick="if(event.target===this)closeEdit()">
@@ -671,15 +1018,14 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
     <div class="t-row"><span>Subtotal</span><strong id="tkSub"></strong></div>
     <div class="t-row"><span>Tax NJ (6.625%)</span><strong id="tkTax"></strong></div>
     <div class="t-row"><span>Gestión</span><strong id="tkGes"></strong></div>
+    <div class="t-row" id="tkTipRow" style="display:none"><span>🙏 Propina repartidor</span><strong id="tkTip" style="color:#166534"></strong></div>
     <div class="t-row" id="tkFeeRow" style="display:none"><span>Cargo Stripe (3.5%)</span><strong id="tkFee"></strong></div>
     <div class="t-total"><span>TOTAL</span><span id="tkTot"></span></div>
     <hr class="t-hr">
     <div id="tkQR"></div>
     <div class="t-qr-note">📍 Escanea para navegar al destino de entrega</div>
     <div class="t-footer">PIDEYA LLC · El Conuco Restaurante<br>715 Summit Ave, Union City, NJ · +1 (201) 772-7540<br>¡Gracias por usar PIDEYA! 🍽️</div>
-    <button class="t-print-btn" onclick="printESCPOS()" id="btPrintBtn">🖨️ Imprimir via Bluetooth (ESC/POS)</button>
-    <button class="t-print-btn" onclick="window.print()" style="background:#555;margin-top:6px;">🖨️ Imprimir via Navegador</button>
-    <div id="btStatus" style="text-align:center;font-size:.72rem;color:#666;margin-top:6px;"></div>
+    <button class="t-print-btn" onclick="window.print()">🖨️ Imprimir Ticket con QR</button>
   </div>
 </div>
 
@@ -692,6 +1038,10 @@ const CSV_MENU=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=o
 const N8N_EDIT_ORDER='https://pideya.app.n8n.cloud/webhook/pideya-edit';
 const N8N_MENU_TOGGLE='https://pideya.app.n8n.cloud/webhook/pideya-menu-toggle';
 const N8N_DISPATCH='https://pideya.app.n8n.cloud/webhook/pideya-dispatch';
+const N8N_UPDATE_SETTINGS='https://pideya.app.n8n.cloud/webhook/pideya-update-settings';
+const N8N_UPDATE_HOURS='https://pideya.app.n8n.cloud/webhook/pideya-update-hours';
+const N8N_DELETE_ORDER='https://pideya.app.n8n.cloud/webhook/pideya-delete';
+const MANAGER_PASS='conuco2024';
 
 function lsGet(k,def){try{const v=localStorage.getItem(k);return v!==null?v:def;}catch(e){return def;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
@@ -708,6 +1058,7 @@ function toDateStr(ts){
 }
 
 let allOrders=[],orderMap={},audioCtx=null,knownIds=new Set(),firstLoad=true,refreshTimer=null,currentPage='dashboard',menuData=[];
+const _dispatchedLocally=new Set(JSON.parse(lsGet('py_dispatched','[]')));
 
 function doLogin(){
   if(document.getElementById('passIn').value===PASS){
@@ -717,37 +1068,23 @@ function doLogin(){
   }else{document.getElementById('loginErr').style.display='block';}
 }
 
-// Sidebar mobile toggle
-function toggleSidebar(){
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('open');
-}
-function closeSidebar(){
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('open');
-}
+const pageTitles={dashboard:'📊 Dashboard',cocina:'🍳 Cocina — Preparar ahora',zelle:'💸 Zelle Pendiente',despachados:'🛵 Pedidos Despachados',ordenes:'📋 Todas las Órdenes',reportes:'📈 Reportes',menu_mgmt:'📋 Gestión del Menú',horario:'🕐 Horario',ajustes:'⚙️ Ajustes',agentes:'👥 Gestión de Agentes',broadcast:'📢 Broadcast'};
 
-const PAGE_KEYS=['dashboard','cocina','zelle','ordenes','reportes','menu_mgmt','horario','ajustes','agentes','broadcast'];
-const pageTitles={dashboard:'📊 Dashboard',cocina:'🍳 Cocina — Preparar ahora',zelle:'💸 Zelle Pendiente',ordenes:'📋 Todas las Órdenes',reportes:'📈 Reportes',menu_mgmt:'📋 Gestión del Menú',horario:'🕐 Horario',ajustes:'⚙️ Ajustes',agentes:'👥 Gestión de Agentes',broadcast:'📢 Broadcast'};
-
-function showPage(id){
+function showPage(id){closeSidebar();
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const pg=document.getElementById('page-'+id);if(pg)pg.classList.add('active');
-  const idx=PAGE_KEYS.indexOf(id);
-  if(idx>=0)document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
-  document.getElementById('pageTitle').textContent=pageTitles[id]||id;
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item')[['dashboard','cocina','zelle','despachados','ordenes','reportes','menu_mgmt','horario','ajustes','agentes','broadcast'].indexOf(id)]?.classList.add('active');
+  document.getElementById('pageTitle').textContent=pageTitles[id];
   currentPage=id;
-  closeSidebar();
   if(id==='ordenes')filterOrders();
   if(id==='reportes')renderReports();
   if(id==='menu_mgmt')loadMenuData();
   if(id==='horario')initHoursPage();
-  if(id==='agentes')initAgentesPage();
   if(id==='broadcast')initBroadcastPage();
+  if(id==='agentes')initAgentesPage();
 }
 
-// ── DELIVERY RADIUS ZIP GENERATOR ──────────────────────────────────────────
 const ZIP_BY_RADIUS={
   3:['07030','07031','07086','07087','07093','07097','07302','07303','07306','07307','07308','07309','07310','07311','07395','07399'],
   5:['07030','07031','07047','07086','07087','07093','07094','07097','07302','07303','07304','07305','07306','07307','07308','07309','07310','07311','07395','07399'],
@@ -781,20 +1118,119 @@ function copyZipCode(){
   const ta=document.getElementById('zipCodeTA');if(!ta)return;
   navigator.clipboard.writeText(ta.value).then(()=>{
     const btn=document.getElementById('copyZipBtn');
-    if(btn){btn.textContent='✅ Copiado!';btn.style.background='#15803D';setTimeout(()=>{btn.textContent='📋 Copiar';btn.style.background='#166534';},2000);}
+    if(btn){btn.textContent='✅ Copiado!';btn.style.background='#15803D';setTimeout(()=>{btn.textContent='📋 Copiar';btn.style.background='#166634';},2000);}
   }).catch(()=>{ta.select();document.execCommand('copy');});
 }
 
-// ── HORARIO ────────────────────────────────────────────────────────────────
-const DEFAULT_HOURS={0:{open:9,close:21,closeMin:0,label:'Domingo'},1:{open:9,close:21,closeMin:40,label:'Lunes'},2:{open:9,close:21,closeMin:40,label:'Martes'},3:{open:9,close:21,closeMin:40,label:'Mi\u00e9rcoles'},4:{open:9,close:21,closeMin:40,label:'Jueves'},5:{open:9,close:21,closeMin:40,label:'Viernes'},6:{open:9,close:21,closeMin:40,label:'S\u00e1bado'}};
+const DAY_NAMES=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const DEFAULT_HOURS={
+  0:{open:9,close:21,closeMin:0,label:'Domingo'},
+  1:{open:9,close:21,closeMin:40,label:'Lunes'},
+  2:{open:9,close:21,closeMin:40,label:'Martes'},
+  3:{open:9,close:21,closeMin:40,label:'Miércoles'},
+  4:{open:9,close:21,closeMin:40,label:'Jueves'},
+  5:{open:9,close:21,closeMin:40,label:'Viernes'},
+  6:{open:9,close:21,closeMin:40,label:'Sábado'}
+};
 let currentHours=JSON.parse(JSON.stringify(DEFAULT_HOURS));
 
+function buildHourOptions(selectId,selectedVal){
+  const sel=document.getElementById(selectId);if(!sel)return;sel.innerHTML='';
+  for(let h=0;h<24;h++){const display=h===0?'12:00 am':h<12?h+':00 am':h===12?'12:00 pm':(h-12)+':00 pm';const opt=document.createElement('option');opt.value=h;opt.textContent=display;if(h===selectedVal)opt.selected=true;sel.appendChild(opt);}
+}
+
+async function initHoursPage(){
+  // Load actual saved hours from Settings sheet first
+  currentHours=JSON.parse(JSON.stringify(DEFAULT_HOURS));
+  try{
+    const resp=await fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet=Settings&_='+Date.now());
+    const text=await resp.text();
+    if(text&&text.length>2){
+      const rows=text.split('\n');
+      for(let i=1;i<rows.length;i++){
+        const row=rows[i].trim();if(!row)continue;
+        const parts=row.match(/^\"([^\"]*)\"[,\t]\"([^\"]*)\"/) || row.split(',');
+        const k=parts[1]?(parts[1].replace(/^\"|\"$/g,'').trim()):(parts[0]||'').trim();
+        const v=parts[2]?(parts[2].replace(/^\"|\"$/g,'').trim()):(parts[1]||'').trim();
+        if(!k||!k.startsWith('hours_'))continue;
+        const kp=k.split('_');
+        const d=parseInt(kp[1]);const type=kp[2];
+        const tp=v.split(':');const h=parseInt(tp[0]);const m=parseInt(tp[1]||'0');
+        if(!isNaN(d)&&!isNaN(h)){
+          if(type==='open'){currentHours[d].open=h;currentHours[d].openMin=m;}
+          else if(type==='close'){currentHours[d].close=h;currentHours[d].closeMin=m;}
+        }
+      }
+    }
+  }catch(e){}
+  const todayIdx=new Date().getDay();const todayH=currentHours[todayIdx];
+  const dayEl=document.getElementById('todayDayName');if(dayEl)dayEl.textContent=DAY_NAMES[todayIdx];
+  const curHoursEl=document.getElementById('todayCurrentHours');
+  if(curHoursEl)curHoursEl.textContent='Horario actual: '+fmt12(todayH.open,todayH.openMin||0)+' – '+fmt12(todayH.close,todayH.closeMin);
+  buildHourOptions('todayOpen',todayH.open);buildHourOptions('todayClose',todayH.close);
+  const minSel=document.getElementById('todayCloseMin');if(minSel)minSel.value=todayH.closeMin;
+  const tm=document.getElementById('saveTodayMsg');if(tm)tm.style.display='none';
+  const wm=document.getElementById('saveWeekMsg');if(wm)wm.style.display='none';
+  renderHoursEditor();
+}
+
+function fmt12(h,m){
+  const suffix=h<12?'am':'pm';const display=h===0?'12':h<=12?''+h:''+(h-12);const mm=m>0?':'+String(m).padStart(2,'0'):'';return display+mm+' '+suffix;
+}
+
+async function saveTodayHours(){
+  const todayIdx=new Date().getDay();
+  const openVal=parseInt(document.getElementById('todayOpen')?.value||9);
+  const closeVal=parseInt(document.getElementById('todayClose')?.value||21);
+  const closeMinVal=parseInt(document.getElementById('todayCloseMin')?.value||0);
+  currentHours[todayIdx].open=openVal;currentHours[todayIdx].close=closeVal;currentHours[todayIdx].closeMin=closeMinVal;
+  const btn=document.getElementById('saveTodayBtn');const msg=document.getElementById('saveTodayMsg');
+  if(btn){btn.textContent='⏳ Guardando...';btn.disabled=true;}
+  try{
+    const r=await fetch(N8N_UPDATE_HOURS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hours:currentHours,changedDay:todayIdx})});
+    if(r.ok){
+      const openStr=fmt12(openVal,0);const closeStr=fmt12(closeVal,closeMinVal);
+      if(btn){btn.textContent='✅ Guardado!';btn.style.background='#15803D';}
+      if(msg){msg.style.display='block';msg.style.background='#DCFCE7';msg.style.color='#166534';msg.style.border='1px solid #86EFAC';msg.textContent='✅ Horario de hoy actualizado: '+openStr+' – '+closeStr+'. El bot ya usa el nuevo horario.';}
+      const curHoursEl=document.getElementById('todayCurrentHours');if(curHoursEl)curHoursEl.textContent='Horario actual: '+openStr+' – '+closeStr;
+      setTimeout(()=>{if(btn){btn.textContent='💾 Guardar horario de hoy';btn.style.background='#166534';btn.disabled=false;}setTimeout(()=>{if(msg)msg.style.display='none';},4000);},2000);
+    }else throw new Error('Error '+r.status);
+  }catch(e){
+    if(btn){btn.textContent='❌ Error — reintentar';btn.style.background='#DC2626';btn.disabled=false;}
+    if(msg){msg.style.display='block';msg.style.background='#FEE2E2';msg.style.color='#DC2626';msg.style.border='1px solid #FCA5A5';msg.textContent='❌ Error al guardar: '+e.message;}
+    setTimeout(()=>{if(btn){btn.textContent='💾 Guardar horario de hoy';btn.style.background='#166534';}},3000);
+  }
+}
+
+async function closeTodayBot(){
+  if(!confirm('¿Cerrar el bot para hoy? Los clientes verán un mensaje de cerrado.'))return;
+  const todayIdx=new Date().getDay();
+  currentHours[todayIdx].open=0;currentHours[todayIdx].close=0;currentHours[todayIdx].closeMin=0;
+  const msg=document.getElementById('saveTodayMsg');
+  try{
+    const r=await fetch(N8N_UPDATE_HOURS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hours:currentHours,changedDay:todayIdx,closed:true})});
+    if(r.ok){
+      if(msg){msg.style.display='block';msg.style.background='#FEE2E2';msg.style.color='#991B1B';msg.style.border='1px solid #FCA5A5';msg.textContent='🔴 Bot cerrado para hoy. Los clientes recibirán mensaje de restaurante cerrado.';}
+      const curHoursEl=document.getElementById('todayCurrentHours');if(curHoursEl)curHoursEl.textContent='🔴 CERRADO HOY';
+    }else throw new Error('Error '+r.status);
+  }catch(e){
+    if(msg){msg.style.display='block';msg.style.background='#FEE2E2';msg.style.color='#DC2626';msg.style.border='1px solid #FCA5A5';msg.textContent='❌ Error: '+e.message;}
+  }
+}
+
+// ── UPDATED: applyPreset now auto-saves to n8n on every preset click ──
 function applyPreset(type){
   if(type==='open24'){for(let d=0;d<7;d++)currentHours[d]={...currentHours[d],open:0,close:23,closeMin:59};}
   else if(type==='normal'){currentHours=JSON.parse(JSON.stringify(DEFAULT_HOURS));}
   else if(type==='extend1h'){for(let d=0;d<7;d++){let c=currentHours[d].close+1,cm=currentHours[d].closeMin;if(c>=24){c=23;cm=59;}currentHours[d]={...currentHours[d],close:c,closeMin:cm};}}
   else if(type==='closed'){for(let d=0;d<7;d++)currentHours[d]={...currentHours[d],open:0,close:0,closeMin:0};}
-  renderHoursEditor();generateAndShow();
+  renderHoursEditor();
+  const _tid=new Date().getDay();const _th=currentHours[_tid];
+  buildHourOptions('todayOpen',_th.open);buildHourOptions('todayClose',_th.close);
+  const _ms=document.getElementById('todayCloseMin');if(_ms)_ms.value=_th.closeMin;
+  const _ce=document.getElementById('todayCurrentHours');
+  if(_ce)_ce.textContent='Horario actual: '+fmt12(_th.open,_th.openMin||0)+' – '+fmt12(_th.close,_th.closeMin);
+  saveAllHoursToN8n();
 }
 
 function renderHoursEditor(){
@@ -805,54 +1241,54 @@ function renderHoursEditor(){
     +'<label style="font-size:.72rem;color:#6B7280;">Abre:</label>'
     +'<select id="open_'+d+'" onchange="onHourChange()" style="background:#F9FAFB;border:1px solid #E2E8F0;color:#111827;border-radius:6px;padding:5px 7px;font-family:Outfit,sans-serif;font-size:.8rem;">'
     +Array.from({length:24},(_,i)=>'<option value="'+i+'"'+(h.open===i?' selected':'')+'>'+String(i).padStart(2,'0')+':00</option>').join('')
-    +'</select>'
-    +'<label style="font-size:.72rem;color:#6B7280;">Cierra:</label>'
+    +'</select><label style="font-size:.72rem;color:#6B7280;">Cierra:</label>'
     +'<select id="close_'+d+'" onchange="onHourChange()" style="background:#F9FAFB;border:1px solid #E2E8F0;color:#111827;border-radius:6px;padding:5px 7px;font-family:Outfit,sans-serif;font-size:.8rem;">'
     +Array.from({length:24},(_,i)=>'<option value="'+i+'"'+(h.close===i?' selected':'')+'>'+String(i).padStart(2,'0')+':00</option>').join('')
     +'</select>'
     +'<select id="closemin_'+d+'" onchange="onHourChange()" style="background:#F9FAFB;border:1px solid #E2E8F0;color:#111827;border-radius:6px;padding:5px 7px;font-family:Outfit,sans-serif;font-size:.8rem;">'
-    +'<option value="0"'+(h.closeMin===0?' selected':'')+'>:00</option>'
-    +'<option value="15"'+(h.closeMin===15?' selected':'')+'>:15</option>'
-    +'<option value="30"'+(h.closeMin===30?' selected':'')+'>:30</option>'
-    +'<option value="40"'+(h.closeMin===40?' selected':'')+'>:40</option>'
-    +'<option value="45"'+(h.closeMin===45?' selected':'')+'>:45</option>'
-    +'</select>'
-    +'</div>'
+    +'<option value="0"'+(h.closeMin===0?' selected':'')+'>:00</option><option value="15"'+(h.closeMin===15?' selected':'')+'>:15</option>'
+    +'<option value="30"'+(h.closeMin===30?' selected':'')+'>:30</option><option value="40"'+(h.closeMin===40?' selected':'')+'>:40</option>'
+    +'<option value="45"'+(h.closeMin===45?' selected':'')+'>:45</option></select></div>'
   ).join('');
 }
 
-function onHourChange(){for(let d=0;d<7;d++){if(!document.getElementById('open_'+d))return;currentHours[d].open=parseInt(document.getElementById('open_'+d).value||9);currentHours[d].close=parseInt(document.getElementById('close_'+d).value||21);currentHours[d].closeMin=parseInt(document.getElementById('closemin_'+d).value||0);}}
+function onHourChange(){
+  for(let d=0;d<7;d++){
+    if(!document.getElementById('open_'+d))return;
+    currentHours[d].open=parseInt(document.getElementById('open_'+d).value||9);
+    currentHours[d].close=parseInt(document.getElementById('close_'+d).value||21);
+    currentHours[d].closeMin=parseInt(document.getElementById('closemin_'+d).value||0);
+  }
+}
 
-function generateAndShow(){
+async function saveAllHoursToN8n(){
   onHourChange();
-  const parts=Object.entries(currentHours).map(([d,h])=>d+':{open:'+h.open+',close:'+h.close+',closeMin:'+h.closeMin+'}').join(',');
-  const code='hours:{'+parts+'}';
-  const ta=document.getElementById('generatedHoursCode');if(ta)ta.value=code;
-  const box=document.getElementById('generatedCodeBox');const inst=document.getElementById('hoursInstructions');
-  if(box)box.style.display='block';if(inst)inst.style.display='block';
+  const btn=document.getElementById('saveHoursBtn');const msg=document.getElementById('saveWeekMsg');
+  if(btn){btn.textContent='⏳ Guardando...';btn.disabled=true;}
+  try{
+    const r=await fetch(N8N_UPDATE_HOURS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hours:currentHours})});
+    if(r.ok){
+      if(btn){btn.textContent='✅ Guardado!';btn.style.background='#15803D';}
+      if(msg){msg.style.display='block';msg.style.background='#DCFCE7';msg.style.color='#166534';msg.style.border='1px solid #86EFAC';msg.textContent='✅ Horario semanal guardado correctamente. El bot ya usa el nuevo horario.';}
+      setTimeout(()=>{if(btn){btn.textContent='💾 Guardar semana completa';btn.style.background='#166534';btn.disabled=false;}setTimeout(()=>{if(msg)msg.style.display='none';},4000);},2000);
+    }else throw new Error('Error '+r.status);
+  }catch(e){
+    if(btn){btn.textContent='❌ Error — reintentar';btn.style.background='#DC2626';btn.disabled=false;}
+    if(msg){msg.style.display='block';msg.style.background='#FEE2E2';msg.style.color='#DC2626';msg.style.border='1px solid #FCA5A5';msg.textContent='❌ Error al guardar: '+e.message;}
+    setTimeout(()=>{if(btn){btn.textContent='💾 Guardar semana completa';btn.style.background='#166534';}},3000);
+  }
 }
 
-function copyHoursCode(){
-  const ta=document.getElementById('generatedHoursCode');if(!ta)return;
-  navigator.clipboard.writeText(ta.value).then(()=>{
-    const btn=document.getElementById('copyHoursBtn');
-    if(btn){btn.textContent='\u2705 Copiado!';btn.style.background='#15803d';setTimeout(()=>{btn.textContent='\ud83d\udccb Copiar';btn.style.background='#166634';},2000);}
-  }).catch(()=>{ta.select();document.execCommand('copy');});
-}
+function saveHoursToN8n(){saveAllHoursToN8n();}
+function generateAndShow(){}
+function copyHoursCode(){}
 
-function initHoursPage(){
-  currentHours=JSON.parse(JSON.stringify(DEFAULT_HOURS));renderHoursEditor();
-  const box=document.getElementById('generatedCodeBox');const inst=document.getElementById('hoursInstructions');
-  if(box)box.style.display='none';if(inst)inst.style.display='none';
-}
-
-// ── AUDIO ──────────────────────────────────────────────────────────────────
 let audioUnlocked=false;
 function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
 function unlockAudio(){
   try{
     const ctx=getCtx();
-    const doUnlock=()=>{const buf=ctx.createBuffer(1,1,22050);const src=ctx.createBufferSource();src.buffer=buf;src.connect(ctx.destination);src.start(0);audioUnlocked=true;const btn=document.getElementById('soundUnlockBtn');if(btn){btn.textContent='\ud83d\udd0a Sonido ON';btn.style.background='#DCFCE7';btn.style.color='#166534';btn.style.borderColor='#86EFAC';}};
+    const doUnlock=()=>{const buf=ctx.createBuffer(1,1,22050);const src=ctx.createBufferSource();src.buffer=buf;src.connect(ctx.destination);src.start(0);audioUnlocked=true;const btn=document.getElementById('soundUnlockBtn');if(btn){btn.textContent='🔊 Sonido ON';btn.style.background='#DCFCE7';btn.style.color='#166534';btn.style.borderColor='#86EFAC';}};
     if(ctx.state==='suspended')ctx.resume().then(doUnlock);else doUnlock();
   }catch(e){}
 }
@@ -870,10 +1306,9 @@ function testSound(){unlockAudio();playBell();}
 function checkNewOrders(orders){
   if(firstLoad){orders.forEach(o=>knownIds.add(o['Order ID']));firstLoad=false;return;}
   const news=orders.filter(o=>(o.Status==='Confirmed'||o.Status==='Zelle-Pending')&&o['Order ID']&&!knownIds.has(o['Order ID']));
-  if(news.length){news.forEach(o=>knownIds.add(o['Order ID']));playBell();let c=0;const orig=document.title;const iv=setInterval(()=>{document.title=c++%2?orig:'\ud83d\udd14 NUEVA ORDEN \u2014 PIDEYA';if(c>10){clearInterval(iv);document.title=orig;}},500);}
+  if(news.length){news.forEach(o=>knownIds.add(o['Order ID']));playBell();let c=0;const orig=document.title;const iv=setInterval(()=>{document.title=c++%2?orig:'🔔 NUEVA ORDEN — PIDEYA';if(c>10){clearInterval(iv);document.title=orig;}},500);}
 }
 
-// ── CSV PARSER ─────────────────────────────────────────────────────────────
 function parseCSV(txt){
   const rows=[];let row=[],cell='',inQ=false;
   for(let i=0;i<txt.length;i++){const c=txt[i];if(inQ){if(c==='"'&&txt[i+1]==='"'){cell+='"';i++;}else if(c==='"')inQ=false;else cell+=c;}else{if(c==='"')inQ=true;else if(c===','){row.push(cell);cell='';}else if(c==='\n'||c==='\r'){row.push(cell);cell='';if(row.some(v=>v))rows.push(row);row=[];if(c==='\r'&&txt[i+1]==='\n')i++;}else cell+=c;}}
@@ -881,9 +1316,8 @@ function parseCSV(txt){
   return rows;
 }
 
-// ── LOAD DATA ──────────────────────────────────────────────────────────────
 async function loadAll(){
-  const btn=document.getElementById('btnRef');btn.disabled=true;btn.textContent='\u27f3 Cargando...';
+  const btn=document.getElementById('btnRef');btn.disabled=true;btn.textContent='⟳ Cargando...';
   try{
     const [or,sr]=await Promise.all([fetch(CSV_ORDERS+'&_='+Date.now()),fetch(CSV_SESSIONS+'&_='+Date.now())]);
     if(or.ok){
@@ -891,9 +1325,10 @@ async function loadAll(){
       const rows=parseCSV(csvText);
       if(rows.length>=2){
         const h=rows[0].map(x=>x.replace(/[\uFEFF\u200B\u00A0]/g,'').trim());
-        const POS=['Order ID','Timestamp','Phone','Name','Address','Items','Subtotal','Tax','Gestion','StripeFee','Total','Status','StripeLink'];
+        const POS=['Order ID','Timestamp','Phone','Name','Address','Items','Subtotal','Tax','Gestion','StripeFee','Total','Status','StripeLink','Tip'];
         allOrders=rows.slice(1).map(r=>{const o={};h.forEach((k,i)=>{if(k)o[k]=(r[i]||'').trim();});POS.forEach((k,i)=>{if(!o[k]&&r[i]!==undefined)o[k]=(r[i]||'').trim();});return o;});
         orderMap={};allOrders.forEach(o=>{if(o['Order ID'])orderMap[o['Order ID']]=o;});
+        _dispatchedLocally.forEach(id=>{const _i=allOrders.findIndex(x=>x['Order ID']===id);if(_i>=0&&allOrders[_i].Status==='Confirmed')allOrders[_i].Status='Enviado';});
       }
     }
     let conn=0;
@@ -904,80 +1339,107 @@ async function loadAll(){
     }
     checkNewOrders(allOrders);checkAndAutoPrint(allOrders);updateAll(conn);
   }catch(e){
-    document.getElementById('list-cocina').innerHTML=`<div class="err-msg">\u274c Error cargando datos.<br><small>${e.message}</small></div>`;
+    document.getElementById('list-cocina').innerHTML=`<div class="err-msg">❌ Error cargando datos.<br><small>${e.message}</small></div>`;
   }finally{
-    btn.disabled=false;btn.textContent='\u27f3 Actualizar';
+    btn.disabled=false;btn.textContent='⟳ Actualizar';
     document.getElementById('refTime').textContent='Actualizado: '+new Date().toLocaleTimeString('es-DO',{hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'});
   }
 }
 
 function updateAll(conn){
   const today=new Date().toISOString().slice(0,10);
-  const confToday=allOrders.filter(o=>o.Status==='Confirmed'&&toDateStr(o.Timestamp)===today);
   const conf=allOrders.filter(o=>o.Status==='Confirmed').reverse();
-  const confRecent=conf.filter(o=>toDateStr(o.Timestamp)===today);
+  const confToday=conf.filter(o=>toDateStr(o.Timestamp)===today);
   const zel=allOrders.filter(o=>o.Status==='Zelle-Pending').reverse();
-  const todayRev=confToday.reduce((s,o)=>s+parseFloat(o.Total||0),0);
+  const despachados=allOrders.filter(o=>(o.Status==='Enviado'&&toDateStr(o.Timestamp)===today)||_dispatchedLocally.has(o['Order ID'])).reverse();
+  const paidToday=allOrders.filter(o=>(o.Status==='Confirmed'||o.Status==='Enviado')&&toDateStr(o.Timestamp)===today);
+  const todayRev=paidToday.reduce((s,o)=>s+parseFloat(o.Total||0),0);
   const todayFees=confToday.reduce((s,o)=>s+parseFloat(o.StripeFee||0),0);
-  const enviadasToday=allOrders.filter(o=>o.Status==='Enviado'&&toDateStr(o.Timestamp)===today);
+  const todayTips=paidToday.reduce((s,o)=>s+parseFloat(o.Tip||0),0);
 
-  document.getElementById('kpiConf').textContent=confToday.length;
-  document.getElementById('kpiEnviadas').textContent=enviadasToday.length;
+  document.getElementById('kpiConf').textContent=paidToday.length;
+  document.getElementById('kpiEnviadas').textContent=despachados.length;
   document.getElementById('kpiZelle').textContent=zel.length;
   document.getElementById('kpiConn').textContent=conn;
   document.getElementById('kpiRev').textContent='$'+todayRev.toFixed(2);
   document.getElementById('kpiTotal').textContent=allOrders.length;
   document.getElementById('kpiFees').textContent='$'+todayFees.toFixed(2);
-  document.getElementById('nb-cocina').textContent=confRecent.length;
+  document.getElementById('kpiTips').textContent='$'+todayTips.toFixed(2);
+  document.getElementById('nb-cocina').textContent=confToday.length;
   document.getElementById('nb-zelle').textContent=zel.length;
+  document.getElementById('nb-despachados').textContent=despachados.length;
   document.getElementById('sbConn').textContent=conn;
 
-  document.getElementById('dash-conf').innerHTML=conf.length?conf.slice(0,5).map(o=>card(o,'c',true)).join(''):'<div class="empty"><em>\u2705</em>Sin \u00f3rdenes hoy</div>';
-  document.getElementById('dash-zelle').innerHTML=zel.length?zel.slice(0,5).map(o=>card(o,'z',true)).join(''):'<div class="empty"><em>\ud83d\udcb8</em>Sin pendientes</div>';
+  document.getElementById('dash-conf').innerHTML=confToday.length?confToday.slice(0,5).map(o=>card(o,'c',true)).join(''):'<div class="empty"><em>✅</em>Sin órdenes hoy</div>';
+  document.getElementById('dash-zelle').innerHTML=zel.length?zel.slice(0,5).map(o=>card(o,'z',true)).join(''):'<div class="empty"><em>💸</em>Sin pendientes</div>';
 
-  const cocinaList=confRecent.length?confRecent:conf.slice(0,20);
-  document.getElementById('cnt-cocina').textContent=confRecent.length;
-  document.getElementById('list-cocina').innerHTML=cocinaList.length?cocinaList.map(o=>card(o,'c',false)).join(''):'<div class="empty"><em>\u2705</em>No hay \u00f3rdenes confirmadas hoy</div>';
+  const cocinaList=confToday.length?confToday:conf.slice(0,20);
+  document.getElementById('cnt-cocina').textContent=confToday.length;
+  document.getElementById('list-cocina').innerHTML=cocinaList.length?cocinaList.map(o=>card(o,'c',false)).join(''):'<div class="empty"><em>✅</em>No hay órdenes confirmadas pendientes de envío</div>';
 
   document.getElementById('cnt-zelle').textContent=zel.length;
-  document.getElementById('list-zelle').innerHTML=zel.length?zel.map(o=>card(o,'z',false)).join(''):'<div class="empty"><em>\ud83d\udcb8</em>No hay \u00f3rdenes Zelle pendientes</div>';
+  document.getElementById('list-zelle').innerHTML=zel.length?zel.map(o=>card(o,'z',false)).join(''):'<div class="empty"><em>💸</em>No hay órdenes Zelle pendientes</div>';
+
+  document.getElementById('cnt-despachados').textContent=despachados.length;
+  document.getElementById('list-despachados').innerHTML=despachados.length?despachados.map(o=>cardDispatched(o)).join(''):'<div class="empty"><em>🛵</em>No hay pedidos despachados hoy</div>';
 
   renderChart('revenueChart',7);
   if(currentPage==='ordenes')filterOrders();
   if(currentPage==='reportes')renderReports();
 }
 
-// ── ORDER CARD ─────────────────────────────────────────────────────────────
 function card(o,type,compact){
   try{
     const items=(o.Items||'').split(' | ').map(i=>'<div class="card-item">'+escH(i)+'</div>').join('');
     const time=o.Timestamp?new Date(o.Timestamp).toLocaleTimeString('es-DO',{hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'}):'—';
-    const badge=type==='c'?'<span class="badge bg-g">\u2705 Confirmada</span>':type==='z'?'<span class="badge bg-y">\ud83d\udcb8 Zelle</span>':'<span class="badge bg-b">'+escH(o.Status||type)+'</span>';
-    const phone=o.Phone?('<br>\ud83d\udcf1 +'+escH((o.Phone||'').replace(/^whatsapp:/i,''))):'';
+    const badge=type==='c'?'<span class="badge bg-g">✅ Confirmada</span>':type==='z'?'<span class="badge bg-y">💸 Zelle</span>':'<span class="badge bg-b">'+escH(o.Status||type)+'</span>';
+    const phone=o.Phone?('<br>📱 +'+escH((o.Phone||'').replace(/^whatsapp:/i,''))):'';
     const idx=allOrders.indexOf(o);
     return '<div class="order-card type-'+type+'">'
       +'<div class="card-row1"><span class="card-id">#'+escH(o['Order ID']||'—')+'</span>'+badge+'</div>'
       +'<div class="card-name">'+escH(o.Name||'—')+'</div>'
-      +'<div class="card-meta">\ud83d\udccd '+escH(o.Address||'—')+phone+'</div>'
+      +'<div class="card-meta">📍 '+escH(o.Address||'—')+phone+'</div>'
       +(compact?'':'<div class="card-items">'+(items||'(sin items)')+'</div>')
       +'<div class="card-foot">'
-        +'<div><div class="card-total">$'+parseFloat(o.Total||0).toFixed(2)+'</div><div class="card-time">\u23f0 '+time+'</div></div>'
+        +'<div><div class="card-total">$'+parseFloat(o.Total||0).toFixed(2)+'</div><div class="card-time">⏰ '+time+'</div></div>'
         +'<div class="card-btns">'
           +'<button class="btn-xs '+(type==='c'?'bx-g':'bx-y')+'" onclick="openTicketByIdx('+idx+')">🖨️ Ticket</button>'
-          +'<button class="btn-xs bx-b" onclick="openMaps('+idx+')">\ud83d\uddfa\ufe0f</button>'
-          +(type==='c'?'<button class="btn-xs" style="background:#DCFCE7;color:#166534;border:1px solid #86EFAC" onclick="markDispatched('+idx+')">\ud83d\udef5</button>':'')
-          +'<button class="btn-xs" style="background:#EEF2FF;color:#3730A3;border:1px solid #C7D2FE" onclick="openEdit('+idx+')">\u270f\ufe0f</button>'
+          +'<button class="btn-xs bx-b" onclick="openMaps('+idx+')">🗺️</button>'
+          +(type==='c'?'<button class="btn-xs" style="background:#DCFCE7;color:#166534;border:1px solid #86EFAC" onclick="markDispatched('+idx+')">🛵 Despachar</button>':'')
+          +'<button class="btn-xs" style="background:#EEF2FF;color:#3730A3;border:1px solid #C7D2FE" onclick="openEdit('+idx+')">✏️</button>'
+          +'<button class="btn-xs" style="background:#FEE2E2;color:#DC2626;border:1px solid #FCA5A5" onclick="deleteOrder('+idx+')" title="Eliminar orden">🗑️</button>'
         +'</div>'
       +'</div>'
     +'</div>';
-  }catch(e){return '<div class="order-card type-'+type+'"><div class="card-name" style="color:var(--red)">\u26a0\ufe0f Error: '+e.message+'</div></div>';}
+  }catch(e){return '<div class="order-card type-'+type+'"><div class="card-name" style="color:var(--red)">⚠️ Error: '+e.message+'</div></div>';}
+}
+
+function cardDispatched(o){
+  try{
+    const items=(o.Items||'').split(' | ').map(i=>'<div class="card-item">'+escH(i)+'</div>').join('');
+    const time=o.Timestamp?new Date(o.Timestamp).toLocaleTimeString('es-DO',{hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'}):'—';
+    const phone=o.Phone?('<br>📱 +'+escH((o.Phone||'').replace(/^whatsapp:/i,''))):'';
+    const idx=allOrders.indexOf(o);
+    return '<div class="order-card type-d">'
+      +'<div class="card-row1"><span class="card-id">#'+escH(o['Order ID']||'—')+'</span><span class="badge bg-b">🛵 Enviado</span></div>'
+      +'<div class="card-name">'+escH(o.Name||'—')+'</div>'
+      +'<div class="card-meta">📍 '+escH(o.Address||'—')+phone+'</div>'
+      +'<div class="card-items">'+(items||'(sin items)')+'</div>'
+      +'<div class="card-foot">'
+        +'<div><div class="card-total">$'+parseFloat(o.Total||0).toFixed(2)+'</div><div class="card-time">⏰ '+time+'</div></div>'
+        +'<div class="card-btns">'
+          +'<button class="btn-xs bx-ghost" onclick="openTicketByIdx('+idx+')">🖨️ Ticket</button>'
+          +'<button class="btn-xs bx-ghost" onclick="openMaps('+idx+')">🗺️</button>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }catch(e){return '<div class="order-card type-d"><div class="card-name" style="color:var(--red)">⚠️ Error: '+e.message+'</div></div>';}
 }
 
 function escH(s){s=s||'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function openTicketByIdx(idx){try{if(allOrders[idx])openTicket(allOrders[idx]);}catch(e){console.error(e);}}
 function openTicketById(id){const o=orderMap[id];if(o)openTicket(o);}
 
-// ── FILTER ORDERS ──────────────────────────────────────────────────────────
 function filterOrders(){
   const q=(document.getElementById('searchInput')?.value||'').toLowerCase();
   const st=document.getElementById('statusFilter')?.value||'';
@@ -992,67 +1454,107 @@ function filterOrders(){
     return true;
   }).reverse();
   const type=o=>o.Status==='Confirmed'?'c':o.Status==='Zelle-Pending'?'z':'d';
-  document.getElementById('list-ordenes').innerHTML=filtered.length?filtered.map(o=>card(o,type(o),false)).join(''):'<div class="empty"><em>\ud83d\udccb</em>No se encontraron \u00f3rdenes</div>';
+  document.getElementById('list-ordenes').innerHTML=filtered.length?filtered.map(o=>card(o,type(o),false)).join(''):'<div class="empty"><em>📋</em>No se encontraron órdenes</div>';
 }
 
-// ── REPORTS ────────────────────────────────────────────────────────────────
-function renderReports(){
+function onRangeChange(){
+  const v=document.getElementById('rpRange').value;
+  const cd=document.getElementById('rpCustomDates');
+  if(cd)cd.style.display=(v==='custom'?'flex':'none');
+  if(v!=='custom')renderReports();
+}
+
+function getReportDateRange(){
+  const v=document.getElementById('rpRange')?.value||'week';
   const today=new Date().toISOString().slice(0,10);
-  const weekAgo=new Date(Date.now()-7*86400000).toISOString().slice(0,10);
-  const conf=allOrders.filter(o=>o.Status==='Confirmed');
-  const todayO=conf.filter(o=>toDateStr(o.Timestamp)===today);
-  const weekO=conf.filter(o=>toDateStr(o.Timestamp)>=weekAgo);
-  document.getElementById('rpRevHoy').textContent='$'+todayO.reduce((s,o)=>s+parseFloat(o.Total||0),0).toFixed(2);
-  document.getElementById('rpRevSem').textContent='$'+weekO.reduce((s,o)=>s+parseFloat(o.Total||0),0).toFixed(2);
-  document.getElementById('rpRevAll').textContent='$'+conf.reduce((s,o)=>s+parseFloat(o.Total||0),0).toFixed(2);
-  document.getElementById('rpStripe').textContent='$'+conf.reduce((s,o)=>s+parseFloat(o.StripeFee||0),0).toFixed(2);
-  document.getElementById('rpGestion').textContent='$'+conf.reduce((s,o)=>s+parseFloat(o.Gestion||0),0).toFixed(2);
-  const zelleToday=allOrders.filter(o=>o.Status==='Zelle-Pending'&&toDateStr(o.Timestamp)===today);
+  if(v==='today')return{from:today,to:today,label:'Hoy'};
+  if(v==='yesterday'){const y=new Date(Date.now()-86400000).toISOString().slice(0,10);return{from:y,to:y,label:'Ayer'};}
+  if(v==='week'){const w=new Date(Date.now()-6*86400000).toISOString().slice(0,10);return{from:w,to:today,label:'Esta semana'};}
+  if(v==='month'){const d=new Date();const f=new Date(d.getFullYear(),d.getMonth(),1).toISOString().slice(0,10);return{from:f,to:today,label:'Este mes'};}
+  if(v==='lastmonth'){const d=new Date();const f=new Date(d.getFullYear(),d.getMonth()-1,1).toISOString().slice(0,10);const t=new Date(d.getFullYear(),d.getMonth(),0).toISOString().slice(0,10);return{from:f,to:t,label:'Mes anterior'};}
+  if(v==='custom'){const f=document.getElementById('rpFrom')?.value||today;const t=document.getElementById('rpTo')?.value||today;return{from:f,to:t,label:f+' → '+t};}
+  return{from:today,to:today,label:'Hoy'};
+}
+
+function renderReports(){
+  const{from,to,label}=getReportDateRange();
+  const allConf=allOrders.filter(o=>o.Status==='Confirmed'||o.Status==='Enviado');
+  const zelleConf=allOrders.filter(o=>o.Status==='Confirmed'&&parseFloat(o.StripeFee||0)===0);
+  const stripeConf=allOrders.filter(o=>o.Status==='Confirmed'&&parseFloat(o.StripeFee||0)>0);
+  const periodOrders=allConf.filter(o=>{const d=toDateStr(o.Timestamp);return d>=from&&d<=to;});
+  const periodZelle=periodOrders.filter(o=>parseFloat(o.StripeFee||0)===0);
+  const periodStripe=periodOrders.filter(o=>parseFloat(o.StripeFee||0)>0);
+  const sum=(arr,key)=>arr.reduce((s,o)=>s+parseFloat(o[key]||0),0);
+  const periodRev=sum(periodOrders,'Total');const periodZelleRev=sum(periodZelle,'Total');const periodStripeRev=sum(periodStripe,'Total');
+  const periodTax=sum(periodOrders,'Tax');const periodGestion=sum(periodOrders,'Gestion');const periodStripeFee=sum(periodStripe,'StripeFee');const periodTips=sum(periodOrders,'Tip');
+  const avgOrder=periodOrders.length?periodRev/periodOrders.length:0;
+  const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  setEl('rpRevPeriod','$'+periodRev.toFixed(2));setEl('rpOrdersPeriod',periodOrders.length);
+  setEl('rpZellePeriod','$'+periodZelleRev.toFixed(2));setEl('rpStripePeriod','$'+periodStripeRev.toFixed(2));
+  setEl('rpTaxPeriod','$'+periodTax.toFixed(2));setEl('rpGestionPeriod','$'+periodGestion.toFixed(2));
+  setEl('rpStripeFeePeriod','$'+periodStripeFee.toFixed(2));setEl('rpAvgOrder','$'+avgOrder.toFixed(2));setEl('rpTipPeriod','$'+periodTips.toFixed(2));
+  setEl('rpRevAll','$'+sum(allConf,'Total').toFixed(2));setEl('rpOrdersAll',allConf.length);
+  setEl('rpStripeAll','$'+sum(stripeConf,'StripeFee').toFixed(2));setEl('rpGestionAll','$'+sum(allConf,'Gestion').toFixed(2));
+  const ct=document.getElementById('rpChartTitle');if(ct)ct.textContent='Ingresos por día — '+label;
   const rows=[
-    ['\u00d3rdenes tarjeta hoy',todayO.length,'$'+todayO.reduce((s,o)=>s+parseFloat(o.Total||0),0).toFixed(2)],
-    ['\u00d3rdenes Zelle hoy',zelleToday.length,'$'+zelleToday.reduce((s,o)=>s+parseFloat(o.Total||0),0).toFixed(2)],
-    ['Subtotal bruto',todayO.length+zelleToday.length,'$'+[...todayO,...zelleToday].reduce((s,o)=>s+parseFloat(o.Subtotal||0),0).toFixed(2)],
-    ['Tax NJ cobrado','—','$'+[...todayO,...zelleToday].reduce((s,o)=>s+parseFloat(o.Tax||0),0).toFixed(2)],
-    ['Comisi\u00f3n Gesti\u00f3n','—','$'+todayO.reduce((s,o)=>s+parseFloat(o.Gestion||0),0).toFixed(2)],
-    ['Comisi\u00f3n Stripe','—','$'+todayO.reduce((s,o)=>s+parseFloat(o.StripeFee||0),0).toFixed(2)],
+    ['💳 Órdenes Stripe',periodStripe.length,'$'+periodStripeRev.toFixed(2)],
+    ['💸 Órdenes Zelle',periodZelle.length,'$'+periodZelleRev.toFixed(2)],
+    ['📦 Total órdenes',periodOrders.length,'$'+periodRev.toFixed(2)],
+    ['🧾 Subtotal bruto','—','$'+sum(periodOrders,'Subtotal').toFixed(2)],
+    ['🏛️ Tax NJ (6.625%)','—','$'+periodTax.toFixed(2)],
+    ['💼 Comisión Gestión','—','$'+periodGestion.toFixed(2)],
+    ['🙏 Propinas repartidor','—','$'+periodTips.toFixed(2)],
+    ['💳 Comisión Stripe','—','$'+periodStripeFee.toFixed(2)],
+    ['💰 Neto estimado','—','$'+(periodRev-periodStripeFee).toFixed(2)],
   ];
-  document.getElementById('reportTbody').innerHTML=rows.map(([c,n,m])=>`<tr><td>${c}</td><td style="font-weight:700">${n}</td><td style="font-weight:700;color:var(--green)">${m}</td></tr>`).join('');
-  renderChart('reportChart',14);
+  const tbody=document.getElementById('reportTbody');
+  if(tbody)tbody.innerHTML=rows.map(([c,n,m])=>`<tr><td>${c}</td><td style="font-weight:700">${n}</td><td style="font-weight:700;color:var(--green)">${m}</td></tr>`).join('');
+  const itemCount={};
+  periodOrders.forEach(o=>{(o.Items||'').split(' | ').forEach(line=>{const m=line.match(/^(\d+)x (.+?) - \$/);if(m){const name=m[2].trim();const qty=parseInt(m[1]);itemCount[name]=(itemCount[name]||0)+qty;}});});
+  const sorted=Object.entries(itemCount).sort((a,b)=>b[1]-a[1]).slice(0,10);const maxQty=sorted.length?sorted[0][1]:1;
+  const topEl=document.getElementById('rpTopItems');
+  if(topEl){if(!sorted.length){topEl.innerHTML='<div class="empty" style="padding:16px"><em>📊</em>Sin datos en este período</div>';}
+  else{topEl.innerHTML=sorted.map(([name,qty],i)=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid #F1F5F9;"><span style="font-size:.68rem;font-weight:800;color:#94A3B8;width:18px;">#${i+1}</span><div style="flex:1;min-width:0;"><div style="font-size:.78rem;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div><div style="background:#E2E8F0;border-radius:3px;height:4px;margin-top:3px;"><div style="background:var(--green);height:4px;border-radius:3px;width:${Math.round((qty/maxQty)*100)}%"></div></div></div><span style="font-size:.78rem;font-weight:800;color:var(--green);white-space:nowrap;">${qty} uds</span></div>`).join('');}}
+  const dayMap={};
+  periodOrders.forEach(o=>{const d=toDateStr(o.Timestamp);if(!dayMap[d])dayMap[d]={orders:0,subtotal:0,tax:0,gestion:0,tip:0,stripefee:0,total:0};dayMap[d].orders++;dayMap[d].subtotal+=parseFloat(o.Subtotal||0);dayMap[d].tax+=parseFloat(o.Tax||0);dayMap[d].gestion+=parseFloat(o.Gestion||0);dayMap[d].tip+=parseFloat(o.Tip||0);dayMap[d].stripefee+=parseFloat(o.StripeFee||0);dayMap[d].total+=parseFloat(o.Total||0);});
+  const days=Object.keys(dayMap).sort().reverse();
+  const dtbody=document.getElementById('rpDailyTbody');
+  if(dtbody){dtbody.innerHTML=days.length?days.map(d=>{const r=dayMap[d];return`<tr><td style="font-weight:600">${d}</td><td style="font-weight:700">${r.orders}</td><td>$${r.subtotal.toFixed(2)}</td><td>$${r.tax.toFixed(2)}</td><td>$${r.gestion.toFixed(2)}</td><td style="color:#166534;font-weight:600">$${r.tip.toFixed(2)}</td><td>$${r.stripefee.toFixed(2)}</td><td style="font-weight:700;color:var(--green)">$${r.total.toFixed(2)}</td></tr>`;}).join(''):'<tr><td colspan="8" style="text-align:center;color:#94A3B8;padding:16px;">Sin órdenes en este período</td></tr>';}
+  renderChart('reportChart',14,from,to);
 }
 
-// ── CHART ──────────────────────────────────────────────────────────────────
-function renderChart(id,days){
-  const el=document.getElementById(id);if(!el)return;
-  const data=[];
-  for(let i=days-1;i>=0;i--){const d=new Date(Date.now()-i*86400000);const ds=d.toISOString().slice(0,10);const lbl=d.toLocaleDateString('es-DO',{weekday:'short',day:'numeric'});const rev=allOrders.filter(o=>o.Status==='Confirmed'&&toDateStr(o.Timestamp)===ds).reduce((s,o)=>s+parseFloat(o.Total||0),0);data.push({lbl,rev});}
-  const max=Math.max(...data.map(d=>d.rev),1);
-  el.innerHTML=data.map(d=>`<div class="bar-wrap"><div class="bar-val">${d.rev>0?'$'+d.rev.toFixed(0):''}</div><div class="bar" style="height:${Math.max((d.rev/max)*100,d.rev>0?8:2)}%" title="$${d.rev.toFixed(2)}"></div><div class="bar-lbl">${d.lbl}</div></div>`).join('');
+function renderChart(id,days,fromDate,toDate){
+  const el=document.getElementById(id);if(!el)return;const data=[];
+  if(fromDate&&toDate){let cur=new Date(fromDate+'T12:00:00Z');const end=new Date(toDate+'T12:00:00Z');while(cur<=end){const ds=cur.toISOString().slice(0,10);const lbl=cur.toLocaleDateString('es-DO',{weekday:'short',day:'numeric'});const rev=allOrders.filter(o=>(o.Status==='Confirmed'||o.Status==='Enviado')&&toDateStr(o.Timestamp)===ds).reduce((s,o)=>s+parseFloat(o.Total||0),0);data.push({lbl,rev});cur=new Date(cur.getTime()+86400000);}}
+  else{for(let i=days-1;i>=0;i--){const d=new Date(Date.now()-i*86400000);const ds=d.toISOString().slice(0,10);const lbl=d.toLocaleDateString('es-DO',{weekday:'short',day:'numeric'});const rev=allOrders.filter(o=>(o.Status==='Confirmed'||o.Status==='Enviado')&&toDateStr(o.Timestamp)===ds).reduce((s,o)=>s+parseFloat(o.Total||0),0);data.push({lbl,rev});}}
+  const max=Math.max(...data.map(d=>d.rev),1);const skip=data.length>30?4:data.length>14?2:1;
+  el.innerHTML=data.map((d,i)=>`<div class="bar-wrap"><div class="bar-val">${d.rev>0&&i%skip===0?'$'+d.rev.toFixed(0):''}</div><div class="bar" style="height:${Math.max((d.rev/max)*100,d.rev>0?8:2)}%" title="${d.lbl}: $${d.rev.toFixed(2)}"></div><div class="bar-lbl">${i%skip===0?d.lbl:''}</div></div>`).join('');
 }
 
-// ── TICKET MODAL ───────────────────────────────────────────────────────────
 function openTicket(o){
   const addr=o.Address||'';const fee=parseFloat(o.StripeFee||0);
-  var _oid=(o['Order ID']||'').trim();document.getElementById('tkId').textContent=_oid?('#'+_oid):'# SIN N\u00daMERO';
+  var _oid=(o['Order ID']||'').trim();document.getElementById('tkId').textContent=_oid?('#'+_oid):'# SIN NÚMERO';
   document.getElementById('tkName').textContent=o.Name||'—';
   document.getElementById('tkPhone').textContent=o.Phone?'+'+(o.Phone+'').replace(/^whatsapp:/i,''):'—';
   document.getElementById('tkAddr').textContent=addr;
   document.getElementById('tkTime').textContent=o.Timestamp?new Date(o.Timestamp).toLocaleString('es-DO',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'}):'—';
-  document.getElementById('tkPay').textContent=o.Status==='Zelle-Pending'?'\ud83d\udcb8 Zelle (Pendiente)':'\u2705 Tarjeta \u2014 Pagado';
+  document.getElementById('tkPay').textContent=o.Status==='Zelle-Pending'?'💸 Zelle (Pendiente)':o.Status==='Enviado'?'✅ Pagado — Enviado':'✅ Tarjeta — Pagado';
   document.getElementById('tkSub').textContent='$'+parseFloat(o.Subtotal||0).toFixed(2);
   document.getElementById('tkTax').textContent='$'+parseFloat(o.Tax||0).toFixed(2);
   document.getElementById('tkGes').textContent='$'+parseFloat(o.Gestion||0).toFixed(2);
   document.getElementById('tkTot').textContent='$'+parseFloat(o.Total||0).toFixed(2);
+  const tip=parseFloat(o.Tip||0);const tipRow=document.getElementById('tkTipRow');
+  if(tip>0){document.getElementById('tkTip').textContent='$'+tip.toFixed(2);tipRow.style.display='flex';}else tipRow.style.display='none';
   const feeRow=document.getElementById('tkFeeRow');
   if(fee>0){document.getElementById('tkFee').textContent='$'+fee.toFixed(2);feeRow.style.display='flex';}else feeRow.style.display='none';
-  document.getElementById('tkItems').innerHTML=(o.Items||'').split(' | ').map(i=>`<div class="t-item">\u2022 ${i}</div>`).join('');
+  document.getElementById('tkItems').innerHTML=(o.Items||'').split(' | ').map(i=>`<div class="t-item">• ${i}</div>`).join('');
   const qrEl=document.getElementById('tkQR');qrEl.innerHTML='';
   const mapsUrl='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(addr);
-  try{new QRCode(qrEl,{text:mapsUrl,width:140,height:140,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});}catch(e){qrEl.innerHTML='<p style="color:#F59E0B;font-weight:bold;padding:14px;font-family:Courier New">\ud83d\udccd Escanea para navegar</p>';}
+  try{new QRCode(qrEl,{text:mapsUrl,width:140,height:140,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});}catch(e){qrEl.innerHTML='<p style="color:#F59E0B;font-weight:bold;padding:14px;font-family:Courier New">📍 Escanea para navegar</p>';}
   document.getElementById('ticketModal').classList.add('open');
 }
 function closeTicket(){document.getElementById('ticketModal').classList.remove('open');}
 
-// ── EDIT ORDER ─────────────────────────────────────────────────────────────
 let editingOrderIdx=null;
 function openEdit(idx){
   const o=allOrders[idx];if(!o)return;editingOrderIdx=idx;
@@ -1062,23 +1564,22 @@ function openEdit(idx){
   document.getElementById('editAddress').value=o.Address||'';
   document.getElementById('editNotes').value=o.Notes||'';
   document.getElementById('editMsg').style.display='none';
-  document.getElementById('editSaveBtn').textContent='\ud83d\udcbe Guardar Cambios';
+  document.getElementById('editSaveBtn').textContent='💾 Guardar Cambios';
   document.getElementById('editModal').classList.add('open');
 }
 function closeEdit(){document.getElementById('editModal').classList.remove('open');editingOrderIdx=null;}
 async function saveEdit(){
   const o=allOrders[editingOrderIdx];if(!o)return;
   const btn=document.getElementById('editSaveBtn');const msg=document.getElementById('editMsg');
-  btn.textContent='\u23f3 Guardando...';btn.disabled=true;
+  btn.textContent='⏳ Guardando...';btn.disabled=true;
   const body={orderId:o['Order ID'],name:document.getElementById('editName').value.trim(),phone:document.getElementById('editPhone').value.trim(),address:document.getElementById('editAddress').value.trim(),notes:document.getElementById('editNotes').value.trim()};
   try{
     const r=await fetch(N8N_EDIT_ORDER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    if(r.ok){o.Name=body.name;o.Phone=body.phone;o.Address=body.address;o.Notes=body.notes;msg.style.display='block';msg.style.color='#166534';msg.textContent='\u2705 Cambios guardados.';btn.textContent='\u2705 Guardado';setTimeout(()=>{closeEdit();loadAll();},1200);}
+    if(r.ok){o.Name=body.name;o.Phone=body.phone;o.Address=body.address;o.Notes=body.notes;msg.style.display='block';msg.style.color='#166534';msg.textContent='✅ Cambios guardados.';btn.textContent='✅ Guardado';setTimeout(()=>{closeEdit();loadAll();},1200);}
     else throw new Error('Error '+r.status);
-  }catch(e){msg.style.display='block';msg.style.color='#DC2626';msg.textContent='\u274c Error: '+e.message;btn.textContent='\ud83d\udcbe Guardar Cambios';btn.disabled=false;}
+  }catch(e){msg.style.display='block';msg.style.color='#DC2626';msg.textContent='❌ Error: '+e.message;btn.textContent='💾 Guardar Cambios';btn.disabled=false;}
 }
 
-// ── MENU MANAGEMENT ────────────────────────────────────────────────────────
 async function loadMenuData(){
   try{
     const r=await fetch(CSV_MENU+'&_='+Date.now());if(!r.ok)return;
@@ -1093,30 +1594,28 @@ async function loadMenuData(){
   }catch(e){console.error('Menu load error:',e);}
 }
 function filterMenu(){
-  const q=(document.getElementById('menuSearch')?.value||'').toLowerCase();
-  const cat=(document.getElementById('menuCatFilter')?.value||'');
+  const q=(document.getElementById('menuSearch')?.value||'').toLowerCase();const cat=(document.getElementById('menuCatFilter')?.value||'');
   renderMenuGrid(menuData.filter(m=>{if(cat&&(m.Category||m.Cat||'General')!==cat)return false;if(q&&!(m.Name||'').toLowerCase().includes(q))return false;return true;}));
 }
 function renderMenuGrid(items){
-  const grid=document.getElementById('menu-grid');if(!grid)return;
-  const list=items||menuData;
-  if(!list.length){grid.innerHTML='<div class="empty"><em>\ud83d\udccb</em>No se encontraron platos</div>';return;}
+  const grid=document.getElementById('menu-grid');if(!grid)return;const list=items||menuData;
+  if(!list.length){grid.innerHTML='<div class="empty"><em>📋</em>No se encontraron platos</div>';return;}
   grid.innerHTML=list.map(item=>{
     const avail=(item.Available||'').toUpperCase().trim();const isAvail=avail!=='NO';
     const id=item.ID||item.id||'';const cat=item.Category||item.Cat||'General';const price=parseFloat(item.Price||0).toFixed(2);
     const newA=isAvail?'NO':'YES';const safeName=(item.Name||'').replace(/"/g,'&quot;');const safeId=(id||'').replace(/"/g,'&quot;');
-    const bg=isAvail?'background:#FEE2E2;color:#991B1B;':'background:#DCFCE7;color:#166534;';const label=isAvail?'\u26d4 Agotado':'\u2705 Disponible';
+    const bg=isAvail?'background:#FEE2E2;color:#991B1B;':'background:#DCFCE7;color:#166534;';const label=isAvail?'⛔ Agotado':'✅ Disponible';
     return '<div style="background:#fff;border:1px solid '+(isAvail?'#E2E8F0':'#FECACA')+';border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);">'
       +'<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:.88rem;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(item.Name||'—')+'</div>'
-      +'<div style="font-size:.7rem;color:#6B7280;margin-top:2px;">'+escH(cat)+' \u00b7 $'+price+'</div>'
-      +(isAvail?'':'<div style="font-size:.68rem;color:#DC2626;font-weight:700;margin-top:3px;">\u26d4 AGOTADO</div>')+'</div>'
+      +'<div style="font-size:.7rem;color:#6B7280;margin-top:2px;">'+escH(cat)+' · $'+price+'</div>'
+      +(isAvail?'':'<div style="font-size:.68rem;color:#DC2626;font-weight:700;margin-top:3px;">⛔ AGOTADO</div>')+'</div>'
       +'<button data-itemid="'+safeId+'" data-name="'+safeName+'" data-avail="'+newA+'" onclick="handleMenuToggle(this)" style="flex-shrink:0;border:none;border-radius:8px;padding:7px 12px;font-family:Outfit,sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;'+bg+'">'+label+'</button>'
       +'</div>';
   }).join('');
 }
 function handleMenuToggle(btn){toggleMenuItem(btn.dataset.itemid,btn.dataset.name,btn.dataset.avail);}
 async function toggleMenuItem(id,name,newAvail){
-  if(!id){alert('Este plato no tiene ID en la hoja de men\u00fa.');return;}
+  if(!id){alert('Este plato no tiene ID en la hoja de menú.');return;}
   const msg=newAvail==='NO'?('¿Marcar "'+name+'" como AGOTADO?'):('¿Marcar "'+name+'" como DISPONIBLE?');
   if(!confirm(msg))return;
   try{
@@ -1126,37 +1625,37 @@ async function toggleMenuItem(id,name,newAvail){
   }catch(e){alert('Error al actualizar: '+e.message);}
 }
 
-// ── SETTINGS ───────────────────────────────────────────────────────────────
-function loadSettings(){
-  document.getElementById('sBellOn').value=S.bellOn?'yes':'no';
-  document.getElementById('sBellTones').value=S.tones;
-  document.getElementById('sBellVol').value=S.vol;
-  document.getElementById('sVolVal').textContent=Math.round(S.vol*100)+'%';
-  document.getElementById('sRefresh').value=S.refreshMs;
-  const radius=lsGet('py_radius','5');
-  const el=document.getElementById('sDeliveryRadius');if(el)el.value=radius;
-  const rd=document.getElementById('radiusDisplay');if(rd)rd.textContent=radius+' millas';
-  const zc=document.getElementById('radiusZipCount');
-  if(zc){const zips=ZIP_BY_RADIUS[parseInt(radius)]||ZIP_BY_RADIUS[5];zc.textContent=zips.length+' c\u00f3digos ZIP cubiertos.';}
-  const ap=document.getElementById('sAutoPrint');if(ap)ap.value=lsGet('py_autoprint','yes');
-  const apz=document.getElementById('sAutoPrintZelle');if(apz)apz.value=lsGet('py_autoprint_zelle','yes');
-}
-function saveSettings(){
-  S.bellOn=document.getElementById('sBellOn').value==='yes';
-  S.tones=parseInt(document.getElementById('sBellTones').value);
-  S.vol=parseFloat(document.getElementById('sBellVol').value);
-  S.refreshMs=parseInt(document.getElementById('sRefresh').value);
-  lsSet('py_bOn',S.bellOn?'yes':'no');lsSet('py_tones',S.tones);lsSet('py_vol',S.vol);lsSet('py_ref',S.refreshMs);
-  const el=document.getElementById('sDeliveryRadius');
-  if(el){lsSet('py_radius',el.value);const rd=document.getElementById('radiusDisplay');if(rd)rd.textContent=el.value+' millas';}
-  const ap=document.getElementById('sAutoPrint');if(ap)lsSet('py_autoprint',ap.value);
-  const apz=document.getElementById('sAutoPrintZelle');if(apz)lsSet('py_autoprint_zelle',apz.value);
-  if(refreshTimer)clearInterval(refreshTimer);
-  refreshTimer=setInterval(loadAll,S.refreshMs);
-  alert('\u2705 Ajustes guardados correctamente.');
+async function loadZelleSetting(){const cached=lsGet('py_zelle_enabled','true');const sel=document.getElementById('sZelleEnabled');if(sel)sel.value=cached;}
+
+async function saveZelleSetting(){
+  const sel=document.getElementById('sZelleEnabled');const btn=document.getElementById('zelleToggleBtn');const msg=document.getElementById('zelleToggleMsg');
+  if(!sel)return;const val=sel.value;btn.textContent='⏳ Guardando...';btn.disabled=true;
+  try{
+    const r=await fetch(N8N_UPDATE_SETTINGS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:'zelle_enabled',value:val})});
+    if(r.ok){lsSet('py_zelle_enabled',val);msg.style.display='block';msg.style.color='#166534';msg.textContent=val==='true'?'✅ Zelle activado — el bot mostrará Zelle como opción de pago.':'🔴 Zelle desactivado — el bot solo mostrará Stripe.';btn.textContent='💾 Guardar Configuración de Pago';btn.disabled=false;setTimeout(()=>{msg.style.display='none';},4000);}
+    else throw new Error('Error '+r.status);
+  }catch(e){msg.style.display='block';msg.style.color='#DC2626';msg.textContent='❌ Error: '+e.message;btn.textContent='💾 Guardar Configuración de Pago';btn.disabled=false;}
 }
 
-// ── AUTO PRINT ─────────────────────────────────────────────────────────────
+function loadSettings(){
+  document.getElementById('sBellOn').value=S.bellOn?'yes':'no';document.getElementById('sBellTones').value=S.tones;document.getElementById('sBellVol').value=S.vol;
+  document.getElementById('sVolVal').textContent=Math.round(S.vol*100)+'%';document.getElementById('sRefresh').value=S.refreshMs;
+  const radius=lsGet('py_radius','5');const el=document.getElementById('sDeliveryRadius');if(el)el.value=radius;
+  const rd=document.getElementById('radiusDisplay');if(rd)rd.textContent=radius+' millas';
+  const zc=document.getElementById('radiusZipCount');if(zc){const zips=ZIP_BY_RADIUS[parseInt(radius)]||ZIP_BY_RADIUS[5];zc.textContent=zips.length+' códigos ZIP cubiertos.';}
+  const ap=document.getElementById('sAutoPrint');if(ap)ap.value=lsGet('py_autoprint','yes');
+  const apz=document.getElementById('sAutoPrintZelle');if(apz)apz.value=lsGet('py_autoprint_zelle','yes');
+  loadZelleSetting();
+}
+function saveSettings(){
+  S.bellOn=document.getElementById('sBellOn').value==='yes';S.tones=parseInt(document.getElementById('sBellTones').value);S.vol=parseFloat(document.getElementById('sBellVol').value);S.refreshMs=parseInt(document.getElementById('sRefresh').value);
+  lsSet('py_bOn',S.bellOn?'yes':'no');lsSet('py_tones',S.tones);lsSet('py_vol',S.vol);lsSet('py_ref',S.refreshMs);
+  const el=document.getElementById('sDeliveryRadius');if(el){lsSet('py_radius',el.value);const rd=document.getElementById('radiusDisplay');if(rd)rd.textContent=el.value+' millas';}
+  const ap=document.getElementById('sAutoPrint');if(ap)lsSet('py_autoprint',ap.value);const apz=document.getElementById('sAutoPrintZelle');if(apz)lsSet('py_autoprint_zelle',apz.value);
+  if(refreshTimer)clearInterval(refreshTimer);refreshTimer=setInterval(loadAll,S.refreshMs);
+  alert('✅ Ajustes guardados correctamente.');
+}
+
 const _printedOrders=new Set(JSON.parse(lsGet('py_printed','[]')));
 function checkAndAutoPrint(orders){
   const autoPrint=lsGet('py_autoprint','yes')==='yes';const autoPrintZelle=lsGet('py_autoprint_zelle','yes')==='yes';
@@ -1168,18 +1667,17 @@ function checkAndAutoPrint(orders){
     const isZelleConfirmed=status==='Confirmed'&&parseFloat(o.StripeFee||0)===0;
     if((isStripeConfirmed&&autoPrint)||(isZelleConfirmed&&autoPrintZelle)){
       _printedOrders.add(id);lsSet('py_printed',JSON.stringify([..._printedOrders].slice(-100)));
-      const tUrl='https://pideyallc.github.io/pideya_kitchen_ticket.html?order='+id
+      const tUrl='https://pideyanj-ai.github.io/pideya_kitchen_ticket.html?order='+id
         +'&name='+encodeURIComponent(o.Name||'')+'&phone='+encodeURIComponent(o.Phone||'')
         +'&address='+encodeURIComponent(o.Address||'')+'&items='+encodeURIComponent((o.Items||'').replace(/\s*\|\s*/g,'|'))
         +'&subtotal='+parseFloat(o.Subtotal||0).toFixed(2)+'&tax='+parseFloat(o.Tax||0).toFixed(2)
-        +'&gestion='+parseFloat(o.Gestion||0).toFixed(2)+'&stripefee='+parseFloat(o.StripeFee||0).toFixed(2)
-        +'&total='+parseFloat(o.Total||0).toFixed(2);
+        +'&gestion='+parseFloat(o.Gestion||0).toFixed(2)+'&tip='+parseFloat(o.Tip||0).toFixed(2)
+        +'&stripefee='+parseFloat(o.StripeFee||0).toFixed(2)+'&total='+parseFloat(o.Total||0).toFixed(2);
       setTimeout(()=>{const pw=window.open(tUrl,'_blank');if(pw)setTimeout(()=>{try{pw.print();}catch(e){}},1200);},500);
     }
   });
 }
 
-// ── MISC ───────────────────────────────────────────────────────────────────
 function toggleDebug(){
   const p=document.getElementById('dbgPanel');
   if(p.style.display==='none'){p.style.display='block';if(allOrders.length>0){const o=allOrders[0];p.textContent='Columns: '+Object.keys(o).join(' | ')+' || OrderID='+o['Order ID']+' Status='+o.Status;}else{p.textContent='No orders loaded';}}
@@ -1190,15 +1688,86 @@ function openMaps(idxOrAddr){const addr=typeof idxOrAddr==='number'?(allOrders[i
 
 async function markDispatched(idx){
   const o=allOrders[idx];if(!o)return;
-  const estTime=prompt('\u23f1\ufe0f Tiempo estimado (minutos):','20-30');if(estTime===null)return;
-  if(!confirm('\u00bfMarcar orden #'+(o['Order ID']||'—')+' de '+(o.Name||'el cliente')+' como ENVIADA?'))return;
+  const estTime=prompt('⏱️ Tiempo estimado (minutos):','20-30');if(estTime===null)return;
+  if(!confirm('¿Marcar orden #'+(o['Order ID']||'—')+' de '+(o.Name||'el cliente')+' como ENVIADA?'))return;
   try{
     const r=await fetch(N8N_DISPATCH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:o['Order ID'],phone:(o.Phone||'').replace(/^whatsapp:/i,''),name:o.Name||'',address:o.Address||'',total:o.Total||0,estTime:estTime||'20-30'})});
-    if(r.ok){o.Status='Enviado';setTimeout(loadAll,800);}else throw new Error('Error '+r.status);
+    if(r.ok){
+      o.Status='Enviado';
+      _dispatchedLocally.add(o['Order ID']);
+      lsSet('py_dispatched',JSON.stringify([..._dispatchedLocally].slice(-200)));
+      const _today=new Date().toISOString().slice(0,10);
+      const _disp=allOrders.filter(x=>(x.Status==='Enviado'&&toDateStr(x.Timestamp)===_today)||_dispatchedLocally.has(x['Order ID'])).reverse();
+      document.getElementById('cnt-despachados').textContent=_disp.length;
+      document.getElementById('nb-despachados').textContent=_disp.length;
+      document.getElementById('list-despachados').innerHTML=_disp.length?_disp.map(x=>cardDispatched(x)).join(''):'<div class="empty"><em>🛵</em>No hay pedidos despachados hoy</div>';
+      updateAll(parseInt(document.getElementById('sbConn').textContent)||0);
+      setTimeout(loadAll,10000);
+    }else throw new Error('Error '+r.status);
   }catch(e){alert('Error al marcar como enviada: '+e.message);}
 }
 
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeTicket();closeEdit();}});
+function buildReportHTML(){
+  const{from,to,label}=getReportDateRange();
+  const now=new Date().toLocaleString('es-DO',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'});
+  const allConf=allOrders.filter(o=>o.Status==='Confirmed'||o.Status==='Enviado');
+  const periodOrders=allConf.filter(o=>{const d=toDateStr(o.Timestamp);return d>=from&&d<=to;});
+  const periodZelle=periodOrders.filter(o=>parseFloat(o.StripeFee||0)===0);const periodStripe=periodOrders.filter(o=>parseFloat(o.StripeFee||0)>0);
+  const sum=(arr,key)=>arr.reduce((s,o)=>s+parseFloat(o[key]||0),0);
+  const periodRev=sum(periodOrders,'Total');const periodZelleRev=sum(periodZelle,'Total');const periodStripeRev=sum(periodStripe,'Total');
+  const periodTax=sum(periodOrders,'Tax');const periodGestion=sum(periodOrders,'Gestion');const periodStripeFee=sum(periodStripe,'StripeFee');const periodTips=sum(periodOrders,'Tip');const periodSubtotal=sum(periodOrders,'Subtotal');
+  const avgOrder=periodOrders.length?periodRev/periodOrders.length:0;const netEst=periodRev-periodStripeFee;
+  const itemCount={};
+  periodOrders.forEach(o=>{(o.Items||'').split(' | ').forEach(line=>{const m=line.match(/^(\d+)x (.+?) - \$/);if(m){const name=m[2].trim();const qty=parseInt(m[1]);itemCount[name]=(itemCount[name]||0)+qty;}});});
+  const topItems=Object.entries(itemCount).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const dayMap={};
+  periodOrders.forEach(o=>{const d=toDateStr(o.Timestamp);if(!dayMap[d])dayMap[d]={orders:0,subtotal:0,tax:0,gestion:0,tip:0,stripefee:0,total:0};dayMap[d].orders++;dayMap[d].subtotal+=parseFloat(o.Subtotal||0);dayMap[d].tax+=parseFloat(o.Tax||0);dayMap[d].gestion+=parseFloat(o.Gestion||0);dayMap[d].tip+=parseFloat(o.Tip||0);dayMap[d].stripefee+=parseFloat(o.StripeFee||0);dayMap[d].total+=parseFloat(o.Total||0);});
+  const days=Object.keys(dayMap).sort();
+  const kpis=[['💰 Ingresos totales','$'+periodRev.toFixed(2)],['📦 Total órdenes',periodOrders.length],['💸 Ingresos Zelle','$'+periodZelleRev.toFixed(2)],['💳 Ingresos Stripe','$'+periodStripeRev.toFixed(2)],['🏛️ Tax cobrado','$'+periodTax.toFixed(2)],['💼 Com. Gestión','$'+periodGestion.toFixed(2)],['🙏 Propinas repartidor','$'+periodTips.toFixed(2)],['📈 Ticket promedio','$'+avgOrder.toFixed(2)]];
+  const breakdown=[['💳 Órdenes Stripe',periodStripe.length,'$'+periodStripeRev.toFixed(2)],['💸 Órdenes Zelle',periodZelle.length,'$'+periodZelleRev.toFixed(2)],['📦 Total órdenes',periodOrders.length,'$'+periodRev.toFixed(2)],['🧾 Subtotal bruto','—','$'+periodSubtotal.toFixed(2)],['🏛️ Tax NJ (6.625%)','—','$'+periodTax.toFixed(2)],['💼 Comisión Gestión','—','$'+periodGestion.toFixed(2)],['🙏 Propinas repartidor','—','$'+periodTips.toFixed(2)],['💳 Comisión Stripe','—','$'+periodStripeFee.toFixed(2)],['💰 Neto estimado','—','$'+netEst.toFixed(2)]];
+  return `<div class="rp-header"><div><div class="rp-logo">🍽️ PIDE<span>YA</span></div><div style="font-size:8pt;color:#555;margin-top:3px;">El Conuco Restaurante · 715 Summit Ave, Union City, NJ 07087 · +1 (201) 772-7540</div></div><div class="rp-meta">Generado: ${now}<br>Período: <strong>${label}</strong><br>${from!==to?from+' → '+to:from}</div></div>
+    <div class="rp-title">📈 Reporte de Ventas — ${label}</div>
+    <div class="rp-kpi-grid">${kpis.map(([l,v])=>`<div class="rp-kpi"><div class="rp-kpi-val">${v}</div><div class="rp-kpi-lbl">${l}</div></div>`).join('')}</div>
+    <div class="rp-two-col"><div><div class="rp-section-title">Desglose del Período</div><table><thead><tr><th>Concepto</th><th style="text-align:center">Cant.</th><th style="text-align:right">Monto</th></tr></thead><tbody>${breakdown.map(([c,n,m],i)=>`<tr${i===breakdown.length-1?' class="rp-totals-row"':''}><td>${c}</td><td style="text-align:center;font-weight:700">${n}</td><td style="text-align:right;font-weight:700;color:#166534">${m}</td></tr>`).join('')}</tbody></table></div>
+    <div><div class="rp-section-title">🏆 Top Platos Más Vendidos</div><table><thead><tr><th style="text-align:center">#</th><th>Plato</th><th style="text-align:center">Uds</th></tr></thead><tbody>${topItems.length?topItems.map(([name,qty],i)=>`<tr><td style="text-align:center;color:#64748B;font-weight:700">${i+1}</td><td>${name}</td><td style="text-align:center;font-weight:700;color:#166534">${qty}</td></tr>`).join(''):'<tr><td colspan="3" style="text-align:center;color:#94A3B8">Sin datos</td></tr>'}</tbody></table></div></div>
+    ${days.length?`<div class="rp-section-title">Ventas por Día — Detalle</div><table><thead><tr><th>Fecha</th><th style="text-align:center">Órdenes</th><th style="text-align:right">Subtotal</th><th style="text-align:right">Tax</th><th style="text-align:right">Gestión</th><th style="text-align:right">Propinas</th><th style="text-align:right">Stripe Fee</th><th style="text-align:right">Total</th></tr></thead><tbody>${days.map(d=>{const r=dayMap[d];return`<tr><td style="font-weight:600">${d}</td><td style="text-align:center">${r.orders}</td><td style="text-align:right">$${r.subtotal.toFixed(2)}</td><td style="text-align:right">$${r.tax.toFixed(2)}</td><td style="text-align:right">$${r.gestion.toFixed(2)}</td><td style="text-align:right;color:#166534;font-weight:600">$${r.tip.toFixed(2)}</td><td style="text-align:right">$${r.stripefee.toFixed(2)}</td><td style="text-align:right;font-weight:800;color:#166534">$${r.total.toFixed(2)}</td></tr>`;}).join('')}<tr class="rp-totals-row"><td>TOTAL</td><td style="text-align:center">${periodOrders.length}</td><td style="text-align:right">$${periodSubtotal.toFixed(2)}</td><td style="text-align:right">$${periodTax.toFixed(2)}</td><td style="text-align:right">$${periodGestion.toFixed(2)}</td><td style="text-align:right">$${periodTips.toFixed(2)}</td><td style="text-align:right">$${periodStripeFee.toFixed(2)}</td><td style="text-align:right">$${periodRev.toFixed(2)}</td></tr></tbody></table>`:''}
+    <div class="rp-footer">PIDEYA LLC · El Conuco Restaurante · +1 (201) 772-7540 · Generado el ${now}</div>`;
+}
+
+function printReport(){
+  renderReports();document.getElementById('reportPrintArea').innerHTML=buildReportHTML();
+  const ticketModal=document.getElementById('ticketModal');const wasOpen=ticketModal.classList.contains('open');
+  if(wasOpen)ticketModal.classList.remove('open');window.print();if(wasOpen)ticketModal.classList.add('open');
+}
+function exportReportPDF(){printReport();}
+
+async function deleteOrder(idx){
+  const o=allOrders[idx];if(!o)return;
+  const pwd=prompt('🔐 Contraseña del gerente para eliminar esta orden:');
+  if(pwd===null)return;
+  if(pwd!==MANAGER_PASS){alert('❌ Contraseña incorrecta. Contacta al administrador.');return;}
+  if(!confirm('⚠️ ¿Eliminar orden #'+(o['Order ID']||'—')+' de '+(o.Name||'—')+'?\nEsta acción no se puede deshacer.'))return;
+  try{
+    const r=await fetch(N8N_DELETE_ORDER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:o['Order ID'],name:o.Name||'',phone:o.Phone||''})});
+    if(r.ok){
+      allOrders.splice(idx,1);
+      delete orderMap[o['Order ID']];
+      updateAll(parseInt(document.getElementById('sbConn').textContent)||0);
+      const msg=document.createElement('div');
+      msg.style.cssText='position:fixed;top:16px;right:16px;background:#166534;color:#fff;padding:12px 18px;border-radius:10px;font-family:Outfit,sans-serif;font-size:.85rem;font-weight:700;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
+      msg.textContent='✅ Orden eliminada correctamente.';
+      document.body.appendChild(msg);setTimeout(()=>msg.remove(),3000);
+    }else throw new Error('Error '+r.status);
+  }catch(e){alert('❌ Error al eliminar: '+e.message);}
+}
+
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');const ov=document.getElementById('sidebarOverlay');
+  if(sb.classList.contains('open')){sb.classList.remove('open');ov.classList.remove('open');}else{sb.classList.add('open');ov.classList.add('open');}
+}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeTicket();closeEdit();closeSidebar();}});
 
 // ── AGENTES PAGE ───────────────────────────────────────────────────────────
 const DEFAULT_AGENTES=[
@@ -1216,15 +1785,15 @@ function initAgentesPage(){
 
 function renderAgentes(){
   const el=document.getElementById('agentes-list');if(!el)return;
-  if(!agentesData.length){el.innerHTML='<div class="empty"><em>\ud83d\udc65</em>No hay agentes configurados</div>';return;}
+  if(!agentesData.length){el.innerHTML='<div class="empty"><em>👥</em>No hay agentes configurados</div>';return;}
   el.innerHTML=agentesData.map((ag,i)=>`
     <div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.06);">
-      <div style="width:36px;height:36px;border-radius:50%;background:${ag.active?'#DCFCE7':'#F1F5F9'};display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">${ag.active?'\ud83d\udc64':'\ud83d\udca4'}</div>
+      <div style="width:36px;height:36px;border-radius:50%;background:${ag.active?'#DCFCE7':'#F1F5F9'};display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">${ag.active?'👤':'💤'}</div>
       <div style="flex:1;min-width:0;">
         <input value="${escH(ag.name)}" onchange="agentesData[${i}].name=this.value" style="width:100%;font-weight:700;font-size:.88rem;color:#111827;background:transparent;border:none;border-bottom:1px dashed #CBD5E1;outline:none;font-family:Outfit,sans-serif;padding:2px 0;margin-bottom:4px;">
         <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
-          <span style="font-size:.7rem;color:#6B7280;">\ud83d\udcf1 +</span>
-          <input value="${escH(ag.phone)}" onchange="agentesData[${i}].phone=this.value.replace(/\\D/g,'')" placeholder="12015550000" style="flex:1;font-size:.82rem;color:#374151;background:#F9FAFB;border:1px solid #E2E8F0;border-radius:6px;padding:4px 8px;font-family:Outfit,sans-serif;outline:none;">
+          <span style="font-size:.7rem;color:#6B7280;">📱 +</span>
+          <input value="${escH(ag.phone)}" onchange="agentesData[${i}].phone=this.value.replace(/\D/g,'')" placeholder="12015550000" style="flex:1;font-size:.82rem;color:#374151;background:#F9FAFB;border:1px solid #E2E8F0;border-radius:6px;padding:4px 8px;font-family:Outfit,sans-serif;outline:none;">
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
@@ -1232,7 +1801,7 @@ function renderAgentes(){
           <input type="checkbox" ${ag.active?'checked':''} onchange="agentesData[${i}].active=this.checked;renderAgentes()" style="width:15px;height:15px;accent-color:#16A34A;">
           Activo
         </label>
-        <button onclick="removeAgente(${i})" style="background:#FEE2E2;color:#DC2626;border:none;border-radius:8px;padding:6px 10px;font-size:.75rem;font-weight:700;cursor:pointer;">\u2715</button>
+        <button onclick="removeAgente(${i})" style="background:#FEE2E2;color:#DC2626;border:none;border-radius:8px;padding:6px 10px;font-size:.75rem;font-weight:700;cursor:pointer;">✕</button>
       </div>
     </div>`).join('');
 }
@@ -1243,14 +1812,14 @@ function addAgenteRow(){
 }
 
 function removeAgente(i){
-  if(!confirm('\u00bfEliminar este agente?'))return;
+  if(!confirm('¿Eliminar este agente?'))return;
   agentesData.splice(i,1);renderAgentes();
 }
 
 function saveAgentes(){
   lsSet('py_agentes',JSON.stringify(agentesData));
   const msg=document.getElementById('agentes-msg');
-  if(msg){msg.style.display='block';msg.style.color='#166534';msg.textContent='\u2705 Guardado localmente. Para aplicar cambios en el bot, actualiza n8n.';setTimeout(()=>msg.style.display='none',4000);}
+  if(msg){msg.style.display='block';msg.style.color='#166534';msg.textContent='✅ Guardado localmente. Para aplicar cambios en el bot, actualiza n8n.';setTimeout(()=>msg.style.display='none',4000);}
 }
 
 // ── BROADCAST PAGE ─────────────────────────────────────────────────────────
@@ -1263,10 +1832,10 @@ function initBroadcastPage(){
 }
 
 const BROADCAST_TEMPLATES={
-  special:'\ud83c\udf7d\ufe0f \u00a1Hola! Hoy en El Conuco tenemos especiales deliciosos. Escr\u00edbenos MENU para ver todas las opciones y hacer tu pedido. \ud83d\udef5 Delivery disponible. \u00a1Te esperamos!',
-  closed:'\ud83d\udd34 Hola, hoy El Conuco estar\u00e1 cerrado. \u00a1Gracias por tu comprensi\u00f3n! Regresamos pronto con m\u00e1s sabor. \ud83c\udf7d\ufe0f',
-  open:'\u2705 \u00a1Buenas noticias! El Conuco ya est\u00e1 abierto y listo para atenderte. Escribe MENU para ver nuestros platos del d\u00eda. \ud83d\udef5 Hacemos delivery.',
-  promo:'\ud83d\udcb8 \u00a1OFERTA ESPECIAL HOY! \ud83d\udd25 Escr\u00edbenos MENU ahora y pide tu comida favorita. Entrega r\u00e1pida a tu puerta. \ud83d\udef5 El Conuco Restaurante.'
+  special:'🍽️ ¡Hola! Hoy en El Conuco tenemos especiales deliciosos. Escríbenos MENU para ver todas las opciones y hacer tu pedido. 🛵 Delivery disponible. ¡Te esperamos!',
+  closed:'🔴 Hola, hoy El Conuco estará cerrado. ¡Gracias por tu comprensión! Regresamos pronto con más sabor. 🍽️',
+  open:'✅ ¡Buenas noticias! El Conuco ya está abierto y listo para atenderte. Escribe MENU para ver nuestros platos del día. 🛵 Hacemos delivery.',
+  promo:'💸 ¡OFERTA ESPECIAL HOY! 🔥 Escríbenos MENU ahora y pide tu comida favorita. Entrega rápida a tu puerta. 🛵 El Conuco Restaurante.'
 };
 
 function setTemplate(key){
@@ -1286,89 +1855,24 @@ function insertEmoji(emoji){
 
 async function sendBroadcast(){
   const ta=document.getElementById('broadcastMsg');
-  const msg=(ta?.value||'').trim();
+  const msg=(ta&&ta.value||'').trim();
   if(!msg){alert('Escribe un mensaje primero.');return;}
   if(msg.length>1000){alert('El mensaje no puede superar 1000 caracteres.');return;}
-  if(!confirm('\u00bfEnviar este mensaje a todos los suscriptores? No se puede deshacer.'))return;
+  if(!confirm('¿Enviar este mensaje a todos los suscriptores? No se puede deshacer.'))return;
   const btn=document.getElementById('broadcastSendBtn');
   const res=document.getElementById('broadcastResult');
-  btn.disabled=true;btn.textContent='\ud83d\udce4 Enviando...';
+  btn.disabled=true;btn.textContent='📤 Enviando...';
   try{
     const r=await fetch('https://pideya.app.n8n.cloud/webhook/pideya-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,timestamp:new Date().toISOString()})});
     if(r.ok){
       res.style.display='block';res.style.background='#DCFCE7';res.style.color='#166534';res.style.border='1px solid #86EFAC';
-      res.textContent='\u2705 Broadcast enviado correctamente.';
+      res.textContent='✅ Broadcast enviado correctamente.';
       ta.value='';if(document.getElementById('broadcastCount'))document.getElementById('broadcastCount').textContent='0 / 1000 caracteres';
     }else throw new Error('Error '+r.status);
   }catch(e){
     res.style.display='block';res.style.background='#FEE2E2';res.style.color='#DC2626';res.style.border='1px solid #FECACA';
-    res.textContent='\u274c Error: '+e.message;
-  }finally{btn.disabled=false;btn.textContent='\ud83d\udce2 Enviar Broadcast';}
-}
-
-// ── ESC/POS BLUETOOTH PRINTING ─────────────────────────────────────────────
-let btDevice=null,btCharacteristic=null;
-const ESC=0x1B,GS=0x1D;
-function textToBytes(str){const b=[];for(let i=0;i<str.length;i++){const c=str.charCodeAt(i);b.push(c<256?c:0x3F);}return b;}
-function wrapText(text,maxLen){const words=text.split(' ');const lines=[];let cur='';for(const w of words){if((cur+(cur?' ':'')+w).length<=maxLen)cur+=(cur?' ':'')+w;else{if(cur)lines.push(cur);cur=w;}}if(cur)lines.push(cur);return lines.length?lines:[text.substring(0,maxLen)];}
-function padLine(label,value,width){const v=(value||'').trim(),l=(label||'').trim();return l+' '.repeat(Math.max(1,width-l.length-v.length))+v;}
-function buildESCPOSTicket(){
-  const bytes=[];
-  bytes.push(ESC,0x40);bytes.push(GS,0x21,0x00);bytes.push(ESC,0x33,30);bytes.push(ESC,0x61,0x01);
-  bytes.push(ESC,0x21,0x38);bytes.push(...textToBytes('PIDEYA LLC\n'));
-  bytes.push(ESC,0x21,0x08);bytes.push(...textToBytes('El Conuco Restaurante\n'));
-  bytes.push(ESC,0x21,0x00);bytes.push(...textToBytes('715 Summit Ave, Union City, NJ\n'));
-  bytes.push(...textToBytes('+1 (201) 772-7540\n'));bytes.push(...textToBytes('-'.repeat(48)+'\n'));
-  bytes.push(ESC,0x61,0x00);
-  const ordId=document.getElementById('tkId')?.textContent||'';
-  bytes.push(ESC,0x21,0x08);bytes.push(...textToBytes('Orden: '+ordId+'\n'));bytes.push(ESC,0x21,0x00);
-  const name=document.getElementById('tkName')?.textContent||'';
-  const addr=document.getElementById('tkAddr')?.textContent||'';
-  const phone=document.getElementById('tkPhone')?.textContent||'';
-  bytes.push(...textToBytes('Cliente: '+name+'\n'));bytes.push(...textToBytes('Tel: '+phone+'\n'));
-  wrapText('Dir: '+addr,48).forEach(l=>bytes.push(...textToBytes(l+'\n')));
-  bytes.push(...textToBytes('-'.repeat(48)+'\n'));bytes.push(ESC,0x21,0x08);bytes.push(...textToBytes('ITEMS\n'));bytes.push(ESC,0x21,0x00);
-  const itemsEl=document.getElementById('tkItems');
-  if(itemsEl)itemsEl.querySelectorAll('.t-item').forEach(el=>{wrapText(el.textContent.trim(),48).forEach(l=>bytes.push(...textToBytes(l+'\n')));});
-  bytes.push(...textToBytes('-'.repeat(48)+'\n'));
-  const rows=[['Subtotal',document.getElementById('tkSub')?.textContent],['Tax NJ (6.625%)',document.getElementById('tkTax')?.textContent],['Gestion',document.getElementById('tkGes')?.textContent]];
-  const feeRow=document.getElementById('tkFeeRow');if(feeRow&&feeRow.style.display!=='none')rows.push(['Cargo Stripe (3.5%)',document.getElementById('tkFee')?.textContent]);
-  rows.forEach(([label,val])=>{if(val)bytes.push(...textToBytes(padLine(label,val,48)+'\n'));});
-  bytes.push(...textToBytes('='.repeat(48)+'\n'));bytes.push(ESC,0x21,0x38);
-  const total=document.getElementById('tkTot')?.textContent||'';
-  bytes.push(...textToBytes(padLine('TOTAL',total,24)+'\n'));bytes.push(ESC,0x21,0x00);
-  bytes.push(...textToBytes('='.repeat(48)+'\n'));bytes.push(ESC,0x61,0x01);
-  bytes.push(...textToBytes('\nGracias por usar PIDEYA!\n'));bytes.push(...textToBytes('pideya.co\n'));
-  bytes.push(0x0A,0x0A,0x0A);bytes.push(GS,0x56,0x42,0x00);
-  return new Uint8Array(bytes);
-}
-async function printESCPOS(){
-  const statusEl=document.getElementById('btStatus'),btn=document.getElementById('btPrintBtn');
-  if(!navigator.bluetooth){statusEl.textContent='\u274c Tu navegador no soporta Web Bluetooth.';return;}
-  try{
-    statusEl.textContent='\ud83d\udd0d Buscando impresora Bluetooth...';btn.disabled=true;
-    if(!btDevice||!btDevice.gatt.connected){
-      btDevice=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:['000018f0-0000-1000-8000-00805f9b34fb','49535343-fe7d-4ae5-8fa9-9fafd205e455','e7810a71-73ae-499d-8c15-faa9aef0c3f2','0000ff00-0000-1000-8000-00805f9b34fb','0000ffe0-0000-1000-8000-00805f9b34fb']});
-      statusEl.textContent='\ud83d\udd17 Conectando a '+btDevice.name+'...';
-      const server=await btDevice.gatt.connect();
-      const serviceUUIDs=['000018f0-0000-1000-8000-00805f9b34fb','49535343-fe7d-4ae5-8fa9-9fafd205e455','e7810a71-73ae-499d-8c15-faa9aef0c3f2','0000ff00-0000-1000-8000-00805f9b34fb','0000ffe0-0000-1000-8000-00805f9b34fb'];
-      let service=null;for(const uuid of serviceUUIDs){try{service=await server.getPrimaryService(uuid);break;}catch(e){}}
-      if(!service){const services=await server.getPrimaryServices();if(services.length)service=services[0];}
-      if(!service)throw new Error('No se encontr\u00f3 servicio de impresi\u00f3n compatible.');
-      const chars=await service.getCharacteristics();
-      btCharacteristic=chars.find(c=>c.properties.write||c.properties.writeWithoutResponse);
-      if(!btCharacteristic)throw new Error('No se encontr\u00f3 caracter\u00edstica de escritura.');
-    }
-    statusEl.textContent='\ud83d\udda8\ufe0f Enviando ticket a la impresora...';
-    const data=buildESCPOSTicket();const CHUNK=512;
-    for(let i=0;i<data.length;i+=CHUNK){
-      const chunk=data.slice(i,i+CHUNK);
-      if(btCharacteristic.properties.writeWithoutResponse)await btCharacteristic.writeValueWithoutResponse(chunk);
-      else await btCharacteristic.writeValue(chunk);
-      await new Promise(r=>setTimeout(r,50));
-    }
-    statusEl.textContent='\u2705 Ticket enviado correctamente.';btn.disabled=false;
-  }catch(e){statusEl.textContent='\u274c Error: '+e.message;btn.disabled=false;btDevice=null;btCharacteristic=null;}
+    res.textContent='❌ Error: '+e.message;
+  }finally{btn.disabled=false;btn.textContent='📢 Enviar Broadcast';}
 }
 </script>
 </body>
