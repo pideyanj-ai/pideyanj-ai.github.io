@@ -455,7 +455,7 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
   <!-- AGENTES -->
   <div class="page" id="page-agentes">
     <div class="sec-head"><div class="sec-title"><div class="sec-dot dot-b"></div>Gestión de Agentes</div><button class="btn-icon btn-green" onclick="saveAgentes()">💾 Guardar Cambios</button></div>
-    <p style="font-size:.78rem;color:#4B5563;margin-bottom:16px;">Configura los números de WhatsApp de los agentes que reciben notificaciones de nuevas órdenes. Al guardar, se generará el código para actualizar n8n.</p>
+    <p style="font-size:.78rem;color:#4B5563;margin-bottom:16px;">Configura los números de WhatsApp de los agentes que reciben notificaciones de nuevas órdenes. Los cambios se guardan automáticamente en el sistema.</p>
     <div id="agentes-list" style="display:flex;flex-direction:column;gap:12px;"><div class="loading-state"><div class="spin"></div><p>Cargando...</p></div></div>
     <button onclick="addAgenteRow()" style="margin-top:16px;width:100%;background:#EEF2FF;color:#3730A3;border:1px solid #C7D2FE;border-radius:10px;padding:12px;font-family:Outfit,sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;">➕ Agregar Agente</button>
     <div id="agentes-msg" style="margin-top:12px;font-size:.8rem;display:none;padding:12px;border-radius:10px;"></div>
@@ -792,15 +792,22 @@ function renderAgentes(){const el=document.getElementById('agentes-list');if(!el
 function addAgenteRow(){agentesData.push({id:'ag_'+Date.now(),name:'Nuevo Agente',phone:'',active:true});renderAgentes();}
 function removeAgente(i){if(!confirm('¿Eliminar este agente?'))return;agentesData.splice(i,1);renderAgentes();}
 
-function saveAgentes(){
+async function saveAgentes(){
   lsSet('py_agentes',JSON.stringify(agentesData));
-  const arr=agentesData.filter(ag=>ag.phone&&ag.phone.length>=10);
-  const code="const AGENTS=["+arr.map(ag=>"{name:'"+ag.name.replace(/'/g,"\\'")+"',phone:'"+ag.phone+"'}").join(',')+"];";
+  const btn=document.querySelector('#page-agentes .btn-green');
   const msg=document.getElementById('agentes-msg');
-  if(msg){
-    msg.style.display='block';msg.style.background='#DCFCE7';msg.style.color='#166534';msg.style.border='1px solid #86EFAC';
-    msg.innerHTML='✅ Guardado.<br><br><div style="font-size:.75rem;font-weight:700;color:#1E293B;margin-bottom:6px;">📋 Copia esto en <strong>Build Response → n8n</strong> (reemplaza la línea <code style="background:#E0E7FF;padding:1px 4px;border-radius:3px;">const AGENTS=</code>):</div><textarea readonly onclick="this.select()" style="width:100%;background:#1E293B;color:#4ADE80;border:1px solid #334155;border-radius:7px;padding:8px;font-family:monospace;font-size:.68rem;line-height:1.5;resize:none;height:68px;outline:none;">'+code+'</textarea>';
-    setTimeout(()=>msg.style.display='none',30000);
+  if(btn){btn.textContent='⏳ Guardando...';btn.disabled=true;}
+  try{
+    const r=await fetch('https://pideya.app.n8n.cloud/webhook/pideya-save-agents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agents:agentesData})});
+    const data=await r.json().catch(()=>({}));
+    if(r.ok&&data.ok!==false){
+      if(msg){msg.style.display='block';msg.style.background='#DCFCE7';msg.style.color='#166534';msg.style.border='1px solid #86EFAC';msg.textContent='✅ Agentes guardados correctamente. El bot se actualizará en menos de 5 minutos.';}
+      setTimeout(()=>{if(msg)msg.style.display='none';},6000);
+    } else throw new Error(data.error||data.reason||'Error del servidor');
+  } catch(e){
+    if(msg){msg.style.display='block';msg.style.background='#FEE2E2';msg.style.color='#DC2626';msg.style.border='1px solid #FCA5A5';msg.textContent='❌ Error al guardar: '+e.message;}
+  } finally{
+    if(btn){btn.textContent='💾 Guardar Cambios';btn.disabled=false;}
   }
 }
 
