@@ -6,53 +6,53 @@
 <title>El Conuco — Menú Digital</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root { --green-dark:#1a3a1a; --green-mid:#2d5a27; --orange:#e8760a; --cream:#f5edd8; --cream-dark:#ede0c4; --text-dark:#1a1a1a; --text-muted:#5a4a35; }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:var(--cream); font-family:'Outfit',sans-serif; color:var(--text-dark); min-height:100vh; }
-  .site-header { background:var(--green-dark); padding:18px 20px; text-align:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
-  .site-header h1 { font-family:'Playfair Display',serif; color:white; font-size:1.4rem; letter-spacing:1px; }
-  .site-header p { color:var(--orange); font-size:0.78rem; letter-spacing:2px; text-transform:uppercase; margin-top:2px; }
-  .search-wrap { background:var(--green-mid); padding:14px 20px; display:flex; gap:10px; align-items:center; }
-  .search-wrap input { flex:1; padding:10px 16px; border-radius:50px; border:none; background:rgba(255,255,255,0.12); color:white; font-family:'Outfit',sans-serif; font-size:0.95rem; outline:none; transition:background 0.2s; }
-  .search-wrap input::placeholder { color:rgba(255,255,255,0.55); }
-  .search-wrap input:focus { background:rgba(255,255,255,0.2); }
-  .search-wrap .search-icon { color:rgba(255,255,255,0.6); font-size:1.1rem; }
-  #search-results { display:none; padding:16px 16px 8px; background:white; border-bottom:2px solid var(--cream-dark); }
-  #search-results.active { display:block; }
-  #search-results h3 { font-size:0.8rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); margin-bottom:10px; }
-  .search-result-card { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--cream); border-radius:10px; margin-bottom:8px; cursor:pointer; transition:background 0.15s; }
-  .search-result-card:hover { background:var(--cream-dark); }
-  .search-result-card .name { font-weight:600; font-size:0.95rem; }
-  .search-result-card .cat { font-size:0.75rem; color:var(--text-muted); }
-  .search-result-card .price { color:var(--orange); font-weight:700; font-size:1rem; }
-  #no-results { text-align:center; color:var(--text-muted); padding:12px; font-size:0.9rem; display:none; }
-  .cat-nav { overflow-x:auto; display:flex; gap:8px; padding:12px 16px; background:var(--cream-dark); scrollbar-width:none; }
-  .cat-nav::-webkit-scrollbar { display:none; }
-  .cat-pill { white-space:nowrap; padding:7px 16px; border-radius:50px; border:2px solid var(--green-dark); background:transparent; color:var(--green-dark); font-family:'Outfit',sans-serif; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
-  .cat-pill:hover,.cat-pill.active { background:var(--green-dark); color:white; }
-  .resto-info { background:var(--green-dark); color:white; padding:16px 20px; display:flex; flex-direction:column; gap:6px; }
-  .resto-info .address { font-size:0.82rem; color:rgba(255,255,255,0.7); }
-  .resto-info .hours { font-size:0.82rem; color:var(--orange); }
-  .order-btn { display:inline-flex; align-items:center; gap:8px; background:#25d366; color:white; padding:11px 22px; border-radius:50px; text-decoration:none; font-weight:600; font-size:0.9rem; margin-top:8px; width:fit-content; transition:transform 0.15s,box-shadow 0.15s; }
-  .order-btn:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(37,211,102,0.4); }
-  .menu-section { margin-bottom:0; }
-  .section-banner { width:100%; display:block; object-fit:cover; max-height:200px; }
-  .section-title-bar { background:var(--green-dark); padding:12px 20px; display:flex; align-items:center; gap:10px; }
-  .section-title-bar h2 { font-family:'Playfair Display',serif; color:white; font-size:1.2rem; }
-  .section-title-bar span { color:var(--orange); font-size:1.3rem; }
-  .dish-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; padding:14px 14px 20px; background:var(--cream); }
-  .dish-card { background:white; border-radius:14px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.08); transition:transform 0.18s,box-shadow 0.18s; cursor:pointer; }
-  .dish-card:hover { transform:translateY(-3px); box-shadow:0 6px 18px rgba(0,0,0,0.13); }
-  .dish-card .dish-img { width:100%; aspect-ratio:1/1; object-fit:cover; object-position:center; display:block; background:var(--cream-dark); }
-  .dish-img-placeholder { width:100%; aspect-ratio:1/1; background:linear-gradient(135deg,var(--green-dark),var(--green-mid)); display:flex; align-items:center; justify-content:center; font-size:2.8rem; color:rgba(255,255,255,0.35); }
-  .dish-info { padding:10px 10px 12px; }
-  .dish-info .dish-name { font-weight:600; font-size:0.88rem; line-height:1.25; color:var(--text-dark); margin-bottom:4px; }
-  .dish-info .dish-desc { font-size:0.73rem; color:var(--text-muted); line-height:1.35; margin-bottom:8px; }
-  .dish-info .dish-price { color:var(--orange); font-weight:700; font-size:1.05rem; }
-  .dish-info .dish-num { font-size:0.7rem; color:#aaa; float:right; margin-top:2px; }
-  .sticky-order { position:fixed; bottom:0; left:0; right:0; background:#25d366; padding:14px 20px; text-align:center; z-index:200; box-shadow:0 -3px 16px rgba(0,0,0,0.2); }
-  .sticky-order a { color:white; text-decoration:none; font-weight:700; font-size:1rem; display:flex; align-items:center; justify-content:center; gap:8px; }
-  .pb-safe { padding-bottom:68px; }
+  :root{--green-dark:#1a3a1a;--green-mid:#2d5a27;--orange:#e8760a;--cream:#f5edd8;--cream-dark:#ede0c4;--text-dark:#1a1a1a;--text-muted:#5a4a35;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--cream);font-family:'Outfit',sans-serif;color:var(--text-dark);min-height:100vh;}
+  .site-header{background:var(--green-dark);padding:18px 20px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.4);}
+  .site-header h1{font-family:'Playfair Display',serif;color:white;font-size:1.4rem;letter-spacing:1px;}
+  .site-header p{color:var(--orange);font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+  .search-wrap{background:var(--green-mid);padding:14px 20px;display:flex;gap:10px;align-items:center;}
+  .search-wrap input{flex:1;padding:10px 16px;border-radius:50px;border:none;background:rgba(255,255,255,0.12);color:white;font-family:'Outfit',sans-serif;font-size:0.95rem;outline:none;transition:background 0.2s;}
+  .search-wrap input::placeholder{color:rgba(255,255,255,0.55);}
+  .search-wrap input:focus{background:rgba(255,255,255,0.2);}
+  .search-wrap .search-icon{color:rgba(255,255,255,0.6);font-size:1.1rem;}
+  #search-results{display:none;padding:16px 16px 8px;background:white;border-bottom:2px solid var(--cream-dark);}
+  #search-results.active{display:block;}
+  #search-results h3{font-size:0.8rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:10px;}
+  .search-result-card{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--cream);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:background 0.15s;}
+  .search-result-card:hover{background:var(--cream-dark);}
+  .search-result-card .name{font-weight:600;font-size:0.95rem;}
+  .search-result-card .cat{font-size:0.75rem;color:var(--text-muted);}
+  .search-result-card .price{color:var(--orange);font-weight:700;font-size:1rem;}
+  #no-results{text-align:center;color:var(--text-muted);padding:12px;font-size:0.9rem;display:none;}
+  .cat-nav{overflow-x:auto;display:flex;gap:8px;padding:12px 16px;background:var(--cream-dark);scrollbar-width:none;}
+  .cat-nav::-webkit-scrollbar{display:none;}
+  .cat-pill{white-space:nowrap;padding:7px 16px;border-radius:50px;border:2px solid var(--green-dark);background:transparent;color:var(--green-dark);font-family:'Outfit',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+  .cat-pill:hover,.cat-pill.active{background:var(--green-dark);color:white;}
+  .resto-info{background:var(--green-dark);color:white;padding:16px 20px;display:flex;flex-direction:column;gap:6px;}
+  .resto-info .address{font-size:0.82rem;color:rgba(255,255,255,0.7);}
+  .resto-info .hours{font-size:0.82rem;color:var(--orange);}
+  .order-btn{display:inline-flex;align-items:center;gap:8px;background:#25d366;color:white;padding:11px 22px;border-radius:50px;text-decoration:none;font-weight:600;font-size:0.9rem;margin-top:8px;width:fit-content;transition:transform 0.15s,box-shadow 0.15s;}
+  .order-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(37,211,102,0.4);}
+  .menu-section{margin-bottom:0;}
+  .section-banner{width:100%;display:block;object-fit:cover;max-height:200px;}
+  .section-title-bar{background:var(--green-dark);padding:12px 20px;display:flex;align-items:center;gap:10px;}
+  .section-title-bar h2{font-family:'Playfair Display',serif;color:white;font-size:1.2rem;}
+  .section-title-bar span{color:var(--orange);font-size:1.3rem;}
+  .dish-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;padding:14px 14px 20px;background:var(--cream);}
+  .dish-card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:transform 0.18s,box-shadow 0.18s;cursor:pointer;}
+  .dish-card:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,0.13);}
+  .dish-card .dish-img{width:100%;aspect-ratio:1/1;object-fit:cover;object-position:center;display:block;background:var(--cream-dark);}
+  .dish-img-placeholder{width:100%;aspect-ratio:1/1;background:linear-gradient(135deg,var(--green-dark),var(--green-mid));display:flex;align-items:center;justify-content:center;font-size:2.8rem;color:rgba(255,255,255,0.35);}
+  .dish-info{padding:10px 10px 12px;}
+  .dish-info .dish-name{font-weight:600;font-size:0.88rem;line-height:1.25;color:var(--text-dark);margin-bottom:4px;}
+  .dish-info .dish-desc{font-size:0.73rem;color:var(--text-muted);line-height:1.35;margin-bottom:8px;}
+  .dish-info .dish-price{color:var(--orange);font-weight:700;font-size:1.05rem;}
+  .dish-info .dish-num{font-size:0.7rem;color:#aaa;float:right;margin-top:2px;}
+  .sticky-order{position:fixed;bottom:0;left:0;right:0;background:#25d366;padding:14px 20px;text-align:center;z-index:200;box-shadow:0 -3px 16px rgba(0,0,0,0.2);}
+  .sticky-order a{color:white;text-decoration:none;font-weight:700;font-size:1rem;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .pb-safe{padding-bottom:68px;}
   @media(min-width:600px){.dish-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}.section-banner{max-height:320px;}}
   @media(min-width:900px){.dish-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;padding:18px;}.section-banner{max-height:380px;}}
 </style>
@@ -103,42 +103,46 @@
   <div class="dish-grid">
     <div class="dish-card">
       <div class="dish-img-placeholder">🍳</div>
-      <div class="dish-info"><div class="dish-name">Tres Golpes</div><div class="dish-desc">Mangú, salami, queso frito y huevo</div><div class="dish-price">$10.99 <span class="dish-num">#1</span></div></div>
+      <div class="dish-info"><div class="dish-name">Tres Golpes</div><div class="dish-desc">Mangú, salami, queso frito y huevo</div><div class="dish-price">$10.99 <span class="dish-num">#7</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🍳</div>
-      <div class="dish-info"><div class="dish-name">Omelette con Papas</div><div class="dish-desc">Huevo, queso, jamón y vegetales con papas salteadas</div><div class="dish-price">$10.99 <span class="dish-num">#2</span></div></div>
+      <div class="dish-info"><div class="dish-name">Omelette con Papas</div><div class="dish-desc">Huevo, queso, jamón y vegetales con papas salteadas</div><div class="dish-price">$10.99 <span class="dish-num">#8</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🍳</div>
-      <div class="dish-info"><div class="dish-name">4 Golpes con Longaniza</div><div class="dish-desc">Mangú, salami, queso frito, huevo y longaniza</div><div class="dish-price">$13.99 <span class="dish-num">#3</span></div></div>
+      <div class="dish-info"><div class="dish-name">4 Golpes con Longaniza</div><div class="dish-desc">Mangú, salami, queso frito, huevo y longaniza</div><div class="dish-price">$13.99 <span class="dish-num">#9</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🍳</div>
-      <div class="dish-info"><div class="dish-name">Desayuno Americano</div><div class="dish-desc">Huevos, bacon, salchichas, pancakes y tostadas</div><div class="dish-price">$12.99 <span class="dish-num">#4</span></div></div>
+      <div class="dish-info"><div class="dish-name">Desayuno Americano</div><div class="dish-desc">Huevos, bacon, salchichas, pancakes y tostadas</div><div class="dish-price">$12.99 <span class="dish-num">#10</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🍳</div>
-      <div class="dish-info"><div class="dish-name">Bistec con Huevo</div><div class="dish-desc">Bistec de res, huevo frito, cebolla y papas fritas</div><div class="dish-price">$12.99 <span class="dish-num">#5</span></div></div>
+      <div class="dish-info"><div class="dish-name">Bistec con Huevo</div><div class="dish-desc">Bistec de res, huevo frito, cebolla y papas fritas</div><div class="dish-price">$12.99 <span class="dish-num">#11</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🥪</div>
-      <div class="dish-info"><div class="dish-name">Club Sándwich + Papas</div><div class="dish-desc">Pollo, jamón, bacon, queso, lechuga y tomate</div><div class="dish-price">$12.95 <span class="dish-num">#6</span></div></div>
+      <div class="dish-info"><div class="dish-name">Club Sándwich + Papas</div><div class="dish-desc">Pollo, jamón, bacon, queso, lechuga y tomate</div><div class="dish-price">$12.95 <span class="dish-num">#12</span></div></div>
     </div>
     <div class="dish-card">
-      <img src="TOCINETA%2C%20HUEVO%20Y%20QUESO.jpg" alt="Tocineta, Huevo y Queso" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <img src="TOCINETA,%20HUEVO%20Y%20QUESO.jpg" alt="Tocineta, Huevo y Queso" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍳</div>
-      <div class="dish-info"><div class="dish-name">Tocineta, Huevo y Queso</div><div class="dish-desc">Clásico dominicano para empezar el día</div><div class="dish-price">— <span class="dish-num">#7</span></div></div>
+      <div class="dish-info"><div class="dish-name">Tocineta, Huevo y Queso</div><div class="dish-desc">Clásico dominicano para empezar el día</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
     <div class="dish-card">
-      <img src="AVENA%20CALIENTE.jpg" alt="Avena Caliente (S/L)" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <img src="AVENA%20CALIENTE.jpg" alt="Avena Caliente (S)" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">☕</div>
-      <div class="dish-info"><div class="dish-name">Avena Caliente (S/L)</div><div class="dish-desc">Avena cremosa caliente · S $3 / L $6</div><div class="dish-price">$3–$6 <span class="dish-num">#8</span></div></div>
+      <div class="dish-info"><div class="dish-name">Avena Caliente (S)</div><div class="dish-desc">Avena cremosa caliente</div><div class="dish-price">$3.00 <span class="dish-num">#51</span></div></div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">☕</div>
+      <div class="dish-info"><div class="dish-name">Avena Caliente (L)</div><div class="dish-desc">Avena cremosa caliente, talla grande</div><div class="dish-price">$6.00 <span class="dish-num">#52</span></div></div>
     </div>
     <div class="dish-card">
       <img src="AVENA%20FRIA.jpg" alt="Avena Fría" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🥛</div>
-      <div class="dish-info"><div class="dish-name">Avena Fría</div><div class="dish-desc">Avena fría refrescante</div><div class="dish-price">$7.00 <span class="dish-num">#9</span></div></div>
+      <div class="dish-info"><div class="dish-name">Avena Fría</div><div class="dish-desc">Avena fría refrescante</div><div class="dish-price">$7.00 <span class="dish-num">#54</span></div></div>
     </div>
   </div>
 </section>
@@ -149,27 +153,27 @@
     <div class="dish-card">
       <img src="ASOPADO%20DE%20CAMARONES.jpg" alt="Asopado de Camarones" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🦐</div>
-      <div class="dish-info"><div class="dish-name">Asopado de Camarones</div><div class="dish-desc">Asopado cremoso con camarones frescos</div><div class="dish-price">— <span class="dish-num">#1</span></div></div>
+      <div class="dish-info"><div class="dish-name">Asopado de Camarones</div><div class="dish-desc">Asopado cremoso con camarones frescos</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
     <div class="dish-card">
       <img src="ASOPADO%20DE%20LANGOSTA.jpg" alt="Asopado de Langosta" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🦞</div>
-      <div class="dish-info"><div class="dish-name">Asopado de Langosta</div><div class="dish-desc">Asopado de langosta, sabor del mar</div><div class="dish-price">— <span class="dish-num">#2</span></div></div>
+      <div class="dish-info"><div class="dish-name">Asopado de Langosta</div><div class="dish-desc">Asopado de langosta, sabor del mar</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
     <div class="dish-card">
       <img src="_TEMP__%20SOPA%20DE%20CAMARON.jpg" alt="Sopa de Camarón" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍲</div>
-      <div class="dish-info"><div class="dish-name">Sopa de Camarón</div><div class="dish-desc">Sopa de camarón al estilo dominicano</div><div class="dish-price">— <span class="dish-num">#3</span></div></div>
+      <div class="dish-info"><div class="dish-name">Sopa de Camarón</div><div class="dish-desc">Sopa de camarón al estilo dominicano</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
     <div class="dish-card">
       <img src="_TEMP__%20SOPA%20DE%20PESCADO.jpg" alt="Sopa de Pescado" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍲</div>
-      <div class="dish-info"><div class="dish-name">Sopa de Pescado</div><div class="dish-desc">Sopa de pescado fresco</div><div class="dish-price">— <span class="dish-num">#4</span></div></div>
+      <div class="dish-info"><div class="dish-name">Sopa de Pescado</div><div class="dish-desc">Sopa de pescado fresco</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
     <div class="dish-card">
       <img src="_TEMP__%20SOPA%20DE%20VEGETALES.jpg" alt="Sopa de Vegetales" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🥦</div>
-      <div class="dish-info"><div class="dish-name">Sopa de Vegetales</div><div class="dish-desc">Sopa de vegetales del huerto</div><div class="dish-price">— <span class="dish-num">#5</span></div></div>
+      <div class="dish-info"><div class="dish-name">Sopa de Vegetales</div><div class="dish-desc">Sopa de vegetales del huerto</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
   </div>
 </section>
@@ -187,8 +191,7 @@
       <div class="dish-info"><div class="dish-name">Combo Yaroa de Pollo + Coca Cola</div><div class="dish-desc">Yaroa de pollo, queso derretido, ketchup y mayo + Papas + Coca-Cola</div><div class="dish-price">$12.99 <span class="dish-num">#2</span></div></div>
     </div>
     <div class="dish-card">
-      <img src="YAROA%20LARGE.jpg" alt="Combo Yaroa Mixta + Coca Cola" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🍟</div>
+      <div class="dish-img-placeholder">🍟</div>
       <div class="dish-info"><div class="dish-name">Combo Yaroa Mixta + Coca Cola</div><div class="dish-desc">Yaroa de res y pollo con queso + Papas + Coca-Cola</div><div class="dish-price">$13.99 <span class="dish-num">#3</span></div></div>
     </div>
     <div class="dish-card">
@@ -212,85 +215,76 @@
     <div class="dish-card">
       <img src="_TEMP__%20PARGO%20A%20LA%20PARRILLA.jpg" alt="Pargo Frito" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🐟</div>
-      <div class="dish-info"><div class="dish-name">Pargo Frito</div><div class="dish-desc">Pargo rojo frito, estilo dominicano</div><div class="dish-price">$29.93 <span class="dish-num">#1</span></div></div>
+      <div class="dish-info"><div class="dish-name">Pargo Frito</div><div class="dish-desc">Pargo rojo frito, estilo dominicano</div><div class="dish-price">$29.93 <span class="dish-num">#23</span></div></div>
     </div>
     <div class="dish-card">
       <img src="CHICHARRON.jpg" alt="Chicharrón de Pollo" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍗</div>
-      <div class="dish-info"><div class="dish-name">Chicharrón de Pollo</div><div class="dish-desc">Trozos crujientes de pollo</div><div class="dish-price">$19.97 <span class="dish-num">#2</span></div></div>
+      <div class="dish-info"><div class="dish-name">Chicharrón de Pollo</div><div class="dish-desc">Trozos crujientes de pollo</div><div class="dish-price">$19.97 <span class="dish-num">#24</span></div></div>
     </div>
     <div class="dish-card">
       <img src="_TEMP__%20FILETE%20DEPESCADO.jpg" alt="Filete Empanizado" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🐟</div>
-      <div class="dish-info"><div class="dish-name">Filete Empanizado</div><div class="dish-desc">Filete de pescado empanizado</div><div class="dish-price">$18.00 <span class="dish-num">#3</span></div></div>
-    </div>
-    <div class="dish-card">
-      <img src="_TEMP__%20ENSALADA%20DE%20PULPO.jpg" alt="Ensalada de Pulpo" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🐙</div>
-      <div class="dish-info"><div class="dish-name">Ensalada de Pulpo</div><div class="dish-desc">Ensalada de pulpo fresco</div><div class="dish-price">— <span class="dish-num">#4</span></div></div>
+      <div class="dish-info"><div class="dish-name">Filete Empanizado</div><div class="dish-desc">Filete de pescado empanizado</div><div class="dish-price">$18.00 <span class="dish-num">#25</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🍗</div>
-      <div class="dish-info"><div class="dish-name">Pechuga a la Parmesana</div><div class="dish-desc">Pechuga empanizada con queso parmesano</div><div class="dish-price">$20.95 <span class="dish-num">#5</span></div></div>
+      <div class="dish-info"><div class="dish-name">Pechuga a la Parmesana</div><div class="dish-desc">Pechuga empanizada con queso parmesano</div><div class="dish-price">$20.95 <span class="dish-num">#26</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🦐</div>
-      <div class="dish-info"><div class="dish-name">Pechuga Rellena de Camarones</div><div class="dish-desc">Pechuga rellena con camarones</div><div class="dish-price">$23.00 <span class="dish-num">#6</span></div></div>
+      <div class="dish-info"><div class="dish-name">Pechuga Rellena de Camarones</div><div class="dish-desc">Pechuga rellena con camarones</div><div class="dish-price">$23.00 <span class="dish-num">#27</span></div></div>
     </div>
     <div class="dish-card">
-      <img src="PECHUGA%20AL%20LIMON.jpg" alt="Pechuga al Limón" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <img src="PECHUGA%20AL%20LIM%C3%93N.jpg" alt="Pechuga al Limón" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍋</div>
-      <div class="dish-info"><div class="dish-name">Pechuga al Limón</div><div class="dish-desc">Pechuga con toque cítrico de limón</div><div class="dish-price">$20.95 <span class="dish-num">#7</span></div></div>
+      <div class="dish-info"><div class="dish-name">Pechuga al Limón</div><div class="dish-desc">Pechuga con toque cítrico</div><div class="dish-price">$20.95 <span class="dish-num">#28</span></div></div>
     </div>
     <div class="dish-card">
       <img src="SALMON.jpg" alt="Salmón" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🐟</div>
-      <div class="dish-info"><div class="dish-name">Salmón</div><div class="dish-desc">Salmón a la parrilla</div><div class="dish-price">$20.00 <span class="dish-num">#8</span></div></div>
-    </div>
-    <div class="dish-card">
-      <img src="SALMON.jpg" alt="Salmón a la Parrilla con Camarones" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🦐</div>
-      <div class="dish-info"><div class="dish-name">Salmón a la Parrilla con Camarones</div><div class="dish-desc">Salmón a la parrilla con camarones</div><div class="dish-price">$28.00 <span class="dish-num">#9</span></div></div>
-    </div>
-    <div class="dish-card">
-      <img src="_TEMP__%20FILETE%20DEPESCADO.jpg" alt="Filete de Pescado al Limón" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🐟</div>
-      <div class="dish-info"><div class="dish-name">Filete de Pescado al Limón</div><div class="dish-desc">Filete de pescado en salsa de limón</div><div class="dish-price">$18.00 <span class="dish-num">#10</span></div></div>
-    </div>
-    <div class="dish-card">
-      <img src="_TEMP__%20FILETE%20DEPESCADO.jpg" alt="Filete de Pescado con Vegetales" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🐟</div>
-      <div class="dish-info"><div class="dish-name">Filete de Pescado con Vegetales</div><div class="dish-desc">Filete de pescado con vegetales</div><div class="dish-price">$18.00 <span class="dish-num">#11</span></div></div>
+      <div class="dish-info"><div class="dish-name">Salmón</div><div class="dish-desc">Salmón a la parrilla</div><div class="dish-price">$20.00 <span class="dish-num">#29</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🦐</div>
-      <div class="dish-info"><div class="dish-name">Camarones Enchilados</div><div class="dish-desc">Camarones en salsa picante</div><div class="dish-price">$19.95 <span class="dish-num">#12</span></div></div>
+      <div class="dish-info"><div class="dish-name">Salmón a la Parrilla con Camarones</div><div class="dish-desc">Salmón a la parrilla con camarones</div><div class="dish-price">$28.00 <span class="dish-num">#30</span></div></div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🐟</div>
+      <div class="dish-info"><div class="dish-name">Filete de Pescado al Limón</div><div class="dish-desc">Filete de pescado en salsa de limón</div><div class="dish-price">$18.00 <span class="dish-num">#31</span></div></div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🐟</div>
+      <div class="dish-info"><div class="dish-name">Filete de Pescado con Vegetales</div><div class="dish-desc">Filete de pescado con vegetales</div><div class="dish-price">$18.00 <span class="dish-num">#32</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🦐</div>
-      <div class="dish-info"><div class="dish-name">Camarones al Ajillo</div><div class="dish-desc">Camarones en salsa de ajo</div><div class="dish-price">$19.95 <span class="dish-num">#13</span></div></div>
+      <div class="dish-info"><div class="dish-name">Camarones Enchilados</div><div class="dish-desc">Camarones en salsa picante</div><div class="dish-price">$19.95 <span class="dish-num">#33</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🦐</div>
-      <div class="dish-info"><div class="dish-name">Camarones Empanizados</div><div class="dish-desc">Camarones empanizados y fritos</div><div class="dish-price">$19.95 <span class="dish-num">#14</span></div></div>
+      <div class="dish-info"><div class="dish-name">Camarones al Ajillo</div><div class="dish-desc">Camarones en salsa de ajo</div><div class="dish-price">$19.95 <span class="dish-num">#34</span></div></div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🦐</div>
+      <div class="dish-info"><div class="dish-name">Camarones Empanizados</div><div class="dish-desc">Camarones empanizados y fritos</div><div class="dish-price">$19.95 <span class="dish-num">#35</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🥘</div>
-      <div class="dish-info"><div class="dish-name">Paella Marinera</div><div class="dish-desc">Paella con mariscos frescos</div><div class="dish-price">$25.00 <span class="dish-num">#15</span></div></div>
+      <div class="dish-info"><div class="dish-name">Paella Marinera</div><div class="dish-desc">Paella con mariscos frescos</div><div class="dish-price">$25.00 <span class="dish-num">#36</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🥘</div>
-      <div class="dish-info"><div class="dish-name">Mariscada</div><div class="dish-desc">Combinación de mariscos</div><div class="dish-price">$25.00 <span class="dish-num">#16</span></div></div>
+      <div class="dish-info"><div class="dish-name">Mariscada</div><div class="dish-desc">Combinación de mariscos</div><div class="dish-price">$25.00 <span class="dish-num">#37</span></div></div>
     </div>
     <div class="dish-card">
-      <img src="_TEMP__%20FILETE%20DEPESCADO.jpg" alt="Filete Ahora" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🐟</div>
-      <div class="dish-info"><div class="dish-name">Filete Ahora</div><div class="dish-desc">Filete de pescado a la parrilla</div><div class="dish-price">$18.00 <span class="dish-num">#17</span></div></div>
+      <div class="dish-img-placeholder">🐟</div>
+      <div class="dish-info"><div class="dish-name">Filete Ahora</div><div class="dish-desc">Filete de pescado a la parrilla</div><div class="dish-price">$18.00 <span class="dish-num">#38</span></div></div>
     </div>
     <div class="dish-card">
-      <img src="ARROZ%20CON%20CALAMARES.jpg" alt="Arroz con Calamares" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🍚</div>
-      <div class="dish-info"><div class="dish-name">Arroz con Calamares</div><div class="dish-desc">Arroz cremoso con calamares frescos</div><div class="dish-price">$18.00 <span class="dish-num">#18</span></div></div>
+      <img src="_TEMP__%20ENSALADA%20DE%20PULPO.jpg" alt="Ensalada de Pulpo" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="dish-img-placeholder" style="display:none">🐙</div>
+      <div class="dish-info"><div class="dish-name">Ensalada de Pulpo</div><div class="dish-desc">Ensalada de pulpo fresco</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
   </div>
 </section>
@@ -300,80 +294,77 @@
   <div class="dish-grid">
     <div class="dish-card">
       <div class="dish-img-placeholder">🍖</div>
-      <div class="dish-info"><div class="dish-name">Asadito El Conuco</div><div class="dish-desc">El Conuco grilled platter, la especialidad de la casa</div><div class="dish-price">$34.95 <span class="dish-num">#1</span></div></div>
+      <div class="dish-info"><div class="dish-name">Asadito El Conuco</div><div class="dish-desc">El Conuco grilled platter, la especialidad de la casa</div><div class="dish-price">$34.95 <span class="dish-num">#13</span></div></div>
     </div>
     <div class="dish-card">
       <img src="CHULETA.jpg" alt="Chuleta a la Parrilla" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🥩</div>
-      <div class="dish-info"><div class="dish-name">Chuleta a la Parrilla</div><div class="dish-desc">Chuleta de cerdo a la parrilla</div><div class="dish-price">$18.00 <span class="dish-num">#2</span></div></div>
+      <div class="dish-info"><div class="dish-name">Chuleta a la Parrilla</div><div class="dish-desc">Chuleta de cerdo a la parrilla</div><div class="dish-price">$18.00 <span class="dish-num">#14</span></div></div>
     </div>
     <div class="dish-card">
       <img src="RIBEYE.jpg" alt="Churrasco" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🥩</div>
-      <div class="dish-info"><div class="dish-name">Churrasco</div><div class="dish-desc">Churrasco a la parrilla</div><div class="dish-price">$35.95 <span class="dish-num">#3</span></div></div>
+      <div class="dish-info"><div class="dish-name">Churrasco</div><div class="dish-desc">Churrasco a la parrilla</div><div class="dish-price">$35.95 <span class="dish-num">#15</span></div></div>
     </div>
     <div class="dish-card">
-      <img src="RIBEYE.jpg" alt="Sirloin Steak a la Brasa" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🥩</div>
-      <div class="dish-info"><div class="dish-name">Sirloin Steak a la Brasa</div><div class="dish-desc">Sirloin a la brasa</div><div class="dish-price">$30.95 <span class="dish-num">#4</span></div></div>
+      <div class="dish-img-placeholder">🥩</div>
+      <div class="dish-info"><div class="dish-name">Sirloin Steak a la Brasa</div><div class="dish-desc">Sirloin a la brasa</div><div class="dish-price">$30.95 <span class="dish-num">#16</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🦐</div>
-      <div class="dish-info"><div class="dish-name">Mar y Tierra Salteado</div><div class="dish-desc">Surf and turf</div><div class="dish-price">$32.95 <span class="dish-num">#5</span></div></div>
+      <div class="dish-info"><div class="dish-name">Mar y Tierra Salteado</div><div class="dish-desc">Surf and turf</div><div class="dish-price">$32.95 <span class="dish-num">#17</span></div></div>
     </div>
     <div class="dish-card">
       <img src="COSTILLA.jpg" alt="Costillas BBQ" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍖</div>
-      <div class="dish-info"><div class="dish-name">Costillas BBQ</div><div class="dish-desc">Costillas BBQ ahumadas</div><div class="dish-price">$29.95 <span class="dish-num">#6</span></div></div>
+      <div class="dish-info"><div class="dish-name">Costillas BBQ</div><div class="dish-desc">Costillas BBQ ahumadas</div><div class="dish-price">$29.95 <span class="dish-num">#18</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🥩</div>
-      <div class="dish-info"><div class="dish-name">Hígado a la Italiana</div><div class="dish-desc">Hígado de res salteado</div><div class="dish-price">$20.00 <span class="dish-num">#7</span></div></div>
+      <div class="dish-info"><div class="dish-name">Hígado a la Italiana</div><div class="dish-desc">Hígado de res salteado</div><div class="dish-price">$20.00 <span class="dish-num">#19</span></div></div>
     </div>
     <div class="dish-card">
-      <img src="BISTEC%20ENCEBOLLADO.jpg" alt="Bistec Empanizado" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🥩</div>
-      <div class="dish-info"><div class="dish-name">Bistec Empanizado</div><div class="dish-desc">Bistec de res empanizado</div><div class="dish-price">$19.95 <span class="dish-num">#8</span></div></div>
+      <div class="dish-img-placeholder">🥩</div>
+      <div class="dish-info"><div class="dish-name">Bistec Empanizado</div><div class="dish-desc">Bistec de res empanizado</div><div class="dish-price">$19.95 <span class="dish-num">#20</span></div></div>
     </div>
     <div class="dish-card">
-      <img src="BISTEC%20ENCEBOLLADO.jpg" alt="Bistec a la Parrilla" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🥩</div>
-      <div class="dish-info"><div class="dish-name">Bistec a la Parrilla</div><div class="dish-desc">Bistec de res a la parrilla</div><div class="dish-price">$19.95 <span class="dish-num">#9</span></div></div>
+      <div class="dish-img-placeholder">🥩</div>
+      <div class="dish-info"><div class="dish-name">Bistec a la Parrilla</div><div class="dish-desc">Bistec de res a la parrilla</div><div class="dish-price">$19.95 <span class="dish-num">#21</span></div></div>
     </div>
     <div class="dish-card">
       <img src="BISTEC%20ENCEBOLLADO.jpg" alt="Bistec Encebollado" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🥩</div>
-      <div class="dish-info"><div class="dish-name">Bistec Encebollado</div><div class="dish-desc">Bistec de res con cebollas</div><div class="dish-price">$19.95 <span class="dish-num">#10</span></div></div>
+      <div class="dish-info"><div class="dish-name">Bistec Encebollado</div><div class="dish-desc">Bistec de res con cebollas</div><div class="dish-price">$19.95 <span class="dish-num">#22</span></div></div>
     </div>
     <div class="dish-card">
       <img src="CARNE%20FRITA.jpg" alt="Carne Frita" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍖</div>
-      <div class="dish-info"><div class="dish-name">Carne Frita</div><div class="dish-desc">Carne frita al estilo dominicano</div><div class="dish-price">— <span class="dish-num">#11</span></div></div>
+      <div class="dish-info"><div class="dish-name">Carne Frita</div><div class="dish-desc">Carne frita al estilo dominicano</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
     <div class="dish-card">
       <img src="CARNE%20GUISADA.jpg" alt="Carne Guisada" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍖</div>
-      <div class="dish-info"><div class="dish-name">Carne Guisada</div><div class="dish-desc">Carne guisada en salsa criolla</div><div class="dish-price">— <span class="dish-num">#12</span></div></div>
+      <div class="dish-info"><div class="dish-name">Carne Guisada</div><div class="dish-desc">Carne guisada en salsa criolla</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
     <div class="dish-card">
       <img src="CHIVO%20GUISADO.jpg" alt="Chivo Guisado" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🐐</div>
-      <div class="dish-info"><div class="dish-name">Chivo Guisado</div><div class="dish-desc">Chivo guisado, sabor auténtico</div><div class="dish-price">— <span class="dish-num">#13</span></div></div>
+      <div class="dish-info"><div class="dish-name">Chivo Guisado</div><div class="dish-desc">Chivo guisado, sabor auténtico</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
     <div class="dish-card">
       <img src="COCIDO%20DE%20PATA.jpg" alt="Cocido de Pata" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🦵</div>
-      <div class="dish-info"><div class="dish-name">Cocido de Pata</div><div class="dish-desc">Cocido de pata al estilo tradicional</div><div class="dish-price">— <span class="dish-num">#14</span></div></div>
+      <div class="dish-info"><div class="dish-name">Cocido de Pata</div><div class="dish-desc">Cocido de pata al estilo tradicional</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
     <div class="dish-card">
       <img src="PERNIL%20AL%20HORNO.jpg" alt="Pernil al Horno" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍖</div>
-      <div class="dish-info"><div class="dish-name">Pernil al Horno</div><div class="dish-desc">Pernil de cerdo asado lentamente</div><div class="dish-price">— <span class="dish-num">#15</span></div></div>
+      <div class="dish-info"><div class="dish-name">Pernil al Horno</div><div class="dish-desc">Pernil de cerdo asado lentamente</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
     <div class="dish-card">
       <img src="RABO%20GUISADO.jpg" alt="Rabo Guisado" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍖</div>
-      <div class="dish-info"><div class="dish-name">Rabo Guisado</div><div class="dish-desc">Rabo de res guisado en salsa</div><div class="dish-price">— <span class="dish-num">#16</span></div></div>
+      <div class="dish-info"><div class="dish-name">Rabo Guisado</div><div class="dish-desc">Rabo de res guisado en salsa</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
   </div>
 </section>
@@ -384,44 +375,25 @@
     <div class="dish-card">
       <img src="PECHUGA%20DE%20POLLO.jpg" alt="Pechuga Encebollada" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍗</div>
-      <div class="dish-info"><div class="dish-name">Pechuga Encebollada</div><div class="dish-desc">Pechuga de pollo a la parrilla con cebolla</div><div class="dish-price">$20.95 <span class="dish-num">#1</span></div></div>
-    </div>
-    <div class="dish-card">
-      <img src="CHICHARRON.jpg" alt="Chicharrón de Pollo" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🍗</div>
-      <div class="dish-info"><div class="dish-name">Chicharrón de Pollo</div><div class="dish-desc">Trozos crujientes de pollo frito</div><div class="dish-price">$19.97 <span class="dish-num">#2</span></div></div>
-    </div>
-    <div class="dish-card">
-      <img src="PECHUGA%20DE%20POLLO.jpg" alt="Pechuga a la Parrilla" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🍗</div>
-      <div class="dish-info"><div class="dish-name">Pechuga a la Parrilla</div><div class="dish-desc">Pechuga de pollo a la parrilla</div><div class="dish-price">$20.95 <span class="dish-num">#3</span></div></div>
+      <div class="dish-info"><div class="dish-name">Pechuga Encebollada</div><div class="dish-desc">Pechuga de pollo a la parrilla con cebolla</div><div class="dish-price">$20.95 <span class="dish-num">#39</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🍗</div>
-      <div class="dish-info"><div class="dish-name">Pechuga con Champiñones</div><div class="dish-desc">Pechuga con salsa de champiñones</div><div class="dish-price">$20.00 <span class="dish-num">#4</span></div></div>
+      <div class="dish-info"><div class="dish-name">Pechuga a la Parrilla</div><div class="dish-desc">Pechuga de pollo a la parrilla</div><div class="dish-price">$20.95 <span class="dish-num">#40</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🍗</div>
-      <div class="dish-info"><div class="dish-name">Pechuga a la Parmesana</div><div class="dish-desc">Pechuga empanizada con queso parmesano</div><div class="dish-price">$20.95 <span class="dish-num">#5</span></div></div>
-    </div>
-    <div class="dish-card">
-      <div class="dish-img-placeholder">🦐</div>
-      <div class="dish-info"><div class="dish-name">Pechuga Rellena de Camarones</div><div class="dish-desc">Pechuga rellena con camarones</div><div class="dish-price">$23.00 <span class="dish-num">#6</span></div></div>
-    </div>
-    <div class="dish-card">
-      <img src="PECHUGA%20AL%20LIMON.jpg" alt="Pechuga al Limón" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🍋</div>
-      <div class="dish-info"><div class="dish-name">Pechuga al Limón</div><div class="dish-desc">Pechuga con toque cítrico</div><div class="dish-price">$20.95 <span class="dish-num">#7</span></div></div>
+      <div class="dish-info"><div class="dish-name">Pechuga con Champiñones</div><div class="dish-desc">Pechuga con salsa de champiñones</div><div class="dish-price">$20.00 <span class="dish-num">#41</span></div></div>
     </div>
     <div class="dish-card">
       <img src="POLLO%20AL%20HORNO.jpg" alt="Pollo al Horno" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍗</div>
-      <div class="dish-info"><div class="dish-name">Pollo al Horno</div><div class="dish-desc">Pollo entero asado al horno</div><div class="dish-price">— <span class="dish-num">#8</span></div></div>
+      <div class="dish-info"><div class="dish-name">Pollo al Horno</div><div class="dish-desc">Pollo entero asado al horno</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
     <div class="dish-card">
       <img src="POLLO%20GUISADO.jpg" alt="Pollo Guisado" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍗</div>
-      <div class="dish-info"><div class="dish-name">Pollo Guisado</div><div class="dish-desc">Pollo guisado en salsa criolla</div><div class="dish-price">— <span class="dish-num">#9</span></div></div>
+      <div class="dish-info"><div class="dish-name">Pollo Guisado</div><div class="dish-desc">Pollo guisado en salsa criolla</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
   </div>
 </section>
@@ -430,24 +402,24 @@
   <div class="dish-grid">
     <div class="dish-card">
       <div class="dish-img-placeholder">🥗</div>
-      <div class="dish-info"><div class="dish-name">Ensalada Mixta</div><div class="dish-desc">Ensalada de jardín fresca</div><div class="dish-price">$8.00 <span class="dish-num">#1</span></div></div>
+      <div class="dish-info"><div class="dish-name">Ensalada Mixta</div><div class="dish-desc">Ensalada de jardín fresca</div><div class="dish-price">$8.00 <span class="dish-num">#42</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🥗</div>
-      <div class="dish-info"><div class="dish-name">Ensalada de Carne</div><div class="dish-desc">Ensalada con bistec a la parrilla</div><div class="dish-price">$17.00 <span class="dish-num">#2</span></div></div>
+      <div class="dish-info"><div class="dish-name">Ensalada de Carne</div><div class="dish-desc">Ensalada con bistec a la parrilla</div><div class="dish-price">$17.00 <span class="dish-num">#43</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🥗</div>
-      <div class="dish-info"><div class="dish-name">Ensalada de Pollo</div><div class="dish-desc">Ensalada con pollo a la parrilla</div><div class="dish-price">$17.00 <span class="dish-num">#3</span></div></div>
+      <div class="dish-info"><div class="dish-name">Ensalada de Pollo</div><div class="dish-desc">Ensalada con pollo a la parrilla</div><div class="dish-price">$17.00 <span class="dish-num">#44</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">🥗</div>
-      <div class="dish-info"><div class="dish-name">Ensalada de Salmón</div><div class="dish-desc">Ensalada con salmón fresco</div><div class="dish-price">$20.00 <span class="dish-num">#4</span></div></div>
+      <div class="dish-info"><div class="dish-name">Ensalada de Salmón</div><div class="dish-desc">Ensalada con salmón fresco</div><div class="dish-price">$20.00 <span class="dish-num">#45</span></div></div>
     </div>
     <div class="dish-card">
       <img src="ENSALADA%20DE%20CAMARONES.jpg" alt="Ensalada de Camarones" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🥗</div>
-      <div class="dish-info"><div class="dish-name">Ensalada de Camarones</div><div class="dish-desc">Ensalada fresca con camarones</div><div class="dish-price">— <span class="dish-num">#5</span></div></div>
+      <div class="dish-info"><div class="dish-name">Ensalada de Camarones</div><div class="dish-desc">Ensalada fresca con camarones</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
   </div>
 </section>
@@ -455,25 +427,9 @@
   <div class="section-title-bar"><span>🍚</span><h2>Arroces</h2></div>
   <div class="dish-grid">
     <div class="dish-card">
-      <div class="dish-img-placeholder">🍚</div>
-      <div class="dish-info"><div class="dish-name">Arroz con Pollo</div><div class="dish-desc">Arroz con pollo sazonado</div><div class="dish-price">$18.00 <span class="dish-num">#1</span></div></div>
-    </div>
-    <div class="dish-card">
-      <div class="dish-img-placeholder">🍚</div>
-      <div class="dish-info"><div class="dish-name">Arroz con Camarones</div><div class="dish-desc">Arroz con camarones frescos</div><div class="dish-price">$19.95 <span class="dish-num">#2</span></div></div>
-    </div>
-    <div class="dish-card">
       <img src="ARROZ%20CON%20CALAMARES.jpg" alt="Arroz con Calamares" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍚</div>
-      <div class="dish-info"><div class="dish-name">Arroz con Calamares</div><div class="dish-desc">Arroz cremoso con calamares</div><div class="dish-price">$18.00 <span class="dish-num">#3</span></div></div>
-    </div>
-    <div class="dish-card">
-      <div class="dish-img-placeholder">🍚</div>
-      <div class="dish-info"><div class="dish-name">Arroz con Longaniza</div><div class="dish-desc">Arroz con longaniza dominicana</div><div class="dish-price">$18.00 <span class="dish-num">#4</span></div></div>
-    </div>
-    <div class="dish-card">
-      <div class="dish-img-placeholder">🍚</div>
-      <div class="dish-info"><div class="dish-name">Chofán Mixto</div><div class="dish-desc">Arroz frito mixto</div><div class="dish-price">$23.00 <span class="dish-num">#5</span></div></div>
+      <div class="dish-info"><div class="dish-name">Arroz con Calamares</div><div class="dish-desc">Arroz cremoso con calamares frescos</div><div class="dish-price">$18.00 <span class="dish-num">#46</span></div></div>
     </div>
   </div>
 </section>
@@ -482,52 +438,29 @@
   <div class="section-title-bar"><span>🍌</span><h2>Mofongos</h2></div>
   <div class="dish-grid">
     <div class="dish-card">
-      <div class="dish-img-placeholder">🍌</div>
-      <div class="dish-info"><div class="dish-name">Mofongo Mar y Tierra</div><div class="dish-desc">Surf and turf mofongo</div><div class="dish-price">$37.95 <span class="dish-num">#1</span></div></div>
-    </div>
-    <div class="dish-card">
       <img src="MOFONGO%20DE%20CARNE%20FRITA.jpg" alt="Mofongo de Carne Frita" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍌</div>
-      <div class="dish-info"><div class="dish-name">Mofongo de Carne Frita</div><div class="dish-desc">Mofongo con carne frita</div><div class="dish-price">$16.00 <span class="dish-num">#2</span></div></div>
+      <div class="dish-info"><div class="dish-name">Mofongo de Carne Frita</div><div class="dish-desc">Mofongo de plátano con carne frita</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
     <div class="dish-card">
-      <img src="MOFONGO%20DE%20CARNE%20FRITA.jpg" alt="Mofongo de Queso y Chicharrón" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <img src="MOFONGO%20DE%20LONGANIZA%20Y%20QUESO.jpg" alt="Mofongo de Longaniza y Queso" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍌</div>
-      <div class="dish-info"><div class="dish-name">Mofongo de Queso y Chicharrón</div><div class="dish-desc">Mofongo con queso y chicharrón</div><div class="dish-price">$23.00 <span class="dish-num">#3</span></div></div>
-    </div>
-    <div class="dish-card">
-      <div class="dish-img-placeholder">🍌</div>
-      <div class="dish-info"><div class="dish-name">Mofongo de Camarones</div><div class="dish-desc">Mofongo con camarones</div><div class="dish-price">$24.00 <span class="dish-num">#4</span></div></div>
+      <div class="dish-info"><div class="dish-name">Mofongo de Longaniza y Queso</div><div class="dish-desc">Mofongo con longaniza y queso derretido</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
     <div class="dish-card">
       <img src="MOFONGO%20DE%20POLLO.jpg" alt="Mofongo de Pollo" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍌</div>
-      <div class="dish-info"><div class="dish-name">Mofongo de Pollo</div><div class="dish-desc">Mofongo con pollo guisado</div><div class="dish-price">$16.00 <span class="dish-num">#5</span></div></div>
+      <div class="dish-info"><div class="dish-name">Mofongo de Pollo</div><div class="dish-desc">Mofongo de plátano con pollo guisado</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
     <div class="dish-card">
       <img src="MOFONGO%20VEGGIE.jpg" alt="Mofongo Veggie" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍌</div>
-      <div class="dish-info"><div class="dish-name">Mofongo Veggie</div><div class="dish-desc">Mofongo con vegetales frescos</div><div class="dish-price">$15.00 <span class="dish-num">#6</span></div></div>
+      <div class="dish-info"><div class="dish-name">Mofongo Veggie</div><div class="dish-desc">Mofongo con vegetales frescos</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
     <div class="dish-card">
-      <img src="MOFONGO%20DE%20CARNE%20FRITA.jpg" alt="Mofongo de Chicharrón" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <img src="TRIO%20MOFONGO.jpg" alt="Trío Mofongo" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍌</div>
-      <div class="dish-info"><div class="dish-name">Mofongo de Chicharrón</div><div class="dish-desc">Mofongo con chicharrón crujiente</div><div class="dish-price">$16.00 <span class="dish-num">#7</span></div></div>
-    </div>
-    <div class="dish-card">
-      <img src="MOFONGO%20DE%20LONSANIZA%20Y%20QUESO.jpg" alt="Mofongo de Longaniza y Queso" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🍌</div>
-      <div class="dish-info"><div class="dish-name">Mofongo de Longaniza y Queso</div><div class="dish-desc">Mofongo con longaniza y queso derretido</div><div class="dish-price">$23.00 <span class="dish-num">#8</span></div></div>
-    </div>
-    <div class="dish-card">
-      <img src="MOFONGO%20DE%20CARNE%20FRITA.jpg" alt="Mofongo de Chicharrón de Pollo y Cerdo" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🍌</div>
-      <div class="dish-info"><div class="dish-name">Mofongo de Chicharrón de Pollo y Cerdo</div><div class="dish-desc">Mofongo con chicharrón de pollo y cerdo</div><div class="dish-price">$23.00 <span class="dish-num">#9</span></div></div>
-    </div>
-    <div class="dish-card">
-      <img src="TRIO%20MOFONGO.jpg" alt="Trio Mofongo" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🍌</div>
-      <div class="dish-info"><div class="dish-name">Trio Mofongo</div><div class="dish-desc">Trío de mofongos — uno de cada sabor</div><div class="dish-price">$20.00 <span class="dish-num">#10</span></div></div>
+      <div class="dish-info"><div class="dish-name">Trío Mofongo</div><div class="dish-desc">Trío de mofongos — uno de cada sabor</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
   </div>
 </section>
@@ -538,17 +471,12 @@
     <div class="dish-card">
       <img src="PAPAS%20FRITAS.jpg" alt="Papas Fritas" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🍟</div>
-      <div class="dish-info"><div class="dish-name">Papas Fritas</div><div class="dish-desc">Papas fritas crujientes</div><div class="dish-price">— <span class="dish-num">#1</span></div></div>
+      <div class="dish-info"><div class="dish-name">Papas Fritas</div><div class="dish-desc">Papas fritas crujientes</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
     <div class="dish-card">
       <img src="YUCA%20FRITA.jpg" alt="Yuca Frita" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🥔</div>
-      <div class="dish-info"><div class="dish-name">Yuca Frita</div><div class="dish-desc">Yuca frita estilo dominicano</div><div class="dish-price">— <span class="dish-num">#2</span></div></div>
-    </div>
-    <div class="dish-card">
-      <img src="YAROA%20LARGE.jpg" alt="Yaroa Large" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🍟</div>
-      <div class="dish-info"><div class="dish-name">Yaroa Large</div><div class="dish-desc">Yaroa grande con todos los toppings</div><div class="dish-price">— <span class="dish-num">#3</span></div></div>
+      <div class="dish-info"><div class="dish-name">Yuca Frita</div><div class="dish-desc">Yuca frita estilo dominicano</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
   </div>
 </section>
@@ -557,17 +485,9 @@
   <div class="section-title-bar"><span>🍮</span><h2>Postres</h2></div>
   <div class="dish-grid">
     <div class="dish-card">
-      <div class="dish-img-placeholder">🍮</div>
-      <div class="dish-info"><div class="dish-name">Flan</div><div class="dish-desc">Flan clásico de la casa</div><div class="dish-price">$6.00 <span class="dish-num">#1</span></div></div>
-    </div>
-    <div class="dish-card">
       <img src="TIRAMISU.jpg" alt="Tiramisú" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🎂</div>
-      <div class="dish-info"><div class="dish-name">Tiramisú</div><div class="dish-desc">Tiramisú artesanal</div><div class="dish-price">$7.00 <span class="dish-num">#2</span></div></div>
-    </div>
-    <div class="dish-card">
-      <div class="dish-img-placeholder">🍰</div>
-      <div class="dish-info"><div class="dish-name">Tres Leches</div><div class="dish-desc">Pastel tres leches</div><div class="dish-price">$7.00 <span class="dish-num">#3</span></div></div>
+      <div class="dish-info"><div class="dish-name">Tiramisú</div><div class="dish-desc">Tiramisú artesanal de la casa</div><div class="dish-price">— <span class="dish-num">#★</span></div></div>
     </div>
   </div>
 </section>
@@ -576,39 +496,29 @@
   <div class="section-title-bar"><span>🥤</span><h2>Bebidas</h2></div>
   <div class="dish-grid">
     <div class="dish-card">
-      <img src="AVENA%20CALIENTE.jpg" alt="Avena Caliente" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">☕</div>
-      <div class="dish-info"><div class="dish-name">Avena Caliente</div><div class="dish-desc">Avena caliente cremosa, talla S o L</div><div class="dish-price">$3–$6 <span class="dish-num">#1</span></div></div>
-    </div>
-    <div class="dish-card">
-      <div class="dish-img-placeholder">☕</div>
-      <div class="dish-info"><div class="dish-name">Café</div><div class="dish-desc">Café dominicano chico o grande</div><div class="dish-price">$3–$5 <span class="dish-num">#2</span></div></div>
-    </div>
-    <div class="dish-card">
       <div class="dish-img-placeholder">🍋</div>
-      <div class="dish-info"><div class="dish-name">Limonada</div><div class="dish-desc">Limonada natural fresquita</div><div class="dish-price">$6.00 <span class="dish-num">#3</span></div></div>
-    </div>
-    <div class="dish-card">
-      <img src="AVENA%20FRIA.jpg" alt="Avena Fría" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="dish-img-placeholder" style="display:none">🥛</div>
-      <div class="dish-info"><div class="dish-name">Avena Fría</div><div class="dish-desc">Avena fría refrescante</div><div class="dish-price">$7.00 <span class="dish-num">#4</span></div></div>
-    </div>
-    <div class="dish-card">
-      <div class="dish-img-placeholder">🍊</div>
-      <div class="dish-info"><div class="dish-name">Chinola</div><div class="dish-desc">Jugo de chinola natural</div><div class="dish-price">$6.00 <span class="dish-num">#5</span></div></div>
-    </div>
-    <div class="dish-card">
-      <div class="dish-img-placeholder">🍈</div>
-      <div class="dish-info"><div class="dish-name">Guanábana</div><div class="dish-desc">Jugo de guanábana</div><div class="dish-price">$7.00 <span class="dish-num">#6</span></div></div>
+      <div class="dish-info"><div class="dish-name">Limonada</div><div class="dish-desc">Limonada natural</div><div class="dish-price">$6.00 <span class="dish-num">#47</span></div></div>
     </div>
     <div class="dish-card">
       <img src="MORIR%20SO%C3%91ANDO.jpg" alt="Morir Soñando" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="dish-img-placeholder" style="display:none">🥛</div>
-      <div class="dish-info"><div class="dish-name">Morir Soñando</div><div class="dish-desc">Leche, jugo de naranja y azúcar</div><div class="dish-price">$7.00 <span class="dish-num">#7</span></div></div>
+      <div class="dish-info"><div class="dish-name">Morir Soñando</div><div class="dish-desc">Leche, jugo de naranja y azúcar</div><div class="dish-price">$7.00 <span class="dish-num">#48</span></div></div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">☕</div>
+      <div class="dish-info"><div class="dish-name">Café Chico</div><div class="dish-desc">Café dominicano</div><div class="dish-price">$3.00 <span class="dish-num">#49</span></div></div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">☕</div>
+      <div class="dish-info"><div class="dish-name">Café Grande</div><div class="dish-desc">Café grande dominicano</div><div class="dish-price">$5.00 <span class="dish-num">#50</span></div></div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍊</div>
+      <div class="dish-info"><div class="dish-name">Chinola</div><div class="dish-desc">Jugo de chinola natural</div><div class="dish-price">$6.00 <span class="dish-num">#53</span></div></div>
     </div>
     <div class="dish-card">
       <div class="dish-img-placeholder">💧</div>
-      <div class="dish-info"><div class="dish-name">Agua Poland Spring</div><div class="dish-desc">Agua natural</div><div class="dish-price">$2.00 <span class="dish-num">#8</span></div></div>
+      <div class="dish-info"><div class="dish-name">Agua Poland Spring</div><div class="dish-desc">Agua natural</div><div class="dish-price">$2.00 <span class="dish-num">#55</span></div></div>
     </div>
   </div>
 </section>
@@ -620,96 +530,85 @@
 
 <script>
 const allDishes=[
-  {name:'Tres Golpes',cat:'Desayunos',price:'$10.99',section:'desayunos'},
-  {name:'Omelette con Papas',cat:'Desayunos',price:'$10.99',section:'desayunos'},
-  {name:'4 Golpes con Longaniza',cat:'Desayunos',price:'$13.99',section:'desayunos'},
-  {name:'Desayuno Americano',cat:'Desayunos',price:'$12.99',section:'desayunos'},
-  {name:'Bistec con Huevo',cat:'Desayunos',price:'$12.99',section:'desayunos'},
-  {name:'Club Sándwich + Papas',cat:'Desayunos',price:'$12.95',section:'desayunos'},
-  {name:'Tocineta, Huevo y Queso',cat:'Desayunos',price:'—',section:'desayunos'},
-  {name:'Avena Caliente',cat:'Desayunos',price:'$3–$6',section:'desayunos'},
-  {name:'Avena Fría',cat:'Desayunos',price:'$7.00',section:'desayunos'},
-  {name:'Asopado de Camarones',cat:'Sopas y Asopados',price:'—',section:'sopas'},
-  {name:'Asopado de Langosta',cat:'Sopas y Asopados',price:'—',section:'sopas'},
-  {name:'Sopa de Camarón',cat:'Sopas y Asopados',price:'—',section:'sopas'},
-  {name:'Sopa de Pescado',cat:'Sopas y Asopados',price:'—',section:'sopas'},
-  {name:'Sopa de Vegetales',cat:'Sopas y Asopados',price:'—',section:'sopas'},
-  {name:'Combo Chimi Clásico + Coca Cola',cat:'Combos PideYa',price:'$11.99',section:'combos'},
-  {name:'Combo Yaroa de Pollo + Coca Cola',cat:'Combos PideYa',price:'$12.99',section:'combos'},
-  {name:'Combo Yaroa Mixta + Coca Cola',cat:'Combos PideYa',price:'$13.99',section:'combos'},
-  {name:'Combo Pica Pollo + Coca Cola',cat:'Combos PideYa',price:'$12.49',section:'combos'},
-  {name:'Combo Chimi Doble + Coca Cola',cat:'Combos PideYa',price:'$13.49',section:'combos'},
-  {name:'Combo Chimi de Pierna + Coca Cola',cat:'Combos PideYa',price:'$12.79',section:'combos'},
-  {name:'Pargo Frito',cat:'Camarones y Pescado',price:'$29.93',section:'camarones'},
-  {name:'Chicharrón de Pollo',cat:'Camarones y Pescado',price:'$19.97',section:'camarones'},
-  {name:'Filete Empanizado',cat:'Camarones y Pescado',price:'$18.00',section:'camarones'},
-  {name:'Ensalada de Pulpo',cat:'Camarones y Pescado',price:'—',section:'camarones'},
-  {name:'Pechuga a la Parmesana',cat:'Camarones y Pescado',price:'$20.95',section:'camarones'},
-  {name:'Pechuga Rellena de Camarones',cat:'Camarones y Pescado',price:'$23.00',section:'camarones'},
-  {name:'Pechuga al Limón',cat:'Camarones y Pescado',price:'$20.95',section:'camarones'},
-  {name:'Salmón',cat:'Camarones y Pescado',price:'$20.00',section:'camarones'},
-  {name:'Salmón a la Parrilla con Camarones',cat:'Camarones y Pescado',price:'$28.00',section:'camarones'},
-  {name:'Filete de Pescado al Limón',cat:'Camarones y Pescado',price:'$18.00',section:'camarones'},
-  {name:'Camarones Enchilados',cat:'Camarones y Pescado',price:'$19.95',section:'camarones'},
-  {name:'Camarones al Ajillo',cat:'Camarones y Pescado',price:'$19.95',section:'camarones'},
-  {name:'Camarones Empanizados',cat:'Camarones y Pescado',price:'$19.95',section:'camarones'},
-  {name:'Paella Marinera',cat:'Camarones y Pescado',price:'$25.00',section:'camarones'},
-  {name:'Mariscada',cat:'Camarones y Pescado',price:'$25.00',section:'camarones'},
-  {name:'Filete Ahora',cat:'Camarones y Pescado',price:'$18.00',section:'camarones'},
-  {name:'Arroz con Calamares',cat:'Camarones y Pescado',price:'$18.00',section:'camarones'},
-  {name:'Asadito El Conuco',cat:'Steak & Pork',price:'$34.95',section:'steak'},
-  {name:'Chuleta a la Parrilla',cat:'Steak & Pork',price:'$18.00',section:'steak'},
-  {name:'Churrasco',cat:'Steak & Pork',price:'$35.95',section:'steak'},
-  {name:'Sirloin Steak a la Brasa',cat:'Steak & Pork',price:'$30.95',section:'steak'},
-  {name:'Mar y Tierra Salteado',cat:'Steak & Pork',price:'$32.95',section:'steak'},
-  {name:'Costillas BBQ',cat:'Steak & Pork',price:'$29.95',section:'steak'},
-  {name:'Hígado a la Italiana',cat:'Steak & Pork',price:'$20.00',section:'steak'},
-  {name:'Bistec Empanizado',cat:'Steak & Pork',price:'$19.95',section:'steak'},
-  {name:'Bistec a la Parrilla',cat:'Steak & Pork',price:'$19.95',section:'steak'},
-  {name:'Bistec Encebollado',cat:'Steak & Pork',price:'$19.95',section:'steak'},
-  {name:'Carne Frita',cat:'Steak & Pork',price:'—',section:'steak'},
-  {name:'Carne Guisada',cat:'Steak & Pork',price:'—',section:'steak'},
-  {name:'Chivo Guisado',cat:'Steak & Pork',price:'—',section:'steak'},
-  {name:'Cocido de Pata',cat:'Steak & Pork',price:'—',section:'steak'},
-  {name:'Pernil al Horno',cat:'Steak & Pork',price:'—',section:'steak'},
-  {name:'Rabo Guisado',cat:'Steak & Pork',price:'—',section:'steak'},
-  {name:'Pechuga Encebollada',cat:'Pollo',price:'$20.95',section:'pollo'},
-  {name:'Pechuga a la Parrilla',cat:'Pollo',price:'$20.95',section:'pollo'},
-  {name:'Pechuga con Champiñones',cat:'Pollo',price:'$20.00',section:'pollo'},
-  {name:'Pollo al Horno',cat:'Pollo',price:'—',section:'pollo'},
-  {name:'Pollo Guisado',cat:'Pollo',price:'—',section:'pollo'},
-  {name:'Ensalada Mixta',cat:'Ensaladas',price:'$8.00',section:'ensaladas'},
-  {name:'Ensalada de Carne',cat:'Ensaladas',price:'$17.00',section:'ensaladas'},
-  {name:'Ensalada de Pollo',cat:'Ensaladas',price:'$17.00',section:'ensaladas'},
-  {name:'Ensalada de Salmón',cat:'Ensaladas',price:'$20.00',section:'ensaladas'},
-  {name:'Ensalada de Camarones',cat:'Ensaladas',price:'—',section:'ensaladas'},
-  {name:'Arroz con Pollo',cat:'Arroces',price:'$18.00',section:'arroces'},
-  {name:'Arroz con Camarones',cat:'Arroces',price:'$19.95',section:'arroces'},
-  {name:'Arroz con Longaniza',cat:'Arroces',price:'$18.00',section:'arroces'},
-  {name:'Chofán Mixto',cat:'Arroces',price:'$23.00',section:'arroces'},
-  {name:'Mofongo Mar y Tierra',cat:'Mofongos',price:'$37.95',section:'mofongos'},
-  {name:'Mofongo de Carne Frita',cat:'Mofongos',price:'$16.00',section:'mofongos'},
-  {name:'Mofongo de Queso y Chicharrón',cat:'Mofongos',price:'$23.00',section:'mofongos'},
-  {name:'Mofongo de Camarones',cat:'Mofongos',price:'$24.00',section:'mofongos'},
-  {name:'Mofongo de Pollo',cat:'Mofongos',price:'$16.00',section:'mofongos'},
-  {name:'Mofongo Veggie',cat:'Mofongos',price:'$15.00',section:'mofongos'},
-  {name:'Mofongo de Chicharrón',cat:'Mofongos',price:'$16.00',section:'mofongos'},
-  {name:'Mofongo de Longaniza y Queso',cat:'Mofongos',price:'$23.00',section:'mofongos'},
-  {name:'Trio Mofongo',cat:'Mofongos',price:'$20.00',section:'mofongos'},
-  {name:'Papas Fritas',cat:'Acompañantes',price:'—',section:'acompanantes'},
-  {name:'Yuca Frita',cat:'Acompañantes',price:'—',section:'acompanantes'},
-  {name:'Yaroa Large',cat:'Acompañantes',price:'—',section:'acompanantes'},
-  {name:'Flan',cat:'Postres',price:'$6.00',section:'postres'},
-  {name:'Tiramisú',cat:'Postres',price:'$7.00',section:'postres'},
-  {name:'Tres Leches',cat:'Postres',price:'$7.00',section:'postres'},
-  {name:'Avena Caliente',cat:'Bebidas',price:'$3–$6',section:'bebidas'},
-  {name:'Café',cat:'Bebidas',price:'$3–$5',section:'bebidas'},
-  {name:'Limonada',cat:'Bebidas',price:'$6.00',section:'bebidas'},
-  {name:'Avena Fría',cat:'Bebidas',price:'$7.00',section:'bebidas'},
-  {name:'Chinola',cat:'Bebidas',price:'$6.00',section:'bebidas'},
-  {name:'Guanábana',cat:'Bebidas',price:'$7.00',section:'bebidas'},
-  {name:'Morir Soñando',cat:'Bebidas',price:'$7.00',section:'bebidas'},
-  {name:'Agua Poland Spring',cat:'Bebidas',price:'$2.00',section:'bebidas'},
+{name:'Tres Golpes',cat:'Desayunos',price:'$10.99',section:'desayunos'},
+{name:'Omelette con Papas',cat:'Desayunos',price:'$10.99',section:'desayunos'},
+{name:'4 Golpes con Longaniza',cat:'Desayunos',price:'$13.99',section:'desayunos'},
+{name:'Desayuno Americano',cat:'Desayunos',price:'$12.99',section:'desayunos'},
+{name:'Bistec con Huevo',cat:'Desayunos',price:'$12.99',section:'desayunos'},
+{name:'Club Sándwich + Papas',cat:'Desayunos',price:'$12.95',section:'desayunos'},
+{name:'Tocineta, Huevo y Queso',cat:'Desayunos',price:'—',section:'desayunos'},
+{name:'Avena Caliente (S)',cat:'Desayunos/Bebidas',price:'$3.00',section:'desayunos'},
+{name:'Avena Caliente (L)',cat:'Desayunos/Bebidas',price:'$6.00',section:'desayunos'},
+{name:'Avena Fría',cat:'Desayunos/Bebidas',price:'$7.00',section:'desayunos'},
+{name:'Asopado de Camarones',cat:'Sopas y Asopados',price:'—',section:'sopas'},
+{name:'Asopado de Langosta',cat:'Sopas y Asopados',price:'—',section:'sopas'},
+{name:'Sopa de Camarón',cat:'Sopas y Asopados',price:'—',section:'sopas'},
+{name:'Sopa de Pescado',cat:'Sopas y Asopados',price:'—',section:'sopas'},
+{name:'Sopa de Vegetales',cat:'Sopas y Asopados',price:'—',section:'sopas'},
+{name:'Combo Chimi Clásico + Coca Cola',cat:'Combos PideYa',price:'$11.99',section:'combos'},
+{name:'Combo Yaroa de Pollo + Coca Cola',cat:'Combos PideYa',price:'$12.99',section:'combos'},
+{name:'Combo Yaroa Mixta + Coca Cola',cat:'Combos PideYa',price:'$13.99',section:'combos'},
+{name:'Combo Pica Pollo + Coca Cola',cat:'Combos PideYa',price:'$12.49',section:'combos'},
+{name:'Combo Chimi Doble + Coca Cola',cat:'Combos PideYa',price:'$13.49',section:'combos'},
+{name:'Combo Chimi de Pierna + Coca Cola',cat:'Combos PideYa',price:'$12.79',section:'combos'},
+{name:'Pargo Frito',cat:'Camarones y Pescado',price:'$29.93',section:'camarones'},
+{name:'Chicharrón de Pollo',cat:'Camarones y Pescado',price:'$19.97',section:'camarones'},
+{name:'Filete Empanizado',cat:'Camarones y Pescado',price:'$18.00',section:'camarones'},
+{name:'Pechuga a la Parmesana',cat:'Camarones y Pescado',price:'$20.95',section:'camarones'},
+{name:'Pechuga Rellena de Camarones',cat:'Camarones y Pescado',price:'$23.00',section:'camarones'},
+{name:'Pechuga al Limón',cat:'Camarones y Pescado',price:'$20.95',section:'camarones'},
+{name:'Salmón',cat:'Camarones y Pescado',price:'$20.00',section:'camarones'},
+{name:'Salmón a la Parrilla con Camarones',cat:'Camarones y Pescado',price:'$28.00',section:'camarones'},
+{name:'Filete de Pescado al Limón',cat:'Camarones y Pescado',price:'$18.00',section:'camarones'},
+{name:'Filete de Pescado con Vegetales',cat:'Camarones y Pescado',price:'$18.00',section:'camarones'},
+{name:'Camarones Enchilados',cat:'Camarones y Pescado',price:'$19.95',section:'camarones'},
+{name:'Camarones al Ajillo',cat:'Camarones y Pescado',price:'$19.95',section:'camarones'},
+{name:'Camarones Empanizados',cat:'Camarones y Pescado',price:'$19.95',section:'camarones'},
+{name:'Paella Marinera',cat:'Camarones y Pescado',price:'$25.00',section:'camarones'},
+{name:'Mariscada',cat:'Camarones y Pescado',price:'$25.00',section:'camarones'},
+{name:'Filete Ahora',cat:'Camarones y Pescado',price:'$18.00',section:'camarones'},
+{name:'Ensalada de Pulpo',cat:'Camarones y Pescado',price:'—',section:'camarones'},
+{name:'Asadito El Conuco',cat:'Steak & Pork',price:'$34.95',section:'steak'},
+{name:'Chuleta a la Parrilla',cat:'Steak & Pork',price:'$18.00',section:'steak'},
+{name:'Churrasco',cat:'Steak & Pork',price:'$35.95',section:'steak'},
+{name:'Sirloin Steak a la Brasa',cat:'Steak & Pork',price:'$30.95',section:'steak'},
+{name:'Mar y Tierra Salteado',cat:'Steak & Pork',price:'$32.95',section:'steak'},
+{name:'Costillas BBQ',cat:'Steak & Pork',price:'$29.95',section:'steak'},
+{name:'Hígado a la Italiana',cat:'Steak & Pork',price:'$20.00',section:'steak'},
+{name:'Bistec Empanizado',cat:'Steak & Pork',price:'$19.95',section:'steak'},
+{name:'Bistec a la Parrilla',cat:'Steak & Pork',price:'$19.95',section:'steak'},
+{name:'Bistec Encebollado',cat:'Steak & Pork',price:'$19.95',section:'steak'},
+{name:'Carne Frita',cat:'Steak & Pork',price:'—',section:'steak'},
+{name:'Carne Guisada',cat:'Steak & Pork',price:'—',section:'steak'},
+{name:'Chivo Guisado',cat:'Steak & Pork',price:'—',section:'steak'},
+{name:'Cocido de Pata',cat:'Steak & Pork',price:'—',section:'steak'},
+{name:'Pernil al Horno',cat:'Steak & Pork',price:'—',section:'steak'},
+{name:'Rabo Guisado',cat:'Steak & Pork',price:'—',section:'steak'},
+{name:'Pechuga Encebollada',cat:'Pollo',price:'$20.95',section:'pollo'},
+{name:'Pechuga a la Parrilla',cat:'Pollo',price:'$20.95',section:'pollo'},
+{name:'Pechuga con Champiñones',cat:'Pollo',price:'$20.00',section:'pollo'},
+{name:'Pollo al Horno',cat:'Pollo',price:'—',section:'pollo'},
+{name:'Pollo Guisado',cat:'Pollo',price:'—',section:'pollo'},
+{name:'Ensalada Mixta',cat:'Ensaladas',price:'$8.00',section:'ensaladas'},
+{name:'Ensalada de Carne',cat:'Ensaladas',price:'$17.00',section:'ensaladas'},
+{name:'Ensalada de Pollo',cat:'Ensaladas',price:'$17.00',section:'ensaladas'},
+{name:'Ensalada de Salmón',cat:'Ensaladas',price:'$20.00',section:'ensaladas'},
+{name:'Ensalada de Camarones',cat:'Ensaladas',price:'—',section:'ensaladas'},
+{name:'Arroz con Calamares',cat:'Arroces',price:'$18.00',section:'arroces'},
+{name:'Mofongo de Carne Frita',cat:'Mofongos',price:'—',section:'mofongos'},
+{name:'Mofongo de Longaniza y Queso',cat:'Mofongos',price:'—',section:'mofongos'},
+{name:'Mofongo de Pollo',cat:'Mofongos',price:'—',section:'mofongos'},
+{name:'Mofongo Veggie',cat:'Mofongos',price:'—',section:'mofongos'},
+{name:'Trío Mofongo',cat:'Mofongos',price:'—',section:'mofongos'},
+{name:'Papas Fritas',cat:'Acompañantes',price:'—',section:'acompanantes'},
+{name:'Yuca Frita',cat:'Acompañantes',price:'—',section:'acompanantes'},
+{name:'Tiramisú',cat:'Postres',price:'—',section:'postres'},
+{name:'Limonada',cat:'Bebidas',price:'$6.00',section:'bebidas'},
+{name:'Morir Soñando',cat:'Bebidas',price:'$7.00',section:'bebidas'},
+{name:'Café Chico',cat:'Bebidas',price:'$3.00',section:'bebidas'},
+{name:'Café Grande',cat:'Bebidas',price:'$5.00',section:'bebidas'},
+{name:'Chinola',cat:'Bebidas',price:'$6.00',section:'bebidas'},
+{name:'Agua Poland Spring',cat:'Bebidas',price:'$2.00',section:'bebidas'},
 ];
 const searchInput=document.getElementById('searchInput');
 const searchResults=document.getElementById('search-results');
