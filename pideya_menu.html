@@ -17,17 +17,14 @@
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--cream); font-family: 'Outfit', sans-serif; color: var(--text-dark); min-height: 100vh; }
-
   .site-header { background: var(--green-dark); padding: 18px 20px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.4); }
   .site-header h1 { font-family: 'Playfair Display', serif; color: white; font-size: 1.4rem; letter-spacing: 1px; }
   .site-header p { color: var(--orange); font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
-
   .search-wrap { background: var(--green-mid); padding: 14px 20px; display: flex; gap: 10px; align-items: center; }
   .search-wrap input { flex: 1; padding: 10px 16px; border-radius: 50px; border: none; background: rgba(255,255,255,0.12); color: white; font-family: 'Outfit', sans-serif; font-size: 0.95rem; outline: none; transition: background 0.2s; }
   .search-wrap input::placeholder { color: rgba(255,255,255,0.55); }
   .search-wrap input:focus { background: rgba(255,255,255,0.2); }
   .search-wrap .search-icon { color: rgba(255,255,255,0.6); font-size: 1.1rem; }
-
   #search-results { display: none; padding: 16px 16px 8px; background: white; border-bottom: 2px solid var(--cream-dark); }
   #search-results.active { display: block; }
   #search-results h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 10px; }
@@ -37,69 +34,35 @@
   .search-result-card .cat { font-size: 0.75rem; color: var(--text-muted); }
   .search-result-card .price { color: var(--orange); font-weight: 700; font-size: 1rem; }
   #no-results { text-align: center; color: var(--text-muted); padding: 12px; font-size: 0.9rem; display: none; }
-
   .cat-nav { overflow-x: auto; display: flex; gap: 8px; padding: 12px 16px; background: var(--cream-dark); scrollbar-width: none; }
   .cat-nav::-webkit-scrollbar { display: none; }
   .cat-pill { white-space: nowrap; padding: 7px 16px; border-radius: 50px; border: 2px solid var(--green-dark); background: transparent; color: var(--green-dark); font-family: 'Outfit', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
   .cat-pill:hover, .cat-pill.active { background: var(--green-dark); color: white; }
-
   .resto-info { background: var(--green-dark); color: white; padding: 16px 20px; display: flex; flex-direction: column; gap: 6px; }
   .resto-info .address { font-size: 0.82rem; color: rgba(255,255,255,0.7); }
   .resto-info .hours { font-size: 0.82rem; color: var(--orange); }
   .order-btn { display: inline-flex; align-items: center; gap: 8px; background: #25d366; color: white; padding: 11px 22px; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 0.9rem; margin-top: 8px; width: fit-content; transition: transform 0.15s, box-shadow 0.15s; }
   .order-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(37,211,102,0.4); }
-
   .menu-section { margin-bottom: 0; }
   .section-banner { width: 100%; display: block; object-fit: cover; max-height: 200px; }
   .section-title-bar { background: var(--green-dark); padding: 12px 20px; display: flex; align-items: center; gap: 10px; }
   .section-title-bar h2 { font-family: 'Playfair Display', serif; color: white; font-size: 1.2rem; }
   .section-title-bar span { color: var(--orange); font-size: 1.3rem; }
-
   .dish-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; padding: 14px 14px 20px; background: var(--cream); }
-
   .dish-card { background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.18s, box-shadow 0.18s; cursor: pointer; }
   .dish-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.13); }
-
-  /* ── DISH IMAGES — 1100x1100 square — works on mobile AND desktop ── */
-  .dish-card .dish-img {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    object-position: center;
-    display: block;
-    background: var(--cream-dark);
-  }
-
-  .dish-img-placeholder {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.8rem;
-    color: rgba(255,255,255,0.35);
-    font-family: 'Playfair Display', serif;
-  }
-
+  .dish-card .dish-img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; object-position: center; display: block; background: var(--cream-dark); }
+  .dish-img-placeholder { width: 100%; aspect-ratio: 1 / 1; background: linear-gradient(135deg, var(--green-dark), var(--green-mid)); display: flex; align-items: center; justify-content: center; font-size: 2.8rem; color: rgba(255,255,255,0.35); font-family: 'Playfair Display', serif; }
   .dish-info { padding: 10px 10px 12px; }
   .dish-info .dish-name { font-weight: 600; font-size: 0.88rem; line-height: 1.25; color: var(--text-dark); margin-bottom: 4px; }
   .dish-info .dish-desc { font-size: 0.73rem; color: var(--text-muted); line-height: 1.35; margin-bottom: 8px; }
   .dish-info .dish-price { color: var(--orange); font-weight: 700; font-size: 1.05rem; }
   .dish-info .dish-num { font-size: 0.7rem; color: #aaa; float: right; margin-top: 2px; }
-
   .sticky-order { position: fixed; bottom: 0; left: 0; right: 0; background: #25d366; padding: 14px 20px; text-align: center; z-index: 200; box-shadow: 0 -3px 16px rgba(0,0,0,0.2); }
   .sticky-order a { color: white; text-decoration: none; font-weight: 700; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
   .pb-safe { padding-bottom: 68px; }
-
-  @media (min-width: 600px) {
-    .dish-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
-    .section-banner { max-height: 320px; }
-  }
-  @media (min-width: 900px) {
-    .dish-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; padding: 18px; }
-    .section-banner { max-height: 380px; }
-  }
+  @media (min-width: 600px) { .dish-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; } .section-banner { max-height: 320px; } }
+  @media (min-width: 900px) { .dish-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; padding: 18px; } .section-banner { max-height: 380px; } }
 </style>
 </head>
 <body>
@@ -140,31 +103,31 @@
 
 <div class="pb-safe">
 
-<!-- ══ 1. COMBOS PIDEYA ══ -->
+<!-- COMBOS -->
 <section class="menu-section" id="combos">
-  <img src="333464.jpg" alt="Combos PideYa" class="section-banner">
+  <img src="https://pideyanj-ai.github.io/img/YAROA-LARGE.jpg" alt="Combos PideYa" class="section-banner">
   <div class="section-title-bar"><span>🍔</span><h2>Combos PideYa</h2></div>
   <div class="dish-grid">
     <div class="dish-card">
       <div class="dish-img-placeholder">🍔</div>
       <div class="dish-info">
-        <div class="dish-name">Combo Chimi Clásico</div>
+        <div class="dish-name">Combo Chimi Clásico + Coca Cola</div>
         <div class="dish-desc">Chimi de res, repollo, tomate, cebolla, salsa rosa + Papas + Coca-Cola</div>
         <div class="dish-price">$11.99 <span class="dish-num">#1</span></div>
       </div>
     </div>
     <div class="dish-card">
-      <div class="dish-img-placeholder">🍟</div>
+      <img src="https://pideyanj-ai.github.io/img/YAROA-LARGE.jpg" alt="Combo Yaroa de Pollo + Coca Cola" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍟</div>
       <div class="dish-info">
-        <div class="dish-name">Combo Yaroa de Pollo</div>
+        <div class="dish-name">Combo Yaroa de Pollo + Coca Cola</div>
         <div class="dish-desc">Yaroa de pollo, queso derretido, ketchup y mayo + Papas + Coca-Cola</div>
         <div class="dish-price">$12.99 <span class="dish-num">#2</span></div>
       </div>
     </div>
     <div class="dish-card">
-      <div class="dish-img-placeholder">🍟</div>
+      <img src="https://pideyanj-ai.github.io/img/YAROA-LARGE.jpg" alt="Combo Yaroa Mixta + Coca Cola" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍟</div>
       <div class="dish-info">
-        <div class="dish-name">Combo Yaroa Mixta</div>
+        <div class="dish-name">Combo Yaroa Mixta + Coca Cola</div>
         <div class="dish-desc">Yaroa de res y pollo con queso + Papas + Coca-Cola</div>
         <div class="dish-price">$13.99 <span class="dish-num">#3</span></div>
       </div>
@@ -172,7 +135,7 @@
     <div class="dish-card">
       <div class="dish-img-placeholder">🍗</div>
       <div class="dish-info">
-        <div class="dish-name">Combo Pica Pollo</div>
+        <div class="dish-name">Combo Pica Pollo + Coca Cola</div>
         <div class="dish-desc">3 piezas de pica pollo crujiente + tostones o papas + Coca-Cola</div>
         <div class="dish-price">$12.49 <span class="dish-num">#4</span></div>
       </div>
@@ -180,7 +143,7 @@
     <div class="dish-card">
       <div class="dish-img-placeholder">🍔</div>
       <div class="dish-info">
-        <div class="dish-name">Combo Chimi Doble</div>
+        <div class="dish-name">Combo Chimi Doble + Coca Cola</div>
         <div class="dish-desc">Chimi doble carne con queso + Papas fritas + Coca-Cola</div>
         <div class="dish-price">$13.49 <span class="dish-num">#5</span></div>
       </div>
@@ -188,7 +151,7 @@
     <div class="dish-card">
       <div class="dish-img-placeholder">🥪</div>
       <div class="dish-info">
-        <div class="dish-name">Combo Chimi de Pierna</div>
+        <div class="dish-name">Combo Chimi de Pierna + Coca Cola</div>
         <div class="dish-desc">Chimi de pierna de cerdo + Papas + Coca-Cola</div>
         <div class="dish-price">$12.79 <span class="dish-num">#6</span></div>
       </div>
@@ -196,128 +159,569 @@
   </div>
 </section>
 
-<!-- ══ 2. CAMARONES Y PESCADO ══ -->
+<!-- CAMARONES Y PESCADO -->
 <section class="menu-section" id="camarones">
-  <img src="333449.jpg" alt="Camarones y Pescado" class="section-banner">
+  <img src="https://pideyanj-ai.github.io/img/SALMON.jpg" alt="Camarones y Pescado" class="section-banner">
   <div class="section-title-bar"><span>🦐</span><h2>Camarones y Pescado</h2></div>
   <div class="dish-grid">
-    <div class="dish-card"><div class="dish-img-placeholder">🐟</div><div class="dish-info"><div class="dish-name">Pargo Frito</div><div class="dish-desc">Fried red snapper</div><div class="dish-price">$29.93 <span class="dish-num">#1</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍗</div><div class="dish-info"><div class="dish-name">Chicharrón de Pollo</div><div class="dish-desc">Trozos crujientes de pollo</div><div class="dish-price">$19.97 <span class="dish-num">#2</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🐟</div><div class="dish-info"><div class="dish-name">Filete Empanizado</div><div class="dish-desc">Breaded fish filet</div><div class="dish-price">$18.00 <span class="dish-num">#3</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍗</div><div class="dish-info"><div class="dish-name">Pechuga a la Parmesana</div><div class="dish-desc">Pechuga empanizada con queso parmesano</div><div class="dish-price">$20.95 <span class="dish-num">#5</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍗</div><div class="dish-info"><div class="dish-name">Pechuga Rellena de Camarones</div><div class="dish-desc">Pechuga rellena con camarones</div><div class="dish-price">$23.00 <span class="dish-num">#6</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍗</div><div class="dish-info"><div class="dish-name">Pechuga al Limón</div><div class="dish-desc">Pechuga con toque cítrico</div><div class="dish-price">$20.95 <span class="dish-num">#7</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🐟</div><div class="dish-info"><div class="dish-name">Salmón</div><div class="dish-desc">Grilled salmon</div><div class="dish-price">$20.00 <span class="dish-num">#8</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🦐</div><div class="dish-info"><div class="dish-name">Salmón a la Parrilla con Camarones</div><div class="dish-desc">Grilled salmon with shrimp</div><div class="dish-price">$28.00 <span class="dish-num">#9</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🐟</div><div class="dish-info"><div class="dish-name">Filete de Pescado al Limón</div><div class="dish-desc">Grilled fish filet in lemon sauce</div><div class="dish-price">$18.00 <span class="dish-num">#10</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🐟</div><div class="dish-info"><div class="dish-name">Filete de Pescado con Vegetales</div><div class="dish-desc">Grilled fish with veggies</div><div class="dish-price">$18.00 <span class="dish-num">#11</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🦐</div><div class="dish-info"><div class="dish-name">Camarones Enchilados</div><div class="dish-desc">Chili shrimp</div><div class="dish-price">$19.95 <span class="dish-num">#12</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🦐</div><div class="dish-info"><div class="dish-name">Camarones al Ajillo</div><div class="dish-desc">Grilled shrimp in garlic sauce</div><div class="dish-price">$19.95 <span class="dish-num">#13</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🦐</div><div class="dish-info"><div class="dish-name">Camarones Empanizados</div><div class="dish-desc">Breaded shrimp</div><div class="dish-price">$19.95 <span class="dish-num">#14</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🥘</div><div class="dish-info"><div class="dish-name">Paella Marinera</div><div class="dish-desc">Seafood paella</div><div class="dish-price">$25.00 <span class="dish-num">#15</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🥘</div><div class="dish-info"><div class="dish-name">Mariscada</div><div class="dish-desc">Seafood dish</div><div class="dish-price">$25.00 <span class="dish-num">#16</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🐟</div><div class="dish-info"><div class="dish-name">Filete Ahora</div><div class="dish-desc">Grilled fish filet</div><div class="dish-price">$18.00 <span class="dish-num">#17</span></div></div></div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/_TEMP-PARGO-A-LA-PARRILLA.jpg" alt="Pargo Frito" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🐟</div>
+      <div class="dish-info">
+        <div class="dish-name">Pargo Frito</div>
+        <div class="dish-desc">Pargo rojo frito, estilo dominicano</div>
+        <div class="dish-price">$29.93 <span class="dish-num">#1</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/CHICHARRON.jpg" alt="Chicharrón de Pollo" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍗</div>
+      <div class="dish-info">
+        <div class="dish-name">Chicharrón de Pollo</div>
+        <div class="dish-desc">Trozos crujientes de pollo</div>
+        <div class="dish-price">$19.97 <span class="dish-num">#2</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/_TEMP-FILETE-DEPESCADO.jpg" alt="Filete Empanizado" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🐟</div>
+      <div class="dish-info">
+        <div class="dish-name">Filete Empanizado</div>
+        <div class="dish-desc">Filete de pescado empanizado</div>
+        <div class="dish-price">$18.00 <span class="dish-num">#3</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍗</div>
+      <div class="dish-info">
+        <div class="dish-name">Pechuga a la Parmesana</div>
+        <div class="dish-desc">Pechuga empanizada con queso parmesano</div>
+        <div class="dish-price">$20.95 <span class="dish-num">#5</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍗</div>
+      <div class="dish-info">
+        <div class="dish-name">Pechuga Rellena de Camarones</div>
+        <div class="dish-desc">Pechuga rellena con camarones</div>
+        <div class="dish-price">$23.00 <span class="dish-num">#6</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/PECHUGA-AL-LIMON.jpg" alt="Pechuga al Limón" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍋</div>
+      <div class="dish-info">
+        <div class="dish-name">Pechuga al Limón</div>
+        <div class="dish-desc">Pechuga con toque cítrico</div>
+        <div class="dish-price">$20.95 <span class="dish-num">#7</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/SALMON.jpg" alt="Salmón" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🐟</div>
+      <div class="dish-info">
+        <div class="dish-name">Salmón</div>
+        <div class="dish-desc">Salmón a la parrilla</div>
+        <div class="dish-price">$20.00 <span class="dish-num">#8</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/SALMON.jpg" alt="Salmón a la Parrilla con Camarones" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🦐</div>
+      <div class="dish-info">
+        <div class="dish-name">Salmón a la Parrilla con Camarones</div>
+        <div class="dish-desc">Salmón a la parrilla con camarones</div>
+        <div class="dish-price">$28.00 <span class="dish-num">#9</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/_TEMP-FILETE-DEPESCADO.jpg" alt="Filete de Pescado al Limón" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🐟</div>
+      <div class="dish-info">
+        <div class="dish-name">Filete de Pescado al Limón</div>
+        <div class="dish-desc">Filete de pescado en salsa de limón</div>
+        <div class="dish-price">$18.00 <span class="dish-num">#10</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/_TEMP-FILETE-DEPESCADO.jpg" alt="Filete de Pescado con Vegetales" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🐟</div>
+      <div class="dish-info">
+        <div class="dish-name">Filete de Pescado con Vegetales</div>
+        <div class="dish-desc">Filete de pescado con vegetales</div>
+        <div class="dish-price">$18.00 <span class="dish-num">#11</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🦐</div>
+      <div class="dish-info">
+        <div class="dish-name">Camarones Enchilados</div>
+        <div class="dish-desc">Camarones en salsa picante</div>
+        <div class="dish-price">$19.95 <span class="dish-num">#12</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🦐</div>
+      <div class="dish-info">
+        <div class="dish-name">Camarones al Ajillo</div>
+        <div class="dish-desc">Camarones en salsa de ajo</div>
+        <div class="dish-price">$19.95 <span class="dish-num">#13</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🦐</div>
+      <div class="dish-info">
+        <div class="dish-name">Camarones Empanizados</div>
+        <div class="dish-desc">Camarones empanizados y fritos</div>
+        <div class="dish-price">$19.95 <span class="dish-num">#14</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🥘</div>
+      <div class="dish-info">
+        <div class="dish-name">Paella Marinera</div>
+        <div class="dish-desc">Paella con mariscos frescos</div>
+        <div class="dish-price">$25.00 <span class="dish-num">#15</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🥘</div>
+      <div class="dish-info">
+        <div class="dish-name">Mariscada</div>
+        <div class="dish-desc">Combinación de mariscos</div>
+        <div class="dish-price">$25.00 <span class="dish-num">#16</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/_TEMP-FILETE-DEPESCADO.jpg" alt="Filete Ahora" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🐟</div>
+      <div class="dish-info">
+        <div class="dish-name">Filete Ahora</div>
+        <div class="dish-desc">Filete de pescado a la parrilla</div>
+        <div class="dish-price">$18.00 <span class="dish-num">#17</span></div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ══ 3. STEAK & PORK ══ -->
+<!-- STEAK & PORK -->
 <section class="menu-section" id="steak">
-  <img src="333452.jpg" alt="Steak & Pork" class="section-banner">
+  <img src="https://pideyanj-ai.github.io/img/RIBEYE.jpg" alt="Steak & Pork" class="section-banner">
   <div class="section-title-bar"><span>🥩</span><h2>Steak &amp; Pork</h2></div>
   <div class="dish-grid">
-    <div class="dish-card"><div class="dish-img-placeholder">🍖</div><div class="dish-info"><div class="dish-name">Asadito El Conuco</div><div class="dish-desc">El Conuco grilled platter</div><div class="dish-price">$34.95 <span class="dish-num">#1</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🥩</div><div class="dish-info"><div class="dish-name">Chuleta a la Parrilla</div><div class="dish-desc">Grilled pork chops</div><div class="dish-price">$18.00 <span class="dish-num">#2</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🥩</div><div class="dish-info"><div class="dish-name">Churrasco</div><div class="dish-desc">Grilled skirt steak</div><div class="dish-price">$35.95 <span class="dish-num">#3</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🥩</div><div class="dish-info"><div class="dish-name">Sirloin Steak a la Brasa</div><div class="dish-desc">Grilled sirloin steak</div><div class="dish-price">$30.95 <span class="dish-num">#4</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🦐</div><div class="dish-info"><div class="dish-name">Mar y Tierra Salteado</div><div class="dish-desc">Surf and turf</div><div class="dish-price">$32.95 <span class="dish-num">#5</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍖</div><div class="dish-info"><div class="dish-name">Costillas BBQ</div><div class="dish-desc">BBQ ribs</div><div class="dish-price">$29.95 <span class="dish-num">#6</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🥩</div><div class="dish-info"><div class="dish-name">Hígado a la Italiana</div><div class="dish-desc">Sautéed beef liver</div><div class="dish-price">$20.00 <span class="dish-num">#7</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🥩</div><div class="dish-info"><div class="dish-name">Bistec Empanizado</div><div class="dish-desc">Breaded steak</div><div class="dish-price">$19.95 <span class="dish-num">#8</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🥩</div><div class="dish-info"><div class="dish-name">Bistec a la Parrilla</div><div class="dish-desc">Grilled steak</div><div class="dish-price">$19.95 <span class="dish-num">#9</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🥩</div><div class="dish-info"><div class="dish-name">Bistec Encebollado</div><div class="dish-desc">Steak & onions</div><div class="dish-price">$19.95 <span class="dish-num">#10</span></div></div></div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍖</div>
+      <div class="dish-info">
+        <div class="dish-name">Asadito El Conuco</div>
+        <div class="dish-desc">El Conuco grilled platter, la especialidad de la casa</div>
+        <div class="dish-price">$34.95 <span class="dish-num">#1</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/CHULETA.jpg" alt="Chuleta a la Parrilla" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🥩</div>
+      <div class="dish-info">
+        <div class="dish-name">Chuleta a la Parrilla</div>
+        <div class="dish-desc">Chuleta de cerdo a la parrilla</div>
+        <div class="dish-price">$18.00 <span class="dish-num">#2</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/RIBEYE.jpg" alt="Churrasco" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🥩</div>
+      <div class="dish-info">
+        <div class="dish-name">Churrasco</div>
+        <div class="dish-desc">Churrasco a la parrilla</div>
+        <div class="dish-price">$35.95 <span class="dish-num">#3</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/RIBEYE.jpg" alt="Sirloin Steak a la Brasa" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🥩</div>
+      <div class="dish-info">
+        <div class="dish-name">Sirloin Steak a la Brasa</div>
+        <div class="dish-desc">Sirloin a la brasa</div>
+        <div class="dish-price">$30.95 <span class="dish-num">#4</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🦐</div>
+      <div class="dish-info">
+        <div class="dish-name">Mar y Tierra Salteado</div>
+        <div class="dish-desc">Surf and turf</div>
+        <div class="dish-price">$32.95 <span class="dish-num">#5</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/COSTILLA.jpg" alt="Costillas BBQ" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍖</div>
+      <div class="dish-info">
+        <div class="dish-name">Costillas BBQ</div>
+        <div class="dish-desc">Costillas BBQ ahumadas</div>
+        <div class="dish-price">$29.95 <span class="dish-num">#6</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🥩</div>
+      <div class="dish-info">
+        <div class="dish-name">Hígado a la Italiana</div>
+        <div class="dish-desc">Hígado de res salteado</div>
+        <div class="dish-price">$20.00 <span class="dish-num">#7</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/BISTEC-ENCEBOLLADO.jpg" alt="Bistec Empanizado" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🥩</div>
+      <div class="dish-info">
+        <div class="dish-name">Bistec Empanizado</div>
+        <div class="dish-desc">Bistec de res empanizado</div>
+        <div class="dish-price">$19.95 <span class="dish-num">#8</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/BISTEC-ENCEBOLLADO.jpg" alt="Bistec a la Parrilla" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🥩</div>
+      <div class="dish-info">
+        <div class="dish-name">Bistec a la Parrilla</div>
+        <div class="dish-desc">Bistec de res a la parrilla</div>
+        <div class="dish-price">$19.95 <span class="dish-num">#9</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/BISTEC-ENCEBOLLADO.jpg" alt="Bistec Encebollado" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🥩</div>
+      <div class="dish-info">
+        <div class="dish-name">Bistec Encebollado</div>
+        <div class="dish-desc">Bistec de res con cebollas</div>
+        <div class="dish-price">$19.95 <span class="dish-num">#10</span></div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ══ 4. POLLO ══ -->
+<!-- POLLO -->
 <section class="menu-section" id="pollo">
-  <img src="333461.jpg" alt="Pollo" class="section-banner">
+  <img src="https://pideyanj-ai.github.io/img/PECHUGA-DE-POLLO.jpg" alt="Pollo" class="section-banner">
   <div class="section-title-bar"><span>🍗</span><h2>Pollo</h2></div>
   <div class="dish-grid">
-    <div class="dish-card"><div class="dish-img-placeholder">🍗</div><div class="dish-info"><div class="dish-name">Pechuga Encebollada</div><div class="dish-desc">Pechuga de pollo a la parrilla con cebolla</div><div class="dish-price">$20.95 <span class="dish-num">#1</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍗</div><div class="dish-info"><div class="dish-name">Chicharrón de Pollo</div><div class="dish-desc">Trozos crujientes de pollo</div><div class="dish-price">$19.97 <span class="dish-num">#2</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍗</div><div class="dish-info"><div class="dish-name">Pechuga a la Parrilla</div><div class="dish-desc">Pechuga de pollo a la parrilla</div><div class="dish-price">$20.95 <span class="dish-num">#3</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍗</div><div class="dish-info"><div class="dish-name">Pechuga con Champiñones</div><div class="dish-desc">Pechuga con salsa de champiñones</div><div class="dish-price">$20.00 <span class="dish-num">#4</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍗</div><div class="dish-info"><div class="dish-name">Pechuga a la Parmesana</div><div class="dish-desc">Pechuga empanizada con queso parmesano</div><div class="dish-price">$20.95 <span class="dish-num">#5</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🦐</div><div class="dish-info"><div class="dish-name">Pechuga Rellena de Camarones</div><div class="dish-desc">Pechuga rellena con camarones</div><div class="dish-price">$23.00 <span class="dish-num">#6</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍋</div><div class="dish-info"><div class="dish-name">Pechuga al Limón</div><div class="dish-desc">Pechuga con toque cítrico</div><div class="dish-price">$20.95 <span class="dish-num">#7</span></div></div></div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/PECHUGA-DE-POLLO.jpg" alt="Pechuga Encebollada" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍗</div>
+      <div class="dish-info">
+        <div class="dish-name">Pechuga Encebollada</div>
+        <div class="dish-desc">Pechuga de pollo a la parrilla con cebolla</div>
+        <div class="dish-price">$20.95 <span class="dish-num">#1</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/CHICHARRON.jpg" alt="Chicharrón de Pollo" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍗</div>
+      <div class="dish-info">
+        <div class="dish-name">Chicharrón de Pollo</div>
+        <div class="dish-desc">Trozos crujientes de pollo frito</div>
+        <div class="dish-price">$19.97 <span class="dish-num">#2</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/PECHUGA-DE-POLLO.jpg" alt="Pechuga a la Parrilla" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍗</div>
+      <div class="dish-info">
+        <div class="dish-name">Pechuga a la Parrilla</div>
+        <div class="dish-desc">Pechuga de pollo a la parrilla</div>
+        <div class="dish-price">$20.95 <span class="dish-num">#3</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍗</div>
+      <div class="dish-info">
+        <div class="dish-name">Pechuga con Champiñones</div>
+        <div class="dish-desc">Pechuga con salsa de champiñones</div>
+        <div class="dish-price">$20.00 <span class="dish-num">#4</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍗</div>
+      <div class="dish-info">
+        <div class="dish-name">Pechuga a la Parmesana</div>
+        <div class="dish-desc">Pechuga empanizada con queso parmesano</div>
+        <div class="dish-price">$20.95 <span class="dish-num">#5</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🦐</div>
+      <div class="dish-info">
+        <div class="dish-name">Pechuga Rellena de Camarones</div>
+        <div class="dish-desc">Pechuga rellena con camarones</div>
+        <div class="dish-price">$23.00 <span class="dish-num">#6</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/PECHUGA-AL-LIMON.jpg" alt="Pechuga al Limón" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍋</div>
+      <div class="dish-info">
+        <div class="dish-name">Pechuga al Limón</div>
+        <div class="dish-desc">Pechuga con toque cítrico</div>
+        <div class="dish-price">$20.95 <span class="dish-num">#7</span></div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ══ 5. ENSALADAS ══ -->
+<!-- ENSALADAS -->
 <section class="menu-section" id="ensaladas">
   <div class="section-title-bar"><span>🥗</span><h2>Ensaladas</h2></div>
   <div class="dish-grid">
-    <div class="dish-card"><div class="dish-img-placeholder">🥗</div><div class="dish-info"><div class="dish-name">Ensalada Mixta</div><div class="dish-desc">Garden salad</div><div class="dish-price">$8.00 <span class="dish-num">#8</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🥗</div><div class="dish-info"><div class="dish-name">Ensalada de Carne</div><div class="dish-desc">Steak salad</div><div class="dish-price">$17.00 <span class="dish-num">#9</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🥗</div><div class="dish-info"><div class="dish-name">Ensalada de Pollo</div><div class="dish-desc">Chicken salad</div><div class="dish-price">$17.00 <span class="dish-num">#10</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🥗</div><div class="dish-info"><div class="dish-name">Ensalada de Salmón</div><div class="dish-desc">Salmon salad</div><div class="dish-price">$20.00 <span class="dish-num">#11</span></div></div></div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🥗</div>
+      <div class="dish-info">
+        <div class="dish-name">Ensalada Mixta</div>
+        <div class="dish-desc">Ensalada de jardín fresca</div>
+        <div class="dish-price">$8.00 <span class="dish-num">#8</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🥗</div>
+      <div class="dish-info">
+        <div class="dish-name">Ensalada de Carne</div>
+        <div class="dish-desc">Ensalada con bistec a la parrilla</div>
+        <div class="dish-price">$17.00 <span class="dish-num">#9</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🥗</div>
+      <div class="dish-info">
+        <div class="dish-name">Ensalada de Pollo</div>
+        <div class="dish-desc">Ensalada con pollo a la parrilla</div>
+        <div class="dish-price">$17.00 <span class="dish-num">#10</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🥗</div>
+      <div class="dish-info">
+        <div class="dish-name">Ensalada de Salmón</div>
+        <div class="dish-desc">Ensalada con salmón fresco</div>
+        <div class="dish-price">$20.00 <span class="dish-num">#11</span></div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ══ 6. ARROCES ══ -->
+<!-- ARROCES -->
 <section class="menu-section" id="arroces">
   <div class="section-title-bar"><span>🍚</span><h2>Arroces</h2></div>
   <div class="dish-grid">
-    <div class="dish-card"><div class="dish-img-placeholder">🍚</div><div class="dish-info"><div class="dish-name">Arroz con Pollo</div><div class="dish-desc">Arroz con pollo sazonado</div><div class="dish-price">$18.00 <span class="dish-num">#12</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍚</div><div class="dish-info"><div class="dish-name">Arroz con Camarones</div><div class="dish-desc">Arroz con camarones</div><div class="dish-price">$19.95 <span class="dish-num">#13</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍚</div><div class="dish-info"><div class="dish-name">Arroz con Calamares</div><div class="dish-desc">Arroz con calamares</div><div class="dish-price">$18.00 <span class="dish-num">#14</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍚</div><div class="dish-info"><div class="dish-name">Arroz con Longaniza</div><div class="dish-desc">Arroz con longaniza</div><div class="dish-price">$18.00 <span class="dish-num">#15</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍚</div><div class="dish-info"><div class="dish-name">Chofán Mixto</div><div class="dish-desc">Arroz frito mixto</div><div class="dish-price">$23.00 <span class="dish-num">#16</span></div></div></div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍚</div>
+      <div class="dish-info">
+        <div class="dish-name">Arroz con Pollo</div>
+        <div class="dish-desc">Arroz con pollo sazonado</div>
+        <div class="dish-price">$18.00 <span class="dish-num">#12</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍚</div>
+      <div class="dish-info">
+        <div class="dish-name">Arroz con Camarones</div>
+        <div class="dish-desc">Arroz con camarones frescos</div>
+        <div class="dish-price">$19.95 <span class="dish-num">#13</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/ARROZ-CON-CALAMARES.jpg" alt="Arroz con Calamares" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍚</div>
+      <div class="dish-info">
+        <div class="dish-name">Arroz con Calamares</div>
+        <div class="dish-desc">Arroz cremoso con calamares</div>
+        <div class="dish-price">$18.00 <span class="dish-num">#14</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍚</div>
+      <div class="dish-info">
+        <div class="dish-name">Arroz con Longaniza</div>
+        <div class="dish-desc">Arroz con longaniza dominicana</div>
+        <div class="dish-price">$18.00 <span class="dish-num">#15</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍚</div>
+      <div class="dish-info">
+        <div class="dish-name">Chofán Mixto</div>
+        <div class="dish-desc">Arroz frito mixto</div>
+        <div class="dish-price">$23.00 <span class="dish-num">#16</span></div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ══ 7. MOFONGOS ══ -->
+<!-- MOFONGOS -->
 <section class="menu-section" id="mofongos">
-  <img src="333458.jpg" alt="Mofongos" class="section-banner">
+  <img src="https://pideyanj-ai.github.io/img/TRIO-MOFONGO.jpg" alt="Mofongos" class="section-banner">
   <div class="section-title-bar"><span>🍌</span><h2>Mofongos</h2></div>
   <div class="dish-grid">
-    <div class="dish-card"><div class="dish-img-placeholder">🍌</div><div class="dish-info"><div class="dish-name">Mofongo Mar y Tierra</div><div class="dish-desc">Surf and turf mofongo</div><div class="dish-price">$37.95 <span class="dish-num">#1</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍌</div><div class="dish-info"><div class="dish-name">Mofongo de Carne Frita</div><div class="dish-desc">Fried beef mofongo</div><div class="dish-price">$16.00 <span class="dish-num">#2</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍌</div><div class="dish-info"><div class="dish-name">Mofongo de Queso y Chicharrón</div><div class="dish-desc">Pork chunks and cheese mofongo</div><div class="dish-price">$23.00 <span class="dish-num">#3</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍌</div><div class="dish-info"><div class="dish-name">Mofongo de Camarones</div><div class="dish-desc">Shrimp mofongo</div><div class="dish-price">$24.00 <span class="dish-num">#4</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍌</div><div class="dish-info"><div class="dish-name">Mofongo de Pollo</div><div class="dish-desc">Chicken mofongo</div><div class="dish-price">$16.00 <span class="dish-num">#5</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍌</div><div class="dish-info"><div class="dish-name">Mofongo Veggie</div><div class="dish-desc">Vegetables mofongo</div><div class="dish-price">$15.00 <span class="dish-num">#6</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍌</div><div class="dish-info"><div class="dish-name">Mofongo de Chicharrón</div><div class="dish-desc">Pork crackling mofongo</div><div class="dish-price">$16.00 <span class="dish-num">#7</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍌</div><div class="dish-info"><div class="dish-name">Mofongo de Longaniza y Queso</div><div class="dish-desc">Pork sausage and cheese mofongo</div><div class="dish-price">$23.00 <span class="dish-num">#8</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍌</div><div class="dish-info"><div class="dish-name">Mofongo de Chicharrón de Pollo y Cerdo</div><div class="dish-desc">Chicken and pork chunks mofongo</div><div class="dish-price">$23.00 <span class="dish-num">#9</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍌</div><div class="dish-info"><div class="dish-name">Trio Mofongo</div><div class="dish-desc">Trio of mofongos</div><div class="dish-price">$20.00 <span class="dish-num">#10</span></div></div></div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍌</div>
+      <div class="dish-info">
+        <div class="dish-name">Mofongo Mar y Tierra</div>
+        <div class="dish-desc">Surf and turf mofongo</div>
+        <div class="dish-price">$37.95 <span class="dish-num">#1</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/MOFONGO-DE-CARNE-FRITA.jpg" alt="Mofongo de Carne Frita" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍌</div>
+      <div class="dish-info">
+        <div class="dish-name">Mofongo de Carne Frita</div>
+        <div class="dish-desc">Mofongo con carne frita</div>
+        <div class="dish-price">$16.00 <span class="dish-num">#2</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/MOFONGO-DE-CARNE-FRITA.jpg" alt="Mofongo de Queso y Chicharrón" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍌</div>
+      <div class="dish-info">
+        <div class="dish-name">Mofongo de Queso y Chicharrón</div>
+        <div class="dish-desc">Mofongo con queso y chicharrón</div>
+        <div class="dish-price">$23.00 <span class="dish-num">#3</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍌</div>
+      <div class="dish-info">
+        <div class="dish-name">Mofongo de Camarones</div>
+        <div class="dish-desc">Mofongo con camarones</div>
+        <div class="dish-price">$24.00 <span class="dish-num">#4</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/MOFONGO-DE-POLLO.jpg" alt="Mofongo de Pollo" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍌</div>
+      <div class="dish-info">
+        <div class="dish-name">Mofongo de Pollo</div>
+        <div class="dish-desc">Mofongo con pollo guisado</div>
+        <div class="dish-price">$16.00 <span class="dish-num">#5</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/MOFONGO-VEGGIE.jpg" alt="Mofongo Veggie" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍌</div>
+      <div class="dish-info">
+        <div class="dish-name">Mofongo Veggie</div>
+        <div class="dish-desc">Mofongo con vegetales frescos</div>
+        <div class="dish-price">$15.00 <span class="dish-num">#6</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/MOFONGO-DE-CARNE-FRITA.jpg" alt="Mofongo de Chicharrón" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍌</div>
+      <div class="dish-info">
+        <div class="dish-name">Mofongo de Chicharrón</div>
+        <div class="dish-desc">Mofongo con chicharrón crujiente</div>
+        <div class="dish-price">$16.00 <span class="dish-num">#7</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/MOFONGO-DE-LONGANIZA-Y-QUESO.jpg" alt="Mofongo de Longaniza y Queso" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍌</div>
+      <div class="dish-info">
+        <div class="dish-name">Mofongo de Longaniza y Queso</div>
+        <div class="dish-desc">Mofongo con longaniza y queso derretido</div>
+        <div class="dish-price">$23.00 <span class="dish-num">#8</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/MOFONGO-DE-CARNE-FRITA.jpg" alt="Mofongo de Chicharrón de Pollo y Cerdo" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍌</div>
+      <div class="dish-info">
+        <div class="dish-name">Mofongo de Chicharrón de Pollo y Cerdo</div>
+        <div class="dish-desc">Mofongo con chicharrón de pollo y cerdo</div>
+        <div class="dish-price">$23.00 <span class="dish-num">#9</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/TRIO-MOFONGO.jpg" alt="Trio Mofongo" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🍌</div>
+      <div class="dish-info">
+        <div class="dish-name">Trio Mofongo</div>
+        <div class="dish-desc">Trío de mofongos — uno de cada sabor</div>
+        <div class="dish-price">$20.00 <span class="dish-num">#10</span></div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ══ 8. POSTRES ══ -->
+<!-- POSTRES -->
 <section class="menu-section" id="postres">
-  <img src="333455.jpg" alt="Postres" class="section-banner">
+  <img src="https://pideyanj-ai.github.io/img/TIRAMISU.jpg" alt="Postres" class="section-banner">
   <div class="section-title-bar"><span>🍮</span><h2>Postres</h2></div>
   <div class="dish-grid">
-    <div class="dish-card"><div class="dish-img-placeholder">🍮</div><div class="dish-info"><div class="dish-name">Flan</div><div class="dish-desc">Classic flan</div><div class="dish-price">$6.00 <span class="dish-num">#1</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🎂</div><div class="dish-info"><div class="dish-name">Tiramisú</div><div class="dish-desc">Classic tiramisu</div><div class="dish-price">$7.00 <span class="dish-num">#2</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍰</div><div class="dish-info"><div class="dish-name">Tres Leches</div><div class="dish-desc">Tres leches cake</div><div class="dish-price">$7.00 <span class="dish-num">#3</span></div></div></div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍮</div>
+      <div class="dish-info">
+        <div class="dish-name">Flan</div>
+        <div class="dish-desc">Flan clásico de la casa</div>
+        <div class="dish-price">$6.00 <span class="dish-num">#1</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/TIRAMISU.jpg" alt="Tiramisú" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🎂</div>
+      <div class="dish-info">
+        <div class="dish-name">Tiramisú</div>
+        <div class="dish-desc">Tiramisú artesanal</div>
+        <div class="dish-price">$7.00 <span class="dish-num">#2</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍰</div>
+      <div class="dish-info">
+        <div class="dish-name">Tres Leches</div>
+        <div class="dish-desc">Pastel tres leches</div>
+        <div class="dish-price">$7.00 <span class="dish-num">#3</span></div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ══ 9. BEBIDAS ══ -->
+<!-- BEBIDAS -->
 <section class="menu-section" id="bebidas">
-  <img src="bebidas.jpg" alt="Bebidas" class="section-banner">
+  <img src="https://pideyanj-ai.github.io/img/MORIR-SONANDO.jpg" alt="Bebidas" class="section-banner">
   <div class="section-title-bar"><span>🥤</span><h2>Bebidas</h2></div>
   <div class="dish-grid">
-    <div class="dish-card"><div class="dish-img-placeholder">☕</div><div class="dish-info"><div class="dish-name">Avena Caliente</div><div class="dish-desc">Hot oatmeal drink</div><div class="dish-price">$3–$6 <span class="dish-num">#4</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">☕</div><div class="dish-info"><div class="dish-name">Café</div><div class="dish-desc">Coffee</div><div class="dish-price">$3–$5 <span class="dish-num">#5</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍋</div><div class="dish-info"><div class="dish-name">Limonada</div><div class="dish-desc">Fresh lemonade</div><div class="dish-price">$6.00 <span class="dish-num">#6</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🥛</div><div class="dish-info"><div class="dish-name">Avena Fría</div><div class="dish-desc">Cold oatmeal drink</div><div class="dish-price">$7.00 <span class="dish-num">#7</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍊</div><div class="dish-info"><div class="dish-name">Chinola</div><div class="dish-desc">Passion fruit drink</div><div class="dish-price">$6.00 <span class="dish-num">#8</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🍈</div><div class="dish-info"><div class="dish-name">Guanábana</div><div class="dish-desc">Soursop drink</div><div class="dish-price">$7.00 <span class="dish-num">#9</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">🥛</div><div class="dish-info"><div class="dish-name">Morir Soñando</div><div class="dish-desc">Milk and orange drink</div><div class="dish-price">$7.00 <span class="dish-num">#10</span></div></div></div>
-    <div class="dish-card"><div class="dish-img-placeholder">💧</div><div class="dish-info"><div class="dish-name">Agua Poland Spring</div><div class="dish-desc">Bottled water</div><div class="dish-price">$2.00 <span class="dish-num">#11</span></div></div></div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/AVENA-CALIENTE.jpg" alt="Avena Caliente" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">☕</div>
+      <div class="dish-info">
+        <div class="dish-name">Avena Caliente</div>
+        <div class="dish-desc">Avena caliente cremosa, talla S o L</div>
+        <div class="dish-price">$3–$6 <span class="dish-num">#4</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">☕</div>
+      <div class="dish-info">
+        <div class="dish-name">Café</div>
+        <div class="dish-desc">Café dominicano chico o grande</div>
+        <div class="dish-price">$3–$5 <span class="dish-num">#5</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍋</div>
+      <div class="dish-info">
+        <div class="dish-name">Limonada</div>
+        <div class="dish-desc">Limonada natural fresquita</div>
+        <div class="dish-price">$6.00 <span class="dish-num">#6</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/AVENA-FRIA.jpg" alt="Avena Fría" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🥛</div>
+      <div class="dish-info">
+        <div class="dish-name">Avena Fría</div>
+        <div class="dish-desc">Avena fría refrescante</div>
+        <div class="dish-price">$7.00 <span class="dish-num">#7</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍊</div>
+      <div class="dish-info">
+        <div class="dish-name">Chinola</div>
+        <div class="dish-desc">Jugo de chinola natural</div>
+        <div class="dish-price">$6.00 <span class="dish-num">#8</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">🍈</div>
+      <div class="dish-info">
+        <div class="dish-name">Guanábana</div>
+        <div class="dish-desc">Jugo de guanábana</div>
+        <div class="dish-price">$7.00 <span class="dish-num">#9</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <img src="https://pideyanj-ai.github.io/img/MORIR-SONANDO.jpg" alt="Morir Soñando" class="dish-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dish-img-placeholder" style="display:none">🥛</div>
+      <div class="dish-info">
+        <div class="dish-name">Morir Soñando</div>
+        <div class="dish-desc">Leche, jugo de naranja y azúcar</div>
+        <div class="dish-price">$7.00 <span class="dish-num">#10</span></div>
+      </div>
+    </div>
+    <div class="dish-card">
+      <div class="dish-img-placeholder">💧</div>
+      <div class="dish-info">
+        <div class="dish-name">Agua Poland Spring</div>
+        <div class="dish-desc">Agua natural</div>
+        <div class="dish-price">$2.00 <span class="dish-num">#11</span></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -329,12 +733,12 @@
 
 <script>
 const allDishes = [
-  {name:'Combo Chimi Clásico', cat:'Combos PideYa', price:'$11.99', section:'combos'},
-  {name:'Combo Yaroa de Pollo', cat:'Combos PideYa', price:'$12.99', section:'combos'},
-  {name:'Combo Yaroa Mixta', cat:'Combos PideYa', price:'$13.99', section:'combos'},
-  {name:'Combo Pica Pollo', cat:'Combos PideYa', price:'$12.49', section:'combos'},
-  {name:'Combo Chimi Doble', cat:'Combos PideYa', price:'$13.49', section:'combos'},
-  {name:'Combo Chimi de Pierna', cat:'Combos PideYa', price:'$12.79', section:'combos'},
+  {name:'Combo Chimi Clásico + Coca Cola', cat:'Combos PideYa', price:'$11.99', section:'combos'},
+  {name:'Combo Yaroa de Pollo + Coca Cola', cat:'Combos PideYa', price:'$12.99', section:'combos'},
+  {name:'Combo Yaroa Mixta + Coca Cola', cat:'Combos PideYa', price:'$13.99', section:'combos'},
+  {name:'Combo Pica Pollo + Coca Cola', cat:'Combos PideYa', price:'$12.49', section:'combos'},
+  {name:'Combo Chimi Doble + Coca Cola', cat:'Combos PideYa', price:'$13.49', section:'combos'},
+  {name:'Combo Chimi de Pierna + Coca Cola', cat:'Combos PideYa', price:'$12.79', section:'combos'},
   {name:'Pargo Frito', cat:'Camarones y Pescado', price:'$29.93', section:'camarones'},
   {name:'Chicharrón de Pollo', cat:'Camarones y Pescado', price:'$19.97', section:'camarones'},
   {name:'Filete Empanizado', cat:'Camarones y Pescado', price:'$18.00', section:'camarones'},
@@ -362,8 +766,12 @@ const allDishes = [
   {name:'Bistec a la Parrilla', cat:'Steak & Pork', price:'$19.95', section:'steak'},
   {name:'Bistec Encebollado', cat:'Steak & Pork', price:'$19.95', section:'steak'},
   {name:'Pechuga Encebollada', cat:'Pollo', price:'$20.95', section:'pollo'},
+  {name:'Chicharrón de Pollo', cat:'Pollo', price:'$19.97', section:'pollo'},
   {name:'Pechuga a la Parrilla', cat:'Pollo', price:'$20.95', section:'pollo'},
   {name:'Pechuga con Champiñones', cat:'Pollo', price:'$20.00', section:'pollo'},
+  {name:'Pechuga a la Parmesana', cat:'Pollo', price:'$20.95', section:'pollo'},
+  {name:'Pechuga Rellena de Camarones', cat:'Pollo', price:'$23.00', section:'pollo'},
+  {name:'Pechuga al Limón', cat:'Pollo', price:'$20.95', section:'pollo'},
   {name:'Ensalada Mixta', cat:'Ensaladas', price:'$8.00', section:'ensaladas'},
   {name:'Ensalada de Carne', cat:'Ensaladas', price:'$17.00', section:'ensaladas'},
   {name:'Ensalada de Pollo', cat:'Ensaladas', price:'$17.00', section:'ensaladas'},
@@ -436,5 +844,6 @@ document.addEventListener('click', e => {
   }
 });
 </script>
+
 </body>
 </html>
