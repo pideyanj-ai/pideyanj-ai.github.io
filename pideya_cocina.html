@@ -564,15 +564,15 @@ body{font-family:'Outfit',sans-serif;background:#F0F4F8;color:#1E293B;display:fl
 const PASS='pideya2024';
 const SHEET_ID='1qzvOElYXtlkdBpiqI3_1E3HRQKlnm4JFhYxtZoNT4r4';
 const CSV_ORDERS=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
-const N8N_GET_ORDERS='https://pideya.app.n8n.cloud/webhook/pideya-get-orders';
+const N8N_GET_ORDERS='https://n8n-production-58223.up.railway.app/webhook/pideya-get-orders';
 const CSV_SESSIONS=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet2`;
 const CSV_MENU=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Menu`;
-const N8N_EDIT_ORDER='https://pideya.app.n8n.cloud/webhook/pideya-edit';
-const N8N_MENU_TOGGLE='https://pideya.app.n8n.cloud/webhook/pideya-menu-toggle';
-const N8N_DISPATCH='https://pideya.app.n8n.cloud/webhook/pideya-dispatch';
-const N8N_UPDATE_SETTINGS='https://pideya.app.n8n.cloud/webhook/pideya-update-settings';
-const N8N_UPDATE_HOURS='https://pideya.app.n8n.cloud/webhook/pideya-update-hours';
-const N8N_DELETE_ORDER='https://pideya.app.n8n.cloud/webhook/pideya-delete';
+const N8N_EDIT_ORDER='https://n8n-production-58223.up.railway.app/webhook/pideya-edit';
+const N8N_MENU_TOGGLE='https://n8n-production-58223.up.railway.app/webhook/pideya-menu-toggle';
+const N8N_DISPATCH='https://n8n-production-58223.up.railway.app/webhook/pideya-dispatch';
+const N8N_UPDATE_SETTINGS='https://n8n-production-58223.up.railway.app/webhook/pideya-update-settings';
+const N8N_UPDATE_HOURS='https://n8n-production-58223.up.railway.app/webhook/pideya-update-hours';
+const N8N_DELETE_ORDER='https://n8n-production-58223.up.railway.app/webhook/pideya-delete';
 const MANAGER_PASS='conuco2024';
 
 function lsGet(k,def){try{const v=localStorage.getItem(k);return v!==null?v:def;}catch(e){return def;}}
@@ -804,7 +804,7 @@ async function saveAgentes(){
   const msg=document.getElementById('agentes-msg');
   if(btn){btn.textContent='⏳ Guardando...';btn.disabled=true;}
   try{
-    const r=await fetch('https://pideya.app.n8n.cloud/webhook/pideya-save-agents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agents:agentesData})});
+    const r=await fetch('https://n8n-production-58223.up.railway.app/webhook/pideya-save-agents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agents:agentesData})});
     const data=await r.json().catch(()=>({}));
     if(r.ok&&data.ok!==false){
       if(msg){msg.style.display='block';msg.style.background='#DCFCE7';msg.style.color='#166534';msg.style.border='1px solid #86EFAC';msg.textContent='✅ Agentes guardados correctamente. El bot se actualizará en menos de 5 minutos.';}
@@ -826,7 +826,7 @@ function initBroadcastPage(){_bcImageUrl='';_bcImageBase64='';bcClearImage();con
 const BROADCAST_TEMPLATES={special:'🍽️ ¡Hola! Hoy en El Conuco tenemos especiales deliciosos. Escríbenos MENU para ver todas las opciones y hacer tu pedido. 🛵 Delivery disponible. ¡Te esperamos!',closed:'🔴 Hola, hoy El Conuco estará cerrado. ¡Gracias por tu comprensión! Regresamos pronto con más sabor. 🍽️',open:'✅ ¡Buenas noticias! El Conuco ya está abierto y listo para atenderte. Escribe MENU para ver nuestros platos del día. 🛵 Hacemos delivery.',promo:'💸 ¡OFERTA ESPECIAL HOY! 🔥 Escríbenos MENU ahora y pide tu comida favorita. Entrega rápida a tu puerta. 🛵 El Conuco Restaurante.'};
 function setTemplate(key){const ta=document.getElementById('broadcastMsg');if(!ta)return;ta.value=BROADCAST_TEMPLATES[key]||'';const cnt=document.getElementById('broadcastCount');if(cnt)cnt.textContent=ta.value.length+' / 1000 caracteres';}
 function insertEmoji(emoji){const ta=document.getElementById('broadcastMsg');if(!ta)return;const start=ta.selectionStart,end=ta.selectionEnd;ta.value=ta.value.slice(0,start)+emoji+ta.value.slice(end);ta.selectionStart=ta.selectionEnd=start+emoji.length;ta.focus();const cnt=document.getElementById('broadcastCount');if(cnt)cnt.textContent=ta.value.length+' / 1000 caracteres';}
-async function sendBroadcast(){const ta=document.getElementById('broadcastMsg');const msg=(ta&&ta.value||'').trim();const hasImg=!!_bcImageUrl||!!_bcImageBase64;if(!msg&&!hasImg){alert('Escribe un mensaje o adjunta una imagen.');return;}if(msg.length>1000){alert('El mensaje no puede superar 1000 caracteres.');return;}const phones=[...new Set(allOrders.filter(o=>o.Phone).map(o=>o.Phone))];if(!phones.length){alert('No hay clientes para enviar el mensaje.');return;}if(!confirm('¿Enviar a '+phones.length+' cliente(s)? No se puede deshacer.'))return;const btn=document.getElementById('broadcastSendBtn');const res=document.getElementById('broadcastResult');btn.disabled=true;btn.textContent='📤 Enviando...';res.style.display='none';try{const payload={message:msg,phones,timestamp:new Date().toISOString()};if(hasImg){if(_bcImageBase64)payload.imageBase64=_bcImageBase64;else payload.imageUrl=_bcImageUrl;}const r=await fetch('https://pideya.app.n8n.cloud/webhook/pideya-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await r.json().catch(()=>({}));if(r.ok&&data.ok!==false){res.style.display='block';res.style.background='#DCFCE7';res.style.color='#166534';res.style.border='1px solid #86EFAC';res.textContent='✅ Broadcast enviado a '+(data.sent||phones.length)+' cliente(s).';ta.value='';if(document.getElementById('broadcastCount'))document.getElementById('broadcastCount').textContent='0 / 1000 caracteres';bcClearImage();}else throw new Error(data.error||'Error '+r.status);}catch(e){res.style.display='block';res.style.background='#FEE2E2';res.style.color='#DC2626';res.style.border='1px solid #FECACA';res.textContent='❌ Error: '+e.message;}finally{btn.disabled=false;btn.textContent='📢 Enviar Broadcast';}}
+async function sendBroadcast(){const ta=document.getElementById('broadcastMsg');const msg=(ta&&ta.value||'').trim();const hasImg=!!_bcImageUrl||!!_bcImageBase64;if(!msg&&!hasImg){alert('Escribe un mensaje o adjunta una imagen.');return;}if(msg.length>1000){alert('El mensaje no puede superar 1000 caracteres.');return;}const phones=[...new Set(allOrders.filter(o=>o.Phone).map(o=>o.Phone))];if(!phones.length){alert('No hay clientes para enviar el mensaje.');return;}if(!confirm('¿Enviar a '+phones.length+' cliente(s)? No se puede deshacer.'))return;const btn=document.getElementById('broadcastSendBtn');const res=document.getElementById('broadcastResult');btn.disabled=true;btn.textContent='📤 Enviando...';res.style.display='none';try{const payload={message:msg,phones,timestamp:new Date().toISOString()};if(hasImg){if(_bcImageBase64)payload.imageBase64=_bcImageBase64;else payload.imageUrl=_bcImageUrl;}const r=await fetch('https://n8n-production-58223.up.railway.app/webhook/pideya-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await r.json().catch(()=>({}));if(r.ok&&data.ok!==false){res.style.display='block';res.style.background='#DCFCE7';res.style.color='#166534';res.style.border='1px solid #86EFAC';res.textContent='✅ Broadcast enviado a '+(data.sent||phones.length)+' cliente(s).';ta.value='';if(document.getElementById('broadcastCount'))document.getElementById('broadcastCount').textContent='0 / 1000 caracteres';bcClearImage();}else throw new Error(data.error||'Error '+r.status);}catch(e){res.style.display='block';res.style.background='#FEE2E2';res.style.color='#DC2626';res.style.border='1px solid #FECACA';res.textContent='❌ Error: '+e.message;}finally{btn.disabled=false;btn.textContent='📢 Enviar Broadcast';}}
 </script>
 </body>
 </html>
